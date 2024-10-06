@@ -1,0 +1,9 @@
+.custom-input {
+    background-color: white;
+    width: 500px;
+}
+
+.custom-input:focus {
+    outline: none;
+}
+
