@@ -260,10 +260,10 @@ exports.forgotPassword = async (req, res) => {
                 driver.token = hashedToken
                 await driver.save().then((data) => {
                     if (data) {
-                        res.status(201).json({ msg: 'لطفا ایمیل خود را بررسی کنید', data, msgCode: 2 })
+                        res.status(201).json({ msg: 'لطفا ایمیل خود را بررسی کنید'})
                     }
                 }).catch(err => {
-                    res.status(403).json({ msg: 'مشکل در فرستادن ایمیل', err, msgCode: 3 })
+                    res.status(403).json({ msg: 'مشکل در فرستادن ایمیل', err })
                 })
             }
         } else {
@@ -309,7 +309,6 @@ exports.resetPassword = async (req, res) => {
         }, { new: true }).then((data) => {
             if (data) {
                 res.status(StatusCodes.OK).json({
-                    data,
                     msg: 'گذرواژه با موفقیت تغییر کرد',
                 })
             }
