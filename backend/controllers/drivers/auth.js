@@ -119,6 +119,7 @@ exports.register = async (req, res, next) => {
                         email: newDriver.email,
                         username: newDriver.username,
                         avatar: newDriver.avatar,
+                        role: newDriver.role,
                     })
                 }
             }
@@ -156,6 +157,7 @@ exports.login = async (req, res, next) => {
                     email: driver.email,
                     username: driver.username,
                     avatar: driver.avatar,
+                    role: driver.role,
                 })
 
             } else {
@@ -260,7 +262,7 @@ exports.forgotPassword = async (req, res) => {
                 driver.token = hashedToken
                 await driver.save().then((data) => {
                     if (data) {
-                        res.status(201).json({ msg: 'لطفا ایمیل خود را بررسی کنید'})
+                        res.status(201).json({ msg: 'لطفا ایمیل خود را بررسی کنید' })
                     }
                 }).catch(err => {
                     res.status(403).json({ msg: 'مشکل در فرستادن ایمیل', err })

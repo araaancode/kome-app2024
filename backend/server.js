@@ -39,7 +39,7 @@ const adminUserRoutes = require("./routes/admins/users")
 // const adminSupportTicketRoutes = require("./routes/admins/supportTickets")
 
 const driverAuthRoutes = require("./routes/drivers/auth")
-// const driverRoutes = require("./routes/drivers/drivers")
+const driverRoutes = require("./routes/drivers/drivers")
 
 const ownerAuthRoutes = require("./routes/owners/auth")
 // const ownerRoutes = require("./routes/owners/owners")
@@ -93,7 +93,7 @@ app.use('/api/admins', adminRoutes)
 
 // *** drivers endpoints ***
 app.use('/api/drivers/auth', driverAuthRoutes)
-// app.use('/api/drivers', driverRoutes)
+app.use('/api/drivers', driverRoutes)
 
 // *** owners endpoints ***
 app.use('/api/owners/auth', ownerAuthRoutes)
