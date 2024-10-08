@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 // Define the Support Ticket schema
-const SupportTicketSchema = new Schema({
+const DriverSupportTicketSchema = new Schema({
   title: {
     type: String,
     required: true,
@@ -30,19 +30,20 @@ const SupportTicketSchema = new Schema({
     type: Date,
     default: Date.now
   },
-  userId: {
+  driver: {
     type: Schema.Types.ObjectId,
-    ref: 'User',
+    ref: 'Driver',
     required: true
   },
   assignedTo: {
     type: Schema.Types.ObjectId,
-    ref: 'User'
+    ref: 'Driver'
   },
+
   comments: [{
-    userId: {
+    driver: {
       type: Schema.Types.ObjectId,
-      ref: 'User'
+      ref: 'Driver'
     },
     comment: {
       type: String,
@@ -52,16 +53,21 @@ const SupportTicketSchema = new Schema({
       type: Date,
       default: Date.now
     }
-  }]
+  }],
+
+  isRead: {
+    type: Boolean,
+    default: false
+  }
 });
 
 // Middleware to update the `updatedAt` field on save
-SupportTicketSchema.pre('save', function(next) {
+DriverSupportTicketSchema.pre('save', function (next) {
   this.updatedAt = Date.now();
   next();
 });
 
 // Create the Support Ticket model
-const SupportTicket = mongoose.model('SupportTicket', SupportTicketSchema);
+const DriverSupportTicket = mongoose.model('DriverSupportTicket', DriverSupportTicketSchema);
 
-module.exports = SupportTicket;
+module.exports = DriverSupportTicket;
