@@ -2,6 +2,7 @@ const Driver = require("../../models/Driver")
 const DriverNotification = require("../../models/DriverNotification")
 const DriverAds = require("../../models/DriverAds")
 const DriverSupportTicket = require("../../models/DriverSupportTicket")
+const Bus = require("../../models/Bus")
 const StatusCodes = require("http-status-codes")
 
 // # description -> HTTP VERB -> Accesss -> Access Type
@@ -180,7 +181,7 @@ exports.createNotification = async (req, res) => {
             message: req.body.message,
             reciever: req.driver._id,
         }).then((data) => {
-            res.status(StatusCodes.OK).json({
+            res.status(StatusCodes.CREATED).json({
                 status: 'success',
                 msg: "اعلان ساخته شد",
                 data
@@ -303,10 +304,10 @@ exports.createAds = async (req, res) => {
             title: req.body.title,
             description: req.body.description,
             price: req.body.price,
-            primePhoto: req.files.photo[0].filename,
+            photo: req.files.photo[0].filename,
             photos,
         }).then((data) => {
-            res.status(StatusCodes.OK).json({
+            res.status(StatusCodes.CREATED).json({
                 status: 'success',
                 msg: "آگهی ساخته شد",
                 data
@@ -360,38 +361,62 @@ exports.updateAds = async (req, res) => {
 // # update driver ads photo -> PUT -> Driver -> PRIVATE
 // @route = /api/drivers/ads/:adsId/update-photo
 exports.updateAdsPhoto = async (req, res) => {
-    DriverAds.findByIdAndUpdate(req.params.adsId, {
-        photo: req.file.filename,
-    }).then((err, doc) => {
-        if (doc) {
-            res.send({
-                update: 1,
-            });
-        } else {
-            res.status(400).send({
-                err,
-            });
-        }
-    });
+    try {
+        await DriverAds.findByIdAndUpdate(req.params.adsId, {
+            photo: req.file.filename,
+        }).then((ads) => {
+            if (ads) {
+                return res.status(StatusCodes.OK).json({
+                    status: 'success',
+                    msg: "تصویر اصلی آگهی ویرایش شد",
+                    ads
+                })
+            } else {
+                return res.status(StatusCodes.BAD_REQUEST).json({
+                    status: 'failure',
+                    msg: "تصویر اصلی آگهی ویرایش نشد",
+                })
+            }
+        });
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
 }
 
 // # description -> HTTP VERB -> Accesss -> Access Type
 // # update driver ads photos -> PUT -> Driver -> PRIVATE
 // @route = /api/drivers/ads/:adsId/update-photos
 exports.updateAdsPhotos = async (req, res) => {
-    DriverAds.findByIdAndUpdate(req.params.adsId, {
-        photos: req.file.filename,
-    }, { new: true }).then((doc) => {
-        if (doc) {
-            res.send({
-                update: 1,
-            });
-        } else {
-            res.status(400).send({
-                err,
-            });
-        }
-    });
+    try {
+        await DriverAds.findByIdAndUpdate(req.params.adsId, {
+            photos: req.file.filename,
+        }).then((ads) => {
+            if (ads) {
+                return res.status(StatusCodes.OK).json({
+                    status: 'success',
+                    msg: "تصاویر آگهی ویرایش شدند",
+                    ads
+                })
+            } else {
+                return res.status(StatusCodes.BAD_REQUEST).json({
+                    status: 'failure',
+                    msg: "تصاویر آگهی ویرایش نشدند",
+                })
+            }
+        });
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
 }
 
 // # description -> HTTP VERB -> Accesss -> Access Type
@@ -493,7 +518,7 @@ exports.createSupportTicket = async (req, res) => {
             driver: req.driver._id,
             assignedTo: req.driver._id,
         }).then((data) => {
-            res.status(StatusCodes.OK).json({
+            res.status(StatusCodes.CREATED).json({
                 status: 'success',
                 msg: "تیکت پشتیبانی ساخته شد",
                 data
@@ -587,6 +612,186 @@ exports.addCommentsToSupportTicket = async (req, res) => {
         });
     }
 }
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # get driver bus -> GET -> Driver -> PRIVATE
+// @route = /api/drivers/bus
+exports.getDriverBus = async (req, res) => {
+    try {
+        let buses = await Bus.find({})
+        let findBus = buses.find(bus => JSON.stringify(bus.driver) == JSON.stringify(req.driver._id));
+
+        if (findBus) {
+            res.status(StatusCodes.OK).json({
+                status: 'success',
+                msg: "اتوبوس پیدا شد",
+                bus: findBus
+            })
+        } else {
+            res.status(StatusCodes.NOT_FOUND).json({
+                status: 'failure',
+                msg: "اتوبوس پیدا نشد",
+            })
+        }
+
+
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # add driver bus -> POST -> Driver -> PRIVATE
+// @route = /api/drivers/bus
+exports.addDriverBus = async (req, res) => {
+    var photos = [];
+    if (req.files.photos) {
+        req.files.photos.forEach((element) => {
+            photos.push(element.filename);
+        });
+    }
+
+    try {
+        await Bus.create({
+            driver: req.driver._id,
+            name: req.body.name,
+            description: req.body.description,
+            model: req.body.model,
+            color: req.body.color,
+            type: req.body.type,
+            licensePlate: req.body.licensePlate,
+            serviceProvider: req.body.serviceProvider,
+            price: req.body.price,
+            seats: req.body.seats,
+            capacity: req.body.capacity,
+            photo: req.files.photo[0].filename,
+            photos,
+            options: req.body.options,
+        }).then((data) => {
+            res.status(StatusCodes.CREATED).json({
+                status: 'success',
+                msg: "اتوبوس افزوده شد",
+                data
+            })
+        })
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # update driver bus -> PUT -> Driver -> PRIVATE
+// @route = /api/drivers/bus/:busId/update-bus
+exports.updateDriverBus = async (req, res) => {
+    try {
+        await Bus.findByIdAndUpdate(req.params.busId, {
+            name: req.body.name,
+            description: req.body.description,
+            model: req.body.model,
+            color: req.body.color,
+            type: req.body.type,
+            licensePlate: req.body.licensePlate,
+            serviceProvider: req.body.serviceProvider,
+            price: req.body.price,
+            seats: req.body.seats,
+            capacity: req.body.capacity,
+        }, { new: true }).then((bus) => {
+            if (bus) {
+                return res.status(StatusCodes.OK).json({
+                    status: 'success',
+                    msg: "اتوبوس ویرایش شد",
+                    bus
+                })
+            } else {
+                return res.status(StatusCodes.BAD_REQUEST).json({
+                    status: 'failure',
+                    msg: "اتوبوس ویرایش نشد"
+                })
+            }
+        })
+
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # update driver bus cover photo -> PUT -> Driver -> PRIVATE
+// @route = /api/drivers/bus/:busId/update-photo 
+exports.updateDriverBusPhoto = async (req, res) => {
+    try {
+        await Bus.findByIdAndUpdate(req.params.busId, {
+            photo: req.file.filename,
+        }).then((bus) => {
+            if (bus) {
+                return res.status(StatusCodes.OK).json({
+                    status: 'success',
+                    msg: "تصویر اصلی اتوبوس ویرایش شد",
+                    bus
+                })
+            } else {
+                return res.status(StatusCodes.BAD_REQUEST).json({
+                    status: 'failure',
+                    msg: "تصویر اصلی اتوبوس ویرایش نشد",
+                })
+            }
+        });
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # update driver bus cover photo -> PUT -> Driver -> PRIVATE
+// @route = /api/drivers/bus/:busId/update-photos
+exports.updateDriverBusPhotos = async (req, res) => {
+    try {
+        await Bus.findByIdAndUpdate(req.params.busId, {
+            photos: req.file.filename,
+        }).then((ads) => {
+            if (ads) {
+                return res.status(StatusCodes.OK).json({
+                    status: 'success',
+                    msg: "تصاویر اتوبوس ویرایش شدند",
+                    ads
+                })
+            } else {
+                return res.status(StatusCodes.BAD_REQUEST).json({
+                    status: 'failure',
+                    msg: "تصاویر اتوبوس ویرایش نشدند",
+                })
+            }
+        });
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
 
 
 

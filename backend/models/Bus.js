@@ -16,6 +16,11 @@ const busSchema = new mongoose.Schema({
         maxlength: [25, 'A bus name must have less or equal then 25 characters'],
         minlength: [6, 'A bus name must have more or equal then 6 characters']
     },
+    description: {
+        type: String,
+        required: [true, 'Please provide bus description'],
+        trim: true,
+    },
     model: {
         type: String,
         required: [true, 'Please provide bus model'],
@@ -48,8 +53,8 @@ const busSchema = new mongoose.Schema({
         type: Number,
         default: 10
     },
-    cover: String,
-    images: [{ type: String }],
+    photo: String,
+    photos: [{ type: String }],
     active: {
         type: Boolean,
         default: false,

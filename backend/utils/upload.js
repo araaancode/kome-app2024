@@ -7,6 +7,7 @@ const userAvatarDir = path.join(__dirname, '../uploads/userAvatarDir/');
 const adminAvatarDir = path.join(__dirname, '../uploads/adminAvatarDir/');
 const driverAvatarDir = path.join(__dirname, '../uploads/driverAvatarDir/');
 const driverAdsPhotosDir = path.join(__dirname, '../uploads/driverAdsPhotosDir/');
+const driverBusPhotosDir = path.join(__dirname, '../uploads/driverBusPhotosDir/');
 
 module.exports = {
     // owner avatar
@@ -86,6 +87,20 @@ module.exports = {
             destination: function (req, file, cb) {
                 const made = mkdirp.sync(driverAdsPhotosDir);
                 cb(null, driverAdsPhotosDir)
+            },
+            filename: function (req, file, cb) {
+                cb(null, Date.now() + path.extname(file.originalname));
+            }
+        })
+    }),
+
+
+    // driver bus photo and photos
+    driverBusPhotosUpload: multer({
+        storage: multer.diskStorage({
+            destination: function (req, file, cb) {
+                const made = mkdirp.sync(driverBusPhotosDir);
+                cb(null, driverBusPhotosDir)
             },
             filename: function (req, file, cb) {
                 cb(null, Date.now() + path.extname(file.originalname));

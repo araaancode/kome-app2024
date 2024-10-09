@@ -3,19 +3,58 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
 
+const drivingLicenseSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: [true, "نام و نام خانوادگی راننده باید وارد شود"],
+    trim: true,
+    min: 6,
+    max: 50
+  },
+  nationalCode: {
+    type: String,
+    required: [true, " کد ملی راننده باید وارد شود"],
+    trim: true,
+    min: 10,
+    max: 10
+  },
+  dateOfIssue: {
+    type: Date,
+    required: [true, "  تاریخ صدور گواهینامه باید وارد شود"],
+  },
+  birthDate: {
+    type: Date,
+    required: [true, "  تاریخ تولد باید وارد شود"],
+  },
+  licenseNumber: {
+    type: String,
+    required: [true, "  شماره گواهینامه باید وارد شود"],
+  },
+  crediteDate: {
+    type: Date,
+    required: [true, "  شماره گواهینامه باید وارد شود"],
+  },
+})
+
 const driverSchema = new mongoose.Schema({
   name: {
     type: String,
+    required: [true, "نام و نام خانوادگی راننده باید وارد شود"],
+    trim: true,
+    min: 6,
+    max: 50
   },
   username: {
     type: String,
     trim: true,
+    required: [true, " نام کاربری راننده باید وارد شود"],
     min: 3,
     max: 20
   },
 
   nationalCode: {
     type: String,
+    required: [true, " کد ملی راننده باید وارد شود"],
     trim: true,
     min: 10,
     max: 10
@@ -32,7 +71,7 @@ const driverSchema = new mongoose.Schema({
   email: {
     type: String,
     lowercase: true,
-    validate: [validator.isEmail, 'Please provide a valid email']
+    validate: [validator.isEmail, 'لطفا یک ایمیل معتبر وارد کنید']
   },
   phone: {
     type: String,
@@ -40,9 +79,9 @@ const driverSchema = new mongoose.Schema({
       validator: function (v) {
         return /09\d{9}/.test(v);
       },
-      message: (props) => `${props.value} is not a valid phone number!`,
+      message: (props) => `${props.value} یک شماره تلفن معتبر نیست!`,
     },
-    required: [true, "User phone number required"],
+    required: [true, "شماره همراه راننده باید وارد شود"],
     unique: true,
   },
   avatar: {
@@ -56,13 +95,36 @@ const driverSchema = new mongoose.Schema({
 
   password: {
     type: String,
-    required: [true, 'Please provide a password'],
+    required: [true, 'پسورد باید وارد شود'],
     minlength: 8,
   },
 
   token: {
     type: String,
   },
+
+  arrival: {
+    type: String,
+    default: false
+  },
+  isArrived: {
+    type: Boolean,
+    default: false
+  },
+  cities: [{
+    type: String,
+  }],
+  movingDate: {
+    type: Date,
+    default: Date.now()
+  },
+  hour: {
+    type: Date,
+    default: Date.now()
+  },
+
+  drivingLicense: drivingLicenseSchema,
+
   passwordChangedAt: Date,
   passwordResetToken: String,
   passwordResetExpires: Date,
