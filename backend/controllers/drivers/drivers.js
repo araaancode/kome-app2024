@@ -3,6 +3,7 @@ const DriverNotification = require("../../models/DriverNotification")
 const DriverAds = require("../../models/DriverAds")
 const DriverSupportTicket = require("../../models/DriverSupportTicket")
 const Bus = require("../../models/Bus")
+const BusTicket = require("../../models/BusTicket")
 const StatusCodes = require("http-status-codes")
 
 // # description -> HTTP VERB -> Accesss -> Access Type
@@ -513,7 +514,7 @@ exports.supportTicket = async (req, res) => {
 exports.createSupportTicket = async (req, res) => {
     try {
         await DriverSupportTicket.create({
-         
+
             title: req.body.title,
             description: req.body.description,
             driver: req.driver._id,
@@ -793,6 +794,45 @@ exports.updateDriverBusPhotos = async (req, res) => {
     }
 }
 
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # get driver bus tickets -> GET -> Driver -> PRIVATE
+// @route = /api/drivers/bus-tickets
+exports.getBusTickets = async (req, res) => {
+    try {
+        let busTickets = await BusTicket.find({})
+        let foundBusTickets = [] 
+        
+        for (let i = 0; i < busTickets.length; i++) {
+          if(JSON.stringify(busTickets[i].driver) == JSON.stringify(req.driver._id)){
+            foundBusTickets.push(busTickets[i])
+          }
+        }
+
+
+        if (foundBusTickets) {
+            res.status(StatusCodes.OK).json({
+                status: 'success',
+                msg: "بلیط های اتوبوس پیدا شد",
+                count:foundBusTickets.length,
+                tickets: foundBusTickets
+            })
+        } else {
+            res.status(StatusCodes.NOT_FOUND).json({
+                status: 'failure',
+                msg: "بلیط های اتوبوس پیدا نشد",
+            })
+        }
+
+
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
 
 
 

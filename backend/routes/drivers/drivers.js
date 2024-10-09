@@ -65,7 +65,9 @@ router.put('/bus/:busId/update-photos', authDriver, driverBusPhotosUpload.single
 
 
 router.get('/finance', authDriver, driverCtrls.finance)
-// router.get('/my-tickets', authDriver, driverCtrls.myTickets)
+
+// bus tickets
+router.get('/bus-tickets', authDriver, driverCtrls.getBusTickets)
 
 
 module.exports = router
