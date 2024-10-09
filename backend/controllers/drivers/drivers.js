@@ -513,6 +513,7 @@ exports.supportTicket = async (req, res) => {
 exports.createSupportTicket = async (req, res) => {
     try {
         await DriverSupportTicket.create({
+         
             title: req.body.title,
             description: req.body.description,
             driver: req.driver._id,

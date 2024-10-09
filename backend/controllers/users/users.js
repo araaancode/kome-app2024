@@ -3,6 +3,7 @@ const House = require("../../models/House")
 const User = require("../../models/User")
 const Booking = require("../../models/Booking")
 const Owner = require("../../models/Owner")
+const BusTicket = require("../../models/BusTicket")
 
 exports.getMe = async (req, res) => {
     try {
@@ -279,12 +280,41 @@ exports.finance = (req, res) => {
     res.send("user finance")
 }
 
+
 exports.myTickets = (req, res) => {
     res.send("user my tickets")
 }
 
-exports.createTicket = (req, res) => {
-    res.send("user create tickets")
+exports.createBusTicket = async(req, res) => {
+    try {
+        await BusTicket.create({
+            driver: req.body.driver,
+            passengers: req.body.passengers,
+            bus: req.body.bus,
+            // user: req.user._id,
+            user: "6704340bbe3bc73cd9a92af8",
+            movingDate: req.body.movingDate,
+            hour: req.body.hour,
+            firstCity: req.body.firstCity,
+            lastCity: req.body.lastCity,
+            ticketPrice: req.body.ticketPrice,
+            seatNumbers: req.body.seatNumbers,
+
+        }).then((data) => {
+            res.status(StatusCodes.CREATED).json({
+                status: 'success',
+                msg: "بلیط اتوبوس صادر شد",
+                data
+            })
+        })
+    } catch (error) {
+        console.error(error);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
 }
 
 exports.myBookings = async (req, res) => {

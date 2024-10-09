@@ -18,8 +18,7 @@ router.post('/search-houses', userCtrls.searchHouses)
 router.post('/book-house', protect, userCtrls.bookHouse)
 router.get('/notifications', userCtrls.notifications)
 router.get('/finance', userCtrls.finance)
-router.get('/my-tickets', userCtrls.myTickets)
-router.post('/create-ticket', userCtrls.createTicket)
+
 router.get('/bookings', protect, userCtrls.myBookings)
 
 router.get('/houses', userCtrls.getHouses)
@@ -34,5 +33,11 @@ router.put('/handle-favorite', protect, userCtrls.handleFavorite)
 
 router.put('/confirm-booking/:bookingId', protect, userCtrls.confirmBooking)
 router.put('/cancel-booking/:bookingId', protect, userCtrls.cancelBooking)
+
+
+// bus ticket
+router.get('/my-tickets', userCtrls.myTickets)
+router.post('/create-bus-ticket', userCtrls.createBusTicket)
+
 
 module.exports = router
