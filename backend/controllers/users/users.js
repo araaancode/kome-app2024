@@ -285,6 +285,39 @@ exports.myTickets = (req, res) => {
     res.send("user my tickets")
 }
 
+
+// const Booking = require('../models/Booking');
+// const Bus = require('../models/Bus');
+
+// exports.bookTicket = async (req, res) => {
+//   try {
+//     const { busId, seatsBooked } = req.body;
+//     const bus = await Bus.findById(busId);
+
+//     if (!bus) return res.status(404).json({ msg: 'Bus not found' });
+//     if (bus.availableSeats < seatsBooked)
+//       return res.status(400).json({ msg: 'Not enough seats available' });
+
+//     const totalPrice = bus.price * seatsBooked;
+
+//     bus.availableSeats -= seatsBooked;
+//     await bus.save();
+
+//     const booking = new Booking({
+//       user: req.user.id,
+//       bus: busId,
+//       seatsBooked,
+//       totalPrice,
+//     });
+
+//     await booking.save();
+//     res.status(201).json({ msg: 'Ticket booked successfully' });
+//   } catch (err) {
+//     res.status(500).json({ msg: 'Server error' });
+//   }
+// };
+
+
 exports.createBusTicket = async(req, res) => {
     try {
         await BusTicket.create({
