@@ -3,15 +3,20 @@ const { promisify } = require('util');
 const randKey = require("random-key");
 const jwt = require('jsonwebtoken');
 const Owner = require('../../models/Owner');
+const Token = require('../../models/Token');
 const OTP = require("../../models/OTP")
 const { StatusCodes } = require("http-status-codes")
+const bcrypt = require("bcryptjs")
+
+
+const { sendEmail, sendSuccessEmail } = require("../../utils/sendMail")
+
 
 const signToken = id => {
     return jwt.sign({ id }, process.env.JWT_SECRET, {
         expiresIn: process.env.JWT_EXPIRES_IN
     });
 };
-
 
 const sendOTPCode = async (phone, owner, req, res) => {
     const code = randKey.generateDigits(5);
@@ -28,7 +33,6 @@ const sendOTPCode = async (phone, owner, req, res) => {
             }
 
         }).catch((error) => {
-            console.log(error);
             res.status(StatusCodes.BAD_REQUEST).json({
                 msg: "کد تایید ارسال نشد",
                 error
@@ -80,30 +84,50 @@ const createSendToken = (owner, statusCode, statusMsg, msg, req, res) => {
 };
 
 exports.register = async (req, res, next) => {
-
     try {
-        let findOwner = await Owner.findOne({ phone: req.body.phone })
+        let { name, username, phone, email, password } = req.body
 
-        if (findOwner) {
+        if (!name || !username || !phone || !email || !password) {
             res.status(StatusCodes.BAD_REQUEST).json({
                 status: 'failure',
-                msg: "کاربر وجود دارد. وارد سایت شوید!",
+                msg: "همه فیلدها باید وارد شوند!",
             })
         } else {
-            let newOwner = await Owner.create({
-                phone: req.body.phone,
-                password: req.body.password,
-            })
+            let findOwner = await Owner.findOne({ phone: req.body.phone })
 
-            if (newOwner) {
-                res.status(StatusCodes.CREATED).json({
-                    status: 'success',
-                    msg: "کاربر با موفقیت ثبت نام شد",
-                    newOwner
+            if (findOwner) {
+                res.status(StatusCodes.BAD_REQUEST).json({
+                    status: 'failure',
+                    msg: "ملک دار وجود دارد. وارد سایت شوید!",
                 })
+            } else {
+                let newOwner = await Owner.create({
+                    name: req.body.name,
+                    username: req.body.username,
+                    phone: req.body.phone,
+                    email: req.body.email,
+                    password: req.body.password,
+                })
+
+                if (newOwner) {
+                    res.status(StatusCodes.CREATED).json({
+                        status: 'success',
+                        msg: "ملک دار با موفقیت ثبت نام شد",
+                        _id: newOwner._id,
+                        name: newOwner.name,
+                        phone: newOwner.phone,
+                        email: newOwner.email,
+                        username: newOwner.username,
+                        avatar: newOwner.avatar,
+                        role: newOwner.role,
+                    })
+                }
             }
         }
+
+
     } catch (error) {
+        console.error(error);
         console.error(error.message);
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
             status: 'failure',
@@ -115,52 +139,48 @@ exports.register = async (req, res, next) => {
 }
 
 exports.login = async (req, res, next) => {
-
     try {
-        const { phone, password } = req.body;
-
-        // 1) Check if phone and password exist
-        if (!phone || !password) {
-            res.status(StatusCodes.UNAUTHORIZED).json({
-                status: 'failure',
-                msg: "همه فیلدها باید وارد شوند!",
-            });
+        if (!req.body.phone || !req.body.password) {
+            res.status(StatusCodes.BAD_REQUEST).json({ status: 'failure', msg: 'لطفا همه فیلدها را وارد کنید' })
         }
 
 
-        // 2) Check if owner exists && password is correct
-        const owner = await Owner.findOne({ phone })
+        let owner = await Owner.findOne({ phone: req.body.phone })
 
-
-        if (!owner || !(owner.correctPassword(password, owner.password))) {
-            res.status(StatusCodes.UNAUTHORIZED).json({
-                status: 'failure',
-                msg: "پسورد نادرست است",
-            });
-        }
-
-        // 3) If everything ok, send token to client
-        // createSendToken(owner,StatusCodes.OK, 'success','با موفقیت وارد سایت شدید', req, res);
         if (owner) {
-            return res.status(StatusCodes.OK).json({
-                status: 'success',
-                msg: "با موفقیت وارد سایت شدید",
-                owner
-            });
-        } else {
-            return res.status(StatusCodes.NOT_FOUND).json({
-                status: 'failure',
-                msg: "کاربر یافت نشد. باید ثبت نام کنید.",
-            });
-        }
+            if (await owner.matchPassword(req.body.password)) {
+                res.status(200).json({
+                    status: 'success',
+                    msg: 'ملک دار با موفقیت وارد سایت شد',
+                    _id: owner._id,
+                    name: owner.name,
+                    phone: owner.phone,
+                    email: owner.email,
+                    username: owner.username,
+                    avatar: owner.avatar,
+                    role: owner.role,
+                })
 
+            } else {
+                res.status(StatusCodes.BAD_REQUEST).json({
+                    status: 'failure',
+                    msg: 'گذرواژه نادرست است',
+                })
+            }
+        }
+        else {
+            res.status(StatusCodes.NOT_FOUND).json({
+                status: 'failure',
+                msg: 'ملک دار یافت نشد, ثبت نام کنید',
+            })
+        }
     } catch (error) {
-        console.error(error);
+        console.log(error);
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
             status: 'failure',
-            msg: "خطای داخلی سرور",
-            error
-        });
+            msg: 'خطای داخلی سرور',
+            error,
+        })
     }
 }
 
@@ -171,12 +191,14 @@ exports.sendOtp = async (req, res) => {
         let { phone } = req.body
         let owner = await Owner.findOne({ phone })
 
-        await sendOTPCode(phone, owner, req, res)
-        //  else {
-        //   res.status(StatusCodes.BAD_REQUEST).json({
-        //     msg: "کاربر یافت نشد",
-        //   })
-        // }
+        if (owner) {
+            await sendOTPCode(phone, owner, req, res)
+        }
+        else {
+            res.status(StatusCodes.BAD_REQUEST).json({
+                msg: "ملک دار یافت نشد",
+            })
+        }
     } catch (error) {
         console.error(error.message);
         // res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -220,14 +242,85 @@ exports.logout = (req, res) => {
 };
 
 
-exports.forgotPassword = (req, res) => {
-    res.send("owners forgot password")
+exports.forgotPassword = async (req, res) => {
+    try {
+        let owner = await Owner.findOne({ email: req.body.email })
+
+        if (owner) {
+            let token = owner.token
+
+
+            if (token) {
+                owner.token = ""
+                await owner.save()
+            } else {
+                let newToken = crypto.randomBytes(32).toString('hex') // raw token
+                let hashedToken = await bcrypt.hash(newToken, 12) // cooked token
+
+                let link = `${process.env.currentURL}/owners/reset-password?token=${newToken}&ownerId=${owner._id}`
+                sendEmail(owner, link)
+
+                owner.token = hashedToken
+                await owner.save().then((data) => {
+                    if (data) {
+                        res.status(201).json({ msg: 'لطفا ایمیل خود را بررسی کنید' })
+                    }
+                }).catch(err => {
+                    res.status(403).json({ msg: 'مشکل در فرستادن ایمیل', err })
+                })
+            }
+        } else {
+            res.status(404).json({
+                msg: 'چنین ایمیلی وجود ندارد',
+            })
+        }
+    }
+
+    catch (error) {
+        console.log(error)
+        res.status(403).json({
+            msg: 'خطایی وجود دارد، دوباره امتحان کنید',
+            error,
+            msgCode: 3
+        })
+    }
 }
 
-exports.resetPassword = (req, res) => {
-    res.send("owners reset password")
-}
+exports.resetPassword = async (req, res) => {
+    let { ownerId, token, password, confirmPassword } = req.body
 
-exports.changePassword = (req, res) => {
-    res.send("owners change password")
+    let findOwner = await Owner.findOne({ _id: ownerId })
+    passwordResetToken = findOwner.token
+
+    if (!passwordResetToken) {
+        throw new Error('Invalid or expired password reset token')
+    }
+
+    const isValid = await bcrypt.compare(token, passwordResetToken)
+
+    if (!isValid) {
+        throw new Error('Invalid or expired password reset token')
+    }
+
+    if (password === confirmPassword) {
+        const hash = await bcrypt.hash(password, 12)
+
+
+        await Owner.findByIdAndUpdate(ownerId, {
+            password: hash,
+            token: ""
+        }, { new: true }).then((data) => {
+            if (data) {
+                res.status(StatusCodes.OK).json({
+                    msg: 'گذرواژه با موفقیت تغییر کرد',
+                })
+            }
+        }).catch(err => {
+            res.status(StatusCodes.BAD_REQUEST).json({ msg: 'خطایی وجود دارد', err })
+        })
+
+        let link = `${process.env.currentURL}/owners/login`
+        sendSuccessEmail(findOwner, link)
+
+    }
 }

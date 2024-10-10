@@ -6,11 +6,15 @@ const bcrypt = require('bcryptjs');
 const ownerSchema = new mongoose.Schema({
   name: {
     type: String,
+    required: [true, "نام و نام خانوادگی ملک دار باید وارد شود"],
+    trim: true,
+    min: 6,
+    max: 50
   },
-
   username: {
     type: String,
     trim: true,
+    required: [true, " نام کاربری ملک دار باید وارد شود"],
     min: 3,
     max: 20
   },
@@ -33,7 +37,7 @@ const ownerSchema = new mongoose.Schema({
   email: {
     type: String,
     lowercase: true,
-    validate: [validator.isEmail, 'Please provide a valid email']
+    validate: [validator.isEmail, 'لطفا یک ایمیل معتبر وارد کنید']
   },
   phone: {
     type: String,
@@ -41,9 +45,9 @@ const ownerSchema = new mongoose.Schema({
       validator: function (v) {
         return /09\d{9}/.test(v);
       },
-      message: (props) => `${props.value} is not a valid phone number!`,
+      message: (props) => `${props.value} یک شماره تلفن معتبر نیست!`,
     },
-    required: [true, "owner phone number required"],
+    required: [true, "شماره همراه ملک دار باید وارد شود"],
     unique: true,
   },
   avatar: {
@@ -52,21 +56,29 @@ const ownerSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    default: 'owner'
+    default: 'driver'
   },
+
   password: {
     type: String,
-    required: [true, 'Please provide a password'],
+    required: [true, 'پسورد باید وارد شود'],
     minlength: 8,
   },
+
+  token: {
+    type: String,
+  },
+
   passwordChangedAt: Date,
   passwordResetToken: String,
   passwordResetExpires: Date,
-  active: {
+
+  isActive: {
     type: Boolean,
     default: true,
     select: false
   },
+
   favorites: [
     {
       type: mongoose.Schema.Types.ObjectId,
@@ -100,12 +112,10 @@ ownerSchema.pre(/^find/, function (next) {
   next();
 });
 
-ownerSchema.methods.correctPassword = async function (
-  candidatePassword,
-  ownerPassword
-) {
-  return await bcrypt.compare(candidatePassword, ownerPassword);
+ownerSchema.methods.matchPassword = async function (enteredPassword) {
+  return await bcrypt.compare(enteredPassword, this.password);
 };
+
 
 ownerSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
   if (this.passwordChangedAt) {

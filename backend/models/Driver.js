@@ -54,7 +54,6 @@ const driverSchema = new mongoose.Schema({
 
   nationalCode: {
     type: String,
-    required: [true, " کد ملی راننده باید وارد شود"],
     trim: true,
     min: 10,
     max: 10
@@ -128,10 +127,12 @@ const driverSchema = new mongoose.Schema({
   passwordChangedAt: Date,
   passwordResetToken: String,
   passwordResetExpires: Date,
-  active: {
+  isActive: {
     type: Boolean,
     default: true,
+    select: false
   },
+
 }, { timestamps: true });
 
 driverSchema.pre('save', async function (next) {
