@@ -42,7 +42,7 @@ const driverAuthRoutes = require("./routes/drivers/auth")
 const driverRoutes = require("./routes/drivers/drivers")
 
 const ownerAuthRoutes = require("./routes/owners/auth")
-// const ownerRoutes = require("./routes/owners/owners")
+const ownerRoutes = require("./routes/owners/owners")
 
 // middlewares
 app.use(express.json())
@@ -97,7 +97,7 @@ app.use('/api/drivers', driverRoutes)
 
 // *** owners endpoints ***
 app.use('/api/owners/auth', ownerAuthRoutes)
-// app.use('/api/owners', ownerRoutes)
+app.use('/api/owners', ownerRoutes)
 
 
 // error middlewares

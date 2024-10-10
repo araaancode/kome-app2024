@@ -11,7 +11,7 @@ const { driverUpload, driverAdsPhotosUpload, driverBusPhotosUpload } = require("
 
 // basic profile api
 router.get('/me', authDriver, driverCtrls.getMe)
-router.put('/update-profile', authDriver, driverUpload.single('avatar'), driverCtrls.updateProfile)
+router.put('/update-profile', authDriver, driverCtrls.updateProfile)
 router.put('/update-avatar', authDriver, driverUpload.single('avatar'), driverCtrls.updateAvatar)
 
 // notifications

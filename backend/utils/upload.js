@@ -8,8 +8,11 @@ const adminAvatarDir = path.join(__dirname, '../uploads/adminAvatarDir/');
 const driverAvatarDir = path.join(__dirname, '../uploads/driverAvatarDir/');
 const driverAdsPhotosDir = path.join(__dirname, '../uploads/driverAdsPhotosDir/');
 const driverBusPhotosDir = path.join(__dirname, '../uploads/driverBusPhotosDir/');
+const ownerAdsDir = path.join(__dirname, '../uploads/ownerAdsDir/');
 
 module.exports = {
+
+    // ******************** owenr ********************
     // owner avatar
     ownerAvatarUpload: multer({
         storage: multer.diskStorage({
@@ -23,7 +26,20 @@ module.exports = {
         })
     }),
 
-    // house cover
+    // owner ads
+    ownerAdsPhotosUpload: multer({
+        storage: multer.diskStorage({
+            destination: function (req, file, cb) {
+                const made = mkdirp.sync(ownerAdsDir);
+                cb(null, ownerAdsDir)
+            },
+            filename: function (req, file, cb) {
+                cb(null, Date.now() + path.extname(file.originalname));
+            }
+        })
+    }),
+
+    // ******************** house cover ********************
     houseUpload: multer({
         storage: multer.diskStorage({
             destination: function (req, file, cb) {
@@ -37,7 +53,7 @@ module.exports = {
     }),
 
 
-    // user avatar
+    // ******************** user avatar ********************
     userUpload: multer({
         storage: multer.diskStorage({
             destination: function (req, file, cb) {
@@ -50,7 +66,7 @@ module.exports = {
         })
     }),
 
-    // admin avatar
+    // ******************** admin avatar ********************
     adminUpload: multer({
 
         storage: multer.diskStorage({
@@ -66,7 +82,9 @@ module.exports = {
     }),
 
 
-    // driver avatar
+
+    // ******************** driver ********************
+    // driver avatar 
     driverUpload: multer({
         storage: multer.diskStorage({
             destination: function (req, file, cb) {
@@ -107,4 +125,7 @@ module.exports = {
             }
         })
     }),
+
+
+
 }

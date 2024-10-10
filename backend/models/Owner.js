@@ -56,7 +56,7 @@ const ownerSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    default: 'driver'
+    default: 'owner'
   },
 
   password: {

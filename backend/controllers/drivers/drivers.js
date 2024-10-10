@@ -121,12 +121,21 @@ exports.updateAvatar = async (req, res) => {
 exports.notifications = async (req, res) => {
     try {
         let notifications = await DriverNotification.find({})
-        if (notifications) {
+        let findDriverNotifications = []
+
+        for (let i = 0; i < notifications.length; i++) {
+            if(JSON.stringify(notifications[i].reciever) == JSON.stringify(req.driver._id)){
+                findDriverNotifications.push(notifications[i])
+            }            
+        }
+
+
+        if (findDriverNotifications) {
             return res.status(StatusCodes.OK).json({
                 status: 'success',
                 msg: "اعلان ها پیدا شد",
-                count: notifications.length,
-                notifications
+                count: findDriverNotifications.length,
+                findDriverNotifications
             })
         } else {
             return res.status(StatusCodes.BAD_REQUEST).json({
@@ -135,6 +144,8 @@ exports.notifications = async (req, res) => {
             })
         }
     } catch (error) {
+        console.log(error);
+        
         console.error(error.message);
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
             status: 'failure',
