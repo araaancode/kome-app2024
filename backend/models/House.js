@@ -51,14 +51,6 @@ const houseSchema = new mongoose.Schema({
         required: true,
     },
 
-    lat: {
-        type: String,
-    },
-
-    lng: {
-        type: String,
-    },
-
     postalCode: {
         type: String,
     },
@@ -130,15 +122,18 @@ const houseSchema = new mongoose.Schema({
     }],
 
     heating: {
-        type: String,
+        type: Boolean,
+        default:false
     },
 
     cooling: {
-        type: String,
+        type: Boolean,
+        default:false
     },
 
     parking: {
-        type: String,
+        type: Boolean,
+        default:false
     },
 
     bill: {
@@ -157,9 +152,9 @@ const houseSchema = new mongoose.Schema({
         type: String,
     },
 
-    hobbies: {
+    hobbies: [{
         type: String,
-    },
+    }],
 
     enviornment: {
         type: String,

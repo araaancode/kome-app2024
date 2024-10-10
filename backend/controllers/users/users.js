@@ -641,3 +641,41 @@ exports.cancelBooking = async (req, res) => {
         });
     }
 }
+
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # owner add review to house -> PUT -> Owner -> PRIVATE
+// @route = /api/owners/houses/:houseId/add-review
+exports.addReviewToHouse = async (req, res) => {
+    try {
+        let review = {
+            name:req.body.name,
+            rating:req.body.rating,
+            comment:req.body.comment,
+            user:req.user._id
+        }
+        
+        let house = await House.findByIdAndUpdate(req.params.houseId, {
+            reviews: [...reviews, review]
+        }, { new: true })
+
+        if (house) {
+            res.status(200).json({
+                status: 'success',
+                msg: 'نقشه ویرایش شد',
+                house,
+            })
+        } else {
+            res.status(403).json({
+                msg: 'نقشه ویرایش نشد',
+            })
+        }
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}

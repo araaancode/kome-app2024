@@ -22,7 +22,7 @@ router.put('/notifications/:ntfId/mark-notification', ownerCtrls.markNotificatio
 
 // advertisments
 router.get('/ads', authOwner, ownerCtrls.allAds)
-// router.get('/ads/:adsId', authDriver, driverCtrls.singleAds)
+router.get('/ads/:adsId', authOwner, ownerCtrls.singleAds)
 router.post('/ads', authOwner, upload.ownerAdsPhotosUpload.fields([
     {
         name: "photo",
@@ -34,14 +34,23 @@ router.post('/ads', authOwner, upload.ownerAdsPhotosUpload.fields([
     },
 ]), ownerCtrls.createAds)
 
-// router.put('/ads/:adsId/update-ads', authDriver, driverCtrls.updateAds)
-// router.put('/ads/:adsId/update-photo', authDriver, driverAdsPhotosUpload.single("photo"), driverCtrls.updateAdsPhoto)
-// router.put('/ads/:adsId/update-photos', authDriver, driverAdsPhotosUpload.single("photos"), driverCtrls.updateAdsPhotos)
-// router.delete('/ads/:adsId', authDriver, driverCtrls.deleteAds)
+router.put('/ads/:adsId/update-ads', authOwner, ownerCtrls.updateAds)
+router.put('/ads/:adsId/update-photo', authOwner, upload.ownerAdsPhotosUpload.single("photo"), ownerCtrls.updateAdsPhoto)
+router.put('/ads/:adsId/update-photos', authOwner, upload.ownerAdsPhotosUpload.single("photos"), ownerCtrls.updateAdsPhotos)
+router.delete('/ads/:adsId', authOwner, ownerCtrls.deleteAds)
 
+
+// support tickets
+router.get('/support-tickets', authOwner, ownerCtrls.supportTickets)
+router.get('/support-tickets/:stId', authOwner, ownerCtrls.supportTicket)
+router.post('/support-tickets', authOwner, ownerCtrls.createSupportTicket)
+router.put('/support-tickets/:stId/read', authOwner, ownerCtrls.readSupportTicket)
+router.put('/support-tickets/:stId/add-comment', authOwner, ownerCtrls.addCommentsToSupportTicket)
 
 // houses
-router.post('/create-house', authOwner, upload.houseUpload.fields([
+router.get('/houses', authOwner, ownerCtrls.getHouses)
+router.get('/houses/:houseId', authOwner, ownerCtrls.getHouse)
+router.post('/houses', authOwner, upload.houseUpload.fields([
     {
         name: "cover",
         maxCount: 1,
@@ -52,14 +61,15 @@ router.post('/create-house', authOwner, upload.houseUpload.fields([
     },
 ]), ownerCtrls.createHouse)
 
-router.put('/:houseId/update-house', authOwner, ownerCtrls.updateHouse)
-router.put('/:houseId/update-cover', authOwner, upload.houseUpload.single("cover"), ownerCtrls.updateCover)
+router.put('/houses/:houseId/update-house', authOwner, ownerCtrls.updateHouse)
+router.put('/houses/:houseId/update-cover', authOwner, upload.houseUpload.single("cover"), ownerCtrls.updateCover)
 router.put(
-    "/:houseId/update-images",
+    "/houses/:houseId/update-images",
     upload.houseUpload.single("images"),
     ownerCtrls.updateImages
 );
 
+router.put('/houses/:houseId/update-map', authOwner, ownerCtrls.updateMap)
 
 
 // router.get('/finance', ownerCtrls.finance)

@@ -4,28 +4,51 @@ const validator = require('validator');
 const bcrypt = require('bcryptjs');
 
 const cookSchema = new mongoose.Schema({
-  firstName: {
+  name: {
     type: String,
-    required: [true, 'Please tell us your first name!']
+    required: [true, "نام و نام خانوادگی آشپز باید وارد شود"],
+    trim: true,
+    min: 6,
+    max: 50
   },
-  lastName: {
+  username: {
     type: String,
-    required: [true, 'Please tell us your last name!']
+    trim: true,
+    required: [true, " نام کاربری آشپز باید وارد شود"],
+    min: 3,
+    max: 20
   },
-  username:{
-    type:String,
-    required:true,
-    trim:true,
-    unique:true,
-    min:3,
-    max:20
+
+  nationalCode: {
+    type: String,
+    trim: true,
+    min: 10,
+    max: 10
+  },
+  gender: {
+    type: String,
+  },
+  city: {
+    type: String,
+  },
+  province: {
+    type: String,
   },
   email: {
     type: String,
-    required: [true, 'Please provide your email'],
-    unique: true,
     lowercase: true,
-    validate: [validator.isEmail, 'Please provide a valid email']
+    validate: [validator.isEmail, 'لطفا یک ایمیل معتبر وارد کنید']
+  },
+  phone: {
+    type: String,
+    validate: {
+      validator: function (v) {
+        return /09\d{9}/.test(v);
+      },
+      message: (props) => `${props.value} یک شماره تلفن معتبر نیست!`,
+    },
+    required: [true, "شماره همراه آشپز باید وارد شود"],
+    unique: true,
   },
   avatar: {
     type: String,
@@ -33,36 +56,38 @@ const cookSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    default: 'user'
+    default: 'owner'
   },
+
   password: {
     type: String,
-    required: [true, 'Please provide a password'],
+    required: [true, 'پسورد باید وارد شود'],
     minlength: 8,
-    select: false
   },
-  passwordConfirm: {
+
+  token: {
     type: String,
-    required: [true, 'Please confirm your password'],
-    validate: {
-      // This only works on CREATE and SAVE!!!
-      validator: function(el) {
-        return el === this.password;
-      },
-      message: 'Passwords are not the same!'
-    }
   },
+
   passwordChangedAt: Date,
   passwordResetToken: String,
   passwordResetExpires: Date,
-  active: {
+
+  isActive: {
     type: Boolean,
     default: true,
     select: false
-  }
-},{timestamps:true});
+  },
 
-cookSchema.pre('save', async function(next) {
+  favorites: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'House',
+    }
+  ],
+}, { timestamps: true });
+
+cookSchema.pre('save', async function (next) {
   // Only run this function if password was actually modified
   if (!this.isModified('password')) return next();
 
@@ -74,27 +99,25 @@ cookSchema.pre('save', async function(next) {
   next();
 });
 
-cookSchema.pre('save', function(next) {
+cookSchema.pre('save', function (next) {
   if (!this.isModified('password') || this.isNew) return next();
 
   this.passwordChangedAt = Date.now() - 1000;
   next();
 });
 
-cookSchema.pre(/^find/, function(next) {
+cookSchema.pre(/^find/, function (next) {
   // this points to the current query
   this.find({ active: { $ne: false } });
   next();
 });
 
-cookSchema.methods.correctPassword = async function(
-  candidatePassword,
-  userPassword
-) {
-  return await bcrypt.compare(candidatePassword, userPassword);
+cookSchema.methods.matchPassword = async function (enteredPassword) {
+  return await bcrypt.compare(enteredPassword, this.password);
 };
 
-cookSchema.methods.changedPasswordAfter = function(JWTTimestamp) {
+
+cookSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
   if (this.passwordChangedAt) {
     const changedTimestamp = parseInt(
       this.passwordChangedAt.getTime() / 1000,
@@ -108,7 +131,7 @@ cookSchema.methods.changedPasswordAfter = function(JWTTimestamp) {
   return false;
 };
 
-cookSchema.methods.createPasswordResetToken = function() {
+cookSchema.methods.createPasswordResetToken = function () {
   const resetToken = crypto.randomBytes(32).toString('hex');
 
   this.passwordResetToken = crypto
