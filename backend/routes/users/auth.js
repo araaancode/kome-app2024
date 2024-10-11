@@ -9,7 +9,6 @@ router.post('/register', userAuthCtrls.register)
 router.post('/forgot-password', userAuthCtrls.forgotPassword)
 router.post('/reset-password', userAuthCtrls.resetPassword)
 router.get('/logout', userAuthCtrls.logout)
-router.post('/change-password', userAuthCtrls.changePassword)
 
 router.post('/send-otp', userAuthCtrls.sendOtp);
 router.post('/verify-otp', userAuthCtrls.verifyOtp);

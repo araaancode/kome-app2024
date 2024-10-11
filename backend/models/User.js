@@ -61,9 +61,12 @@ const userSchema = new mongoose.Schema({
   passwordChangedAt: Date,
   passwordResetToken: String,
   passwordResetExpires: Date,
-  active: {
+  isActive: {
     type: Boolean,
     default: true,
+  },
+  token: {
+    type: String,
   },
   favorites: [
     {
@@ -98,12 +101,10 @@ userSchema.pre(/^find/, function (next) {
   next();
 });
 
-userSchema.methods.correctPassword = async function (
-  candidatePassword,
-  userPassword
-) {
-  return await bcrypt.compare(candidatePassword, userPassword);
+userSchema.methods.matchPassword = async function (enteredPassword) {
+  return await bcrypt.compare(enteredPassword, this.password);
 };
+
 
 userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
   if (this.passwordChangedAt) {
