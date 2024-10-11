@@ -44,6 +44,8 @@ const driverRoutes = require("./routes/drivers/drivers")
 const ownerAuthRoutes = require("./routes/owners/auth")
 const ownerRoutes = require("./routes/owners/owners")
 
+const cookAuthRoutes = require("./routes/cooks/auth")
+
 // middlewares
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
@@ -98,6 +100,8 @@ app.use('/api/drivers', driverRoutes)
 // *** owners endpoints ***
 app.use('/api/owners/auth', ownerAuthRoutes)
 app.use('/api/owners', ownerRoutes)
+
+app.use('/api/cooks/auth', cookAuthRoutes)
 
 
 // error middlewares
