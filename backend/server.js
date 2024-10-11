@@ -45,6 +45,7 @@ const ownerAuthRoutes = require("./routes/owners/auth")
 const ownerRoutes = require("./routes/owners/owners")
 
 const cookAuthRoutes = require("./routes/cooks/auth")
+const cookRoutes = require("./routes/cooks/cooks")
 
 // middlewares
 app.use(express.json())
@@ -102,6 +103,7 @@ app.use('/api/owners/auth', ownerAuthRoutes)
 app.use('/api/owners', ownerRoutes)
 
 app.use('/api/cooks/auth', cookAuthRoutes)
+app.use('/api/cooks', cookRoutes)
 
 
 // error middlewares

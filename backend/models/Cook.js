@@ -56,7 +56,7 @@ const cookSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    default: 'owner'
+    default: 'cook'
   },
 
   password: {

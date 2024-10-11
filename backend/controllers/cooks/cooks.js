@@ -1,27 +1,25 @@
 const { StatusCodes } = require('http-status-codes');
-const OwnerNotification = require("../../models/OwnerNotification")
-const Owner = require("../../models/Owner")
-const House = require("../../models/House")
-const OwnerAds = require("../../models/OwnerAds");
-const OwnerSupportTicket = require('../../models/OwnerSupportTicket');
+const CookNotification = require("../../models/CookNotification")
+const Cook = require("../../models/Cook")
+const CookAds = require("../../models/CookAds");
+const CookSupportTicket = require('../../models/CookSupportTicket');
 
-// *** owners apis ***
 // # description -> HTTP VERB -> Accesss -> Access Type
-// # owner get profile -> GET -> Owner -> PRIVATE
-// @route = /api/owners/me
+// # cook get profile -> GET -> Cook -> PRIVATE
+// @route = /api/cooks/me
 exports.getMe = async (req, res) => {
     try {
-        let owner = await Owner.findById(req.owner.id).select('-password')
-        if (owner) {
+        let cook = await Cook.findById(req.cook.id).select('-password')
+        if (cook) {
             res.status(StatusCodes.OK).json({
                 status: 'success',
-                msg: 'ملک دار پیدا شد',
-                owner,
+                msg: 'غذادار پیدا شد',
+                cook,
             })
         } else {
             res.status(StatusCodes.BAD_REQUEST).json({
                 status: 'failure',
-                msg: 'ملک دار پیدا نشد',
+                msg: 'غذادار پیدا نشد',
 
             })
         }
@@ -35,13 +33,12 @@ exports.getMe = async (req, res) => {
     }
 }
 
-// *** owners apis ***
 // # description -> HTTP VERB -> Accesss -> Access Type
-// # owner update profile -> PUT -> Owner -> PRIVATE
-// @route = /api/owners/update-profile
+// # cook update profile -> PUT -> Cook -> PRIVATE
+// @route = /api/cooks/update-profile
 exports.updateProfile = async (req, res) => {
     try {
-        let owner = await Owner.findByIdAndUpdate(req.owner._id, {
+        let cook = await Cook.findByIdAndUpdate(req.cook._id, {
             name: req.body.name,
             phone: req.body.phone,
             email: req.body.email,
@@ -52,23 +49,23 @@ exports.updateProfile = async (req, res) => {
             gender: req.body.gender,
         }, { new: true })
 
-        if (owner) {
+        if (cook) {
             res.status(StatusCodes.OK).json({
                 status: 'success',
-                msg: 'اطلاعات ملک دار ویرایش شد',
-                name: owner.name,
-                phone: owner.phone,
-                email: owner.email,
-                username: owner.username,
-                nationalCode: owner.nationalCode,
-                province: owner.province,
-                city: owner.city,
-                gender: owner.gender,
+                msg: 'اطلاعات غذادار ویرایش شد',
+                name: cook.name,
+                phone: cook.phone,
+                email: cook.email,
+                username: cook.username,
+                nationalCode: cook.nationalCode,
+                province: cook.province,
+                city: cook.city,
+                gender: cook.gender,
             })
         } else {
             res.status(StatusCodes.BAD_REQUEST).json({
                 status: 'failure',
-                msg: 'اطلاعات ملک دار ویرایش نشد',
+                msg: 'اطلاعات غذادار ویرایش نشد',
             })
         }
     } catch (error) {
@@ -81,39 +78,38 @@ exports.updateProfile = async (req, res) => {
     }
 }
 
-// *** owners apis ***
+// *** cooks apis ***
 // # description -> HTTP VERB -> Accesss -> Access Type
-// # owner update avatar -> PUT -> Owner -> PRIVATE
-// @route = /api/owners/update-avatar
+// # cook update avatar -> PUT -> Cook -> PRIVATE
+// @route = /api/cooks/update-avatar
 exports.updateAvatar = async (req, res) => {
-    console.log(req.owner);
 
     try {
-        await Owner.findByIdAndUpdate(
-            req.owner._id,
+        await Cook.findByIdAndUpdate(
+            req.cook._id,
             {
                 avatar: req.file.filename,
             },
             { new: true }
-        ).then((owner) => {
-            if (owner) {
+        ).then((cook) => {
+            if (cook) {
                 res.status(StatusCodes.OK).json({
-                    msg: 'آواتار ملک دار ویرایش شد',
-                    name: owner.name,
-                    phone: owner.phone,
-                    email: owner.email,
-                    username: owner.username,
-                    nationalCode: owner.nationalCode,
-                    province: owner.province,
-                    city: owner.city,
-                    gender: owner.gender,
-                    avatar: owner.avatar,
+                    msg: 'آواتار غذادار ویرایش شد',
+                    name: cook.name,
+                    phone: cook.phone,
+                    email: cook.email,
+                    username: cook.username,
+                    nationalCode: cook.nationalCode,
+                    province: cook.province,
+                    city: cook.city,
+                    gender: cook.gender,
+                    avatar: cook.avatar,
                 })
             }
         }).catch(err => {
             console.log(err)
             res.status(StatusCodes.BAD_REQUEST).json({
-                msg: 'آواتار ملک دار ویرایش نشد',
+                msg: 'آواتار غذادار ویرایش نشد',
                 err,
             })
         })
@@ -129,25 +125,25 @@ exports.updateAvatar = async (req, res) => {
 
 
 // # description -> HTTP VERB -> Accesss -> Access Type
-// # get  owner notifications -> GET -> Owner -> PRIVATE
-// @route = /api/owners/notifications
+// # get  owner notifications -> GET -> Cook -> PRIVATE
+// @route = /api/cooks/notifications
 exports.notifications = async (req, res) => {
     try {
-        let notifications = await OwnerNotification.find({})
-        let findOwnerNotifications = []
+        let notifications = await CookNotification.find({})
+        let findCookNotifications = []
 
         for (let i = 0; i < notifications.length; i++) {
-            if (JSON.stringify(notifications[i].reciever) == JSON.stringify(req.owner._id)) {
-                findOwnerNotifications.push(notifications[i])
+            if (JSON.stringify(notifications[i].reciever) == JSON.stringify(req.cook._id)) {
+                findCookNotifications.push(notifications[i])
             }
         }
 
-        if (findOwnerNotifications) {
+        if (findCookNotifications) {
             return res.status(StatusCodes.OK).json({
                 status: 'success',
                 msg: "اعلان ها پیدا شد",
-                count: findOwnerNotifications.length,
-                findOwnerNotifications
+                count: findCookNotifications.length,
+                findCookNotifications
             })
         } else {
             return res.status(StatusCodes.BAD_REQUEST).json({
@@ -166,11 +162,11 @@ exports.notifications = async (req, res) => {
 }
 
 // # description -> HTTP VERB -> Accesss -> Access Type
-// # get single driver notification -> GET -> Driver -> PRIVATE
-// @route = /api/owners/notifications/:ntfId
+// # get single cook notification -> GET -> Cook -> PRIVATE
+// @route = /api/cooks/notifications/:ntfId
 exports.notification = async (req, res) => {
     try {
-        let notification = await OwnerNotification.findById(req.params.ntfId)
+        let notification = await CookNotification.findById(req.params.ntfId)
         if (notification) {
             return res.status(StatusCodes.OK).json({
                 status: 'success',
@@ -195,14 +191,14 @@ exports.notification = async (req, res) => {
 
 
 // # description -> HTTP VERB -> Accesss -> Access Type
-// # create notification for driver -> POST -> Driver -> PRIVATE
-// @route = /api/owners/notifications
+// # create notification for cook -> POST -> Cook -> PRIVATE
+// @route = /api/cooks/notifications
 exports.createNotification = async (req, res) => {
     try {
-        await OwnerNotification.create({
+        await CookNotification.create({
             title: req.body.title,
             message: req.body.message,
-            reciever: req.owner._id,
+            reciever: req.cook._id,
         }).then((data) => {
             res.status(StatusCodes.CREATED).json({
                 status: 'success',
@@ -222,11 +218,11 @@ exports.createNotification = async (req, res) => {
 
 
 // # description -> HTTP VERB -> Accesss -> Access Type
-// # mark driver notification -> GET -> Driver -> PRIVATE
-// @route = /api/owners/notifications/:ntfId/mark-notification
+// # mark cook notification -> GET -> cook -> PRIVATE
+// @route = /api/cooks/notifications/:ntfId/mark-notification
 exports.markNotification = async (req, res) => {
     try {
-        await OwnerNotification.findByIdAndUpdate(req.params.ntfId, { read: true }, { new: true }).then((nft) => {
+        await CookNotification.findByIdAndUpdate(req.params.ntfId, { read: true }, { new: true }).then((nft) => {
             if (nft) {
                 return res.status(StatusCodes.OK).json({
                     status: 'success',
@@ -253,11 +249,11 @@ exports.markNotification = async (req, res) => {
 
 
 // # description -> HTTP VERB -> Accesss -> Access Type
-// # get all owners ads -> GET -> Owner -> PRIVATE
-// @route = /api/owners/ads
+// # get all cooks ads -> GET -> Cook -> PRIVATE
+// @route = /api/cooks/ads
 exports.allAds = async (req, res) => {
     try {
-        let ads = await OwnerAds.find({ owner: req.owner._id }).populate('owner').select('-password')
+        let ads = await CookAds.find({ cook: req.cook._id }).populate('cook').select('-password')
         if (ads) {
             return res.status(StatusCodes.OK).json({
                 status: 'success',
@@ -284,11 +280,11 @@ exports.allAds = async (req, res) => {
 
 
 // # description -> HTTP VERB -> Accesss -> Access Type
-// # get single driver ads -> GET -> A -> PRIVATE
-// @route = /api/owners/notifications/:adsId
+// # get single cook ads -> GET -> A -> PRIVATE
+// @route = /api/cooks/notifications/:adsId
 exports.singleAds = async (req, res) => {
     try {
-        let ads = await OwnerAds.findById(req.params.adsId)
+        let ads = await CookAds.findById(req.params.adsId)
         if (ads) {
             return res.status(StatusCodes.OK).json({
                 status: 'success',
@@ -312,8 +308,8 @@ exports.singleAds = async (req, res) => {
 }
 
 // # description -> HTTP VERB -> Accesss -> Access Type
-// # get create owner ads -> POST -> Owner -> PRIVATE
-// @route = /api/owners/ads
+// # get create cook ads -> POST -> Cook -> PRIVATE
+// @route = /api/cooks/ads
 exports.createAds = async (req, res) => {
     var photos = [];
     if (req.files.photos) {
@@ -323,8 +319,8 @@ exports.createAds = async (req, res) => {
     }
 
     try {
-        await OwnerAds.create({
-            owner: req.owner._id,
+        await CookAds.create({
+            cook: req.cook._id,
             company: "6702a7927bfdbe2dde087edd",
             title: req.body.title,
             description: req.body.description,
@@ -350,11 +346,11 @@ exports.createAds = async (req, res) => {
 
 
 // # description -> HTTP VERB -> Accesss -> Access Type
-// # update owner ads -> PUT -> Owner -> PRIVATE
-// @route = /api/owners/ads/:adsId/update-ads
+// # update cook ads -> PUT -> Cook -> PRIVATE
+// @route = /api/cooks/ads/:adsId/update-ads
 exports.updateAds = async (req, res) => {
     try {
-        await OwnerAds.findByIdAndUpdate(req.params.adsId, {
+        await CookAds.findByIdAndUpdate(req.params.adsId, {
             title: req.body.title,
             description: req.body.description,
             price: req.body.price,
@@ -383,14 +379,12 @@ exports.updateAds = async (req, res) => {
     }
 }
 
-
-
 // # description -> HTTP VERB -> Accesss -> Access Type
-// # update owner ads photo -> PUT -> Owner -> PRIVATE
-// @route = /api/owners/ads/:adsId/update-photo
+// # update cook ads photo -> PUT -> Cook -> PRIVATE
+// @route = /api/cooks/ads/:adsId/update-photo
 exports.updateAdsPhoto = async (req, res) => {
     try {
-        await OwnerAds.findByIdAndUpdate(req.params.adsId, {
+        await CookAds.findByIdAndUpdate(req.params.adsId, {
             photo: req.file.filename,
         }).then((ads) => {
             if (ads) {
@@ -416,13 +410,12 @@ exports.updateAdsPhoto = async (req, res) => {
     }
 }
 
-
 // # description -> HTTP VERB -> Accesss -> Access Type
-// # update owner ads photos -> PUT -> Owner -> PRIVATE
-// @route = /api/owners/ads/:adsId/update-photos
+// # update cook ads photos -> PUT -> Cook -> PRIVATE
+// @route = /api/cooks/ads/:adsId/update-photos
 exports.updateAdsPhotos = async (req, res) => {
     try {
-        await OwnerAds.findByIdAndUpdate(req.params.adsId, {
+        await CookAds.findByIdAndUpdate(req.params.adsId, {
             photos: req.file.filename,
         }).then((ads) => {
             if (ads) {
@@ -449,11 +442,11 @@ exports.updateAdsPhotos = async (req, res) => {
 }
 
 // # description -> HTTP VERB -> Accesss -> Access Type
-// # delete owner ads -> DELETE -> Owner -> PRIVATE
-// @route = /api/owners/ads/:adsId
+// # delete cook ads -> DELETE -> Cook -> PRIVATE
+// @route = /api/cooks/ads/:adsId
 exports.deleteAds = async (req, res) => {
     try {
-        await OwnerAds.findByIdAndDelete(req.params.adsId).then((ads) => {
+        await CookAds.findByIdAndDelete(req.params.adsId).then((ads) => {
             if (ads) {
                 return res.status(StatusCodes.OK).json({
                     status: 'success',
@@ -480,11 +473,11 @@ exports.deleteAds = async (req, res) => {
 
 
 // # description -> HTTP VERB -> Accesss -> Access Type
-// # get all owners support tickets -> GET -> Owner -> PRIVATE
-// @route = /api/owners/support-tickets
+// # get all cooks support tickets -> GET -> Cook -> PRIVATE
+// @route = /api/cooks/support-tickets
 exports.supportTickets = async (req, res) => {
     try {
-        let tickets = await OwnerSupportTicket.find({})
+        let tickets = await CookSupportTicket.find({})
         if (tickets) {
             return res.status(StatusCodes.OK).json({
                 status: 'success',
@@ -510,11 +503,11 @@ exports.supportTickets = async (req, res) => {
 
 
 // # description -> HTTP VERB -> Accesss -> Access Type
-// # get single owners support ticket -> GET -> Owner -> PRIVATE
-// @route = /api/owners/support-tickets/:stId
+// # get single cooks support ticket -> GET -> Cook -> PRIVATE
+// @route = /api/cooks/support-tickets/:stId
 exports.supportTicket = async (req, res) => {
     try {
-        let ticket = await OwnerSupportTicket.findById(req.params.stId)
+        let ticket = await CookSupportTicket.findById(req.params.stId)
         if (ticket) {
             return res.status(StatusCodes.OK).json({
                 status: 'success',
@@ -539,15 +532,15 @@ exports.supportTicket = async (req, res) => {
 
 
 // # description -> HTTP VERB -> Accesss -> Access Type
-// # create owners support ticket -> POST -> Owner -> PRIVATE
-// @route = /api/owners/support-tickets
+// # create cooks support ticket -> POST -> Cook -> PRIVATE
+// @route = /api/cooks/support-tickets
 exports.createSupportTicket = async (req, res) => {
     try {
-        await OwnerSupportTicket.create({
+        await CookSupportTicket.create({
             title: req.body.title,
             description: req.body.description,
-            owner: req.owner._id,
-            assignedTo: req.owner._id,
+            cook: req.cook._id,
+            assignedTo: req.cook._id,
         }).then((data) => {
             res.status(StatusCodes.CREATED).json({
                 status: 'success',
@@ -567,11 +560,11 @@ exports.createSupportTicket = async (req, res) => {
 
 
 // # description -> HTTP VERB -> Accesss -> Access Type
-// # read support ticket -> PUT -> Owner -> PRIVATE
-// @route = /api/owners/support-tickets/:stId/read
+// # read support ticket -> PUT -> Cook -> PRIVATE
+// @route = /api/cooks/support-tickets/:stId/read
 exports.readSupportTicket = async (req, res) => {
     try {
-        await OwnerSupportTicket.findByIdAndUpdate(req.params.stId, {
+        await CookSupportTicket.findByIdAndUpdate(req.params.stId, {
             isRead: true
         }, { new: true }).then((ticket) => {
             if (ticket) {
@@ -600,14 +593,14 @@ exports.readSupportTicket = async (req, res) => {
 
 
 // # description -> HTTP VERB -> Accesss -> Access Type
-// # add comments to support ticket -> PUT -> Owner -> PRIVATE
-// @route = /api/owners/support-tickets/:stId/add-comment
+// # add comments to support ticket -> PUT -> Cook -> PRIVATE
+// @route = /api/cooks/support-tickets/:stId/add-comment
 exports.addCommentsToSupportTicket = async (req, res) => {
     try {
-        let supportTicketFound = await OwnerSupportTicket.findById(req.params.stId)
+        let supportTicketFound = await CookSupportTicket.findById(req.params.stId)
         if (supportTicketFound) {
             let comments = {
-                owner: req.owner._id,
+                cook: req.cook._id,
                 comment: req.body.comment
             }
 
@@ -646,15 +639,15 @@ exports.addCommentsToSupportTicket = async (req, res) => {
 }
 
 // # description -> HTTP VERB -> Accesss -> Access Type
-// # owner get house -> GET -> Owner -> PRIVATE
-// @route = /api/owners/houses
+// # cook get house -> GET -> Cook -> PRIVATE
+// @route = /api/cooks/houses
 exports.getHouses = async (req, res) => {
     try {
         let houses = await House.find({})
         let findHouses = []
 
         for (let i = 0; i < houses.length; i++) {
-            if (JSON.stringify(req.owner._id) == JSON.stringify(houses[i].owner)) {
+            if (JSON.stringify(req.cook._id) == JSON.stringify(houses[i].owner)) {
                 findHouses.push(houses[i])
             }
         }
@@ -684,8 +677,8 @@ exports.getHouses = async (req, res) => {
 }
 
 // # description -> HTTP VERB -> Accesss -> Access Type
-// # owner get house -> GET -> Owner -> PRIVATE
-// @route = /api/owners/houses/:houseId
+// # cook get house -> GET -> Cook -> PRIVATE
+// @route = /api/cooks/houses/:houseId
 exports.getHouse = async (req, res) => {
     try {
         let house = await House.findById(req.params.houseId)
@@ -713,8 +706,8 @@ exports.getHouse = async (req, res) => {
 
 
 // # description -> HTTP VERB -> Accesss -> Access Type
-// # owner create house -> POST -> Owner -> PRIVATE
-// @route = /api/owners/houses
+// # cook create house -> POST -> Cook -> PRIVATE
+// @route = /api/cooks/houses
 exports.createHouse = async (req, res) => {
     try {
         let images = [];
@@ -725,7 +718,7 @@ exports.createHouse = async (req, res) => {
         }
 
         let house = await House.create({
-            owner: req.owner.id,
+            cook: req.cook.id,
             name: req.body.name,
             province: req.body.province,
             city: req.body.city,
@@ -752,8 +745,8 @@ exports.createHouse = async (req, res) => {
 
 
 // # description -> HTTP VERB -> Accesss -> Access Type
-// # owner update house -> GET -> Owner -> PRIVATE
-// @route = /api/owners/houses/:houseId/update-house
+// # cook update house -> GET -> Cook -> PRIVATE
+// @route = /api/cooks/houses/:houseId/update-house
 exports.updateHouse = async (req, res) => {
     try {
         let house = await House.findByIdAndUpdate(req.params.houseId, {
@@ -809,8 +802,8 @@ exports.updateHouse = async (req, res) => {
 }
 
 // # description -> HTTP VERB -> Accesss -> Access Type
-// # owner update house cover -> PUT -> Owner -> PRIVATE
-// @route = /api/owners/houses/:houseId/update-cover
+// # cook update house cover -> PUT -> Cook -> PRIVATE
+// @route = /api/cooks/houses/:houseId/update-cover
 exports.updateCover = async (req, res) => {
     try {
         let houseCover = await House.findById(req.params.houseId)
@@ -851,8 +844,8 @@ exports.updateCover = async (req, res) => {
 }
 
 // # description -> HTTP VERB -> Accesss -> Access Type
-// # owner update house images -> PUT -> Owner -> PRIVATE
-// @route = /api/owners/houses/:houseId/update-images
+// # cook update house images -> PUT -> Cook -> PRIVATE
+// @route = /api/cooks/houses/:houseId/update-images
 exports.updateImages = async (req, res) => {
     try {
         await House.findByIdAndUpdate(req.params.houseId, {
@@ -882,8 +875,8 @@ exports.updateImages = async (req, res) => {
 }
 
 // # description -> HTTP VERB -> Accesss -> Access Type
-// # owner update house map -> PUT -> Owner -> PRIVATE
-// @route = /api/owners/houses/:houseId/update-map
+// # cook update house map -> PUT -> Cook -> PRIVATE
+// @route = /api/cooks/houses/:houseId/update-map
 exports.updateMap = async (req, res) => {
     try {
         let house = await House.findByIdAndUpdate(req.params.houseId, {

@@ -2,28 +2,29 @@ const express = require("express")
 
 const router = express()
 
-const ownerCtrls = require("../../controllers/owners/owners")
+const cookCtrls = require("../../controllers/cooks/cooks")
 
-const { authOwner } = require("../../middlewares/authOwner")
+const { authCook } = require("../../middlewares/authCook")
 
 const upload = require("../../utils/upload")
 
-// owner profile
-router.get('/me', authOwner, ownerCtrls.getMe)
-router.put('/update-profile', authOwner, ownerCtrls.updateProfile)
-router.put('/update-avatar', authOwner, upload.ownerAvatarUpload.single("avatar"), ownerCtrls.updateAvatar)
+// cook profile
+router.get('/me', authCook, cookCtrls.getMe)
+
+router.put('/update-profile', authCook, cookCtrls.updateProfile)
+router.put('/update-avatar', authCook, upload.ownerAvatarUpload.single("avatar"), cookCtrls.updateAvatar)
 
 
 // notifications
-router.get('/notifications', authOwner, ownerCtrls.notifications)
-router.get('/notifications/:ntfId', authOwner, ownerCtrls.notification)
-router.post('/notifications', authOwner, ownerCtrls.createNotification)
-router.put('/notifications/:ntfId/mark-notification', ownerCtrls.markNotification)
+router.get('/notifications', authCook, cookCtrls.notifications)
+router.get('/notifications/:ntfId', authCook, cookCtrls.notification)
+router.post('/notifications', authCook, cookCtrls.createNotification)
+router.put('/notifications/:ntfId/mark-notification', cookCtrls.markNotification)
 
 // advertisments
-router.get('/ads', authOwner, ownerCtrls.allAds)
-router.get('/ads/:adsId', authOwner, ownerCtrls.singleAds)
-router.post('/ads', authOwner, upload.ownerAdsPhotosUpload.fields([
+router.get('/ads', authCook, cookCtrls.allAds)
+router.get('/ads/:adsId', authCook, cookCtrls.singleAds)
+router.post('/ads', authCook, upload.cookAdsPhotosUpload.fields([
     {
         name: "photo",
         maxCount: 1,
@@ -32,47 +33,47 @@ router.post('/ads', authOwner, upload.ownerAdsPhotosUpload.fields([
         name: "photos",
         maxCount: 6,
     },
-]), ownerCtrls.createAds)
+]), cookCtrls.createAds)
 
-router.put('/ads/:adsId/update-ads', authOwner, ownerCtrls.updateAds)
-router.put('/ads/:adsId/update-photo', authOwner, upload.ownerAdsPhotosUpload.single("photo"), ownerCtrls.updateAdsPhoto)
-router.put('/ads/:adsId/update-photos', authOwner, upload.ownerAdsPhotosUpload.single("photos"), ownerCtrls.updateAdsPhotos)
-router.delete('/ads/:adsId', authOwner, ownerCtrls.deleteAds)
-
-
-// support tickets
-router.get('/support-tickets', authOwner, ownerCtrls.supportTickets)
-router.get('/support-tickets/:stId', authOwner, ownerCtrls.supportTicket)
-router.post('/support-tickets', authOwner, ownerCtrls.createSupportTicket)
-router.put('/support-tickets/:stId/read', authOwner, ownerCtrls.readSupportTicket)
-router.put('/support-tickets/:stId/add-comment', authOwner, ownerCtrls.addCommentsToSupportTicket)
-
-// houses
-router.get('/houses', authOwner, ownerCtrls.getHouses)
-router.get('/houses/:houseId', authOwner, ownerCtrls.getHouse)
-router.post('/houses', authOwner, upload.houseUpload.fields([
-    {
-        name: "cover",
-        maxCount: 1,
-    },
-    {
-        name: "images",
-        maxCount: 6,
-    },
-]), ownerCtrls.createHouse)
-
-router.put('/houses/:houseId/update-house', authOwner, ownerCtrls.updateHouse)
-router.put('/houses/:houseId/update-cover', authOwner, upload.houseUpload.single("cover"), ownerCtrls.updateCover)
-router.put(
-    "/houses/:houseId/update-images",
-    upload.houseUpload.single("images"),
-    ownerCtrls.updateImages
-);
-
-router.put('/houses/:houseId/update-map', authOwner, ownerCtrls.updateMap)
+router.put('/ads/:adsId/update-ads', authCook, cookCtrls.updateAds)
+router.put('/ads/:adsId/update-photo', authCook, upload.cookAdsPhotosUpload.single("photo"), cookCtrls.updateAdsPhoto)
+router.put('/ads/:adsId/update-photos', authCook, upload.cookAdsPhotosUpload.single("photos"), cookCtrls.updateAdsPhotos)
+router.delete('/ads/:adsId', authCook, cookCtrls.deleteAds)
 
 
-// router.get('/finance', ownerCtrls.finance)
-// router.get('/my-tickets', ownerCtrls.myTickets)
+// // support tickets
+router.get('/support-tickets', authCook, cookCtrls.supportTickets)
+router.get('/support-tickets/:stId', authCook, cookCtrls.supportTicket)
+router.post('/support-tickets', authCook, cookCtrls.createSupportTicket)
+router.put('/support-tickets/:stId/read', authCook, cookCtrls.readSupportTicket)
+router.put('/support-tickets/:stId/add-comment', authCook, cookCtrls.addCommentsToSupportTicket)
+
+// // houses
+// router.get('/houses', authCook, cookCtrls.getHouses)
+// router.get('/houses/:houseId', authCook, cookCtrls.getHouse)
+// router.post('/houses', authCook, upload.houseUpload.fields([
+//     {
+//         name: "cover",
+//         maxCount: 1,
+//     },
+//     {
+//         name: "images",
+//         maxCount: 6,
+//     },
+// ]), cookCtrls.createHouse)
+
+// router.put('/houses/:houseId/update-house', authCook, cookCtrls.updateHouse)
+// router.put('/houses/:houseId/update-cover', authCook, upload.houseUpload.single("cover"), cookCtrls.updateCover)
+// router.put(
+//     "/houses/:houseId/update-images",
+//     upload.houseUpload.single("images"),
+//     cookCtrls.updateImages
+// );
+
+// router.put('/houses/:houseId/update-map', authCook, cookCtrls.updateMap)
+
+
+// // router.get('/finance', cookCtrls.finance)
+// // router.get('/my-tickets', cookCtrls.myTickets)
 
 module.exports = router
