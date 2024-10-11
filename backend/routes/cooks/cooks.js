@@ -48,29 +48,23 @@ router.post('/support-tickets', authCook, cookCtrls.createSupportTicket)
 router.put('/support-tickets/:stId/read', authCook, cookCtrls.readSupportTicket)
 router.put('/support-tickets/:stId/add-comment', authCook, cookCtrls.addCommentsToSupportTicket)
 
-// // houses
-// router.get('/houses', authCook, cookCtrls.getHouses)
-// router.get('/houses/:houseId', authCook, cookCtrls.getHouse)
-// router.post('/houses', authCook, upload.houseUpload.fields([
-//     {
-//         name: "cover",
-//         maxCount: 1,
-//     },
-//     {
-//         name: "images",
-//         maxCount: 6,
-//     },
-// ]), cookCtrls.createHouse)
-
-// router.put('/houses/:houseId/update-house', authCook, cookCtrls.updateHouse)
-// router.put('/houses/:houseId/update-cover', authCook, upload.houseUpload.single("cover"), cookCtrls.updateCover)
-// router.put(
-//     "/houses/:houseId/update-images",
-//     upload.houseUpload.single("images"),
-//     cookCtrls.updateImages
-// );
-
-// router.put('/houses/:houseId/update-map', authCook, cookCtrls.updateMap)
+// foods
+router.get('/foods', authCook, cookCtrls.getFoods)
+router.get('/foods/:foodId', authCook, cookCtrls.getFood)
+router.post('/foods', authCook, upload.foodPhotosUpload.fields([
+    {
+        name: "photo",
+        maxCount: 1,
+    },
+    {
+        name: "photos",
+        maxCount: 6,
+    },
+]), cookCtrls.createFood)
+router.put('/foods/:foodId/update-food', authCook, cookCtrls.updateFood)
+router.put('/foods/:foodId/update-food-photo', authCook, upload.foodPhotosUpload.single("photo"), cookCtrls.updateFoodPhoto)
+router.put('/foods/:foodId/update-food-photos', authCook, upload.foodPhotosUpload.single("photos"), cookCtrls.updateFoodPhotos)
+router.delete('/foods/:foodId', authCook, cookCtrls.deleteFood)
 
 
 // // router.get('/finance', cookCtrls.finance)

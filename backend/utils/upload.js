@@ -11,6 +11,7 @@ const driverBusPhotosDir = path.join(__dirname, '../uploads/driverBusPhotosDir/'
 const ownerAdsDir = path.join(__dirname, '../uploads/ownerAdsDir/');
 const cookAvatarDir = path.join(__dirname, '../uploads/cookAvatarDir/');
 const cookAdsDir = path.join(__dirname, '../uploads/cookAdsDir/');
+const foodPhotosDir = path.join(__dirname, '../uploads/foodPhotosDir/');
 
 module.exports = {
 
@@ -155,4 +156,15 @@ module.exports = {
         })
     }),
 
+    foodPhotosUpload: multer({
+        storage: multer.diskStorage({
+            destination: function (req, file, cb) {
+                const made = mkdirp.sync(foodPhotosDir);
+                cb(null, foodPhotosDir)
+            },
+            filename: function (req, file, cb) {
+                cb(null, Date.now() + path.extname(file.originalname));
+            }
+        })
+    }),
 }

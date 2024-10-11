@@ -3,6 +3,7 @@ const CookNotification = require("../../models/CookNotification")
 const Cook = require("../../models/Cook")
 const CookAds = require("../../models/CookAds");
 const CookSupportTicket = require('../../models/CookSupportTicket');
+const Food = require('../../models/Food');
 
 // # description -> HTTP VERB -> Accesss -> Access Type
 // # cook get profile -> GET -> Cook -> PRIVATE
@@ -639,30 +640,31 @@ exports.addCommentsToSupportTicket = async (req, res) => {
 }
 
 // # description -> HTTP VERB -> Accesss -> Access Type
-// # cook get house -> GET -> Cook -> PRIVATE
-// @route = /api/cooks/houses
-exports.getHouses = async (req, res) => {
+// # cook get food -> GET -> Cook -> PRIVATE
+// @route = /api/foods
+exports.getFoods = async (req, res) => {
     try {
-        let houses = await House.find({})
-        let findHouses = []
+        let foods = await Food.find({})
+        let findFoods = []
 
-        for (let i = 0; i < houses.length; i++) {
-            if (JSON.stringify(req.cook._id) == JSON.stringify(houses[i].owner)) {
-                findHouses.push(houses[i])
+        for (let i = 0; i < foods.length; i++) {
+
+            if (JSON.stringify(req.cook._id) == JSON.stringify(foods[i].chef)) {
+                findFoods.push(foods[i])
             }
         }
 
-        if (findHouses) {
+        if (findFoods) {
             return res.status(StatusCodes.OK).json({
                 status: 'success',
-                msg: "خانه ها پیدا شد",
-                count: findHouses.length,
-                findHouses
+                msg: "غذا ها پیدا شد",
+                count: findFoods.length,
+                findFoods
             })
         } else {
             return res.status(StatusCodes.BAD_REQUEST).json({
                 status: 'failure',
-                msg: "خانه ها پیدا نشد"
+                msg: "غذا ها پیدا نشد"
             })
         }
 
@@ -677,21 +679,21 @@ exports.getHouses = async (req, res) => {
 }
 
 // # description -> HTTP VERB -> Accesss -> Access Type
-// # cook get house -> GET -> Cook -> PRIVATE
-// @route = /api/cooks/houses/:houseId
-exports.getHouse = async (req, res) => {
+// # cook get food -> GET -> Cook -> PRIVATE
+// @route = /api/foods/:foodId
+exports.getFood = async (req, res) => {
     try {
-        let house = await House.findById(req.params.houseId)
-        if (house) {
+        let food = await Food.findById(req.params.foodId)
+        if (food) {
             return res.status(StatusCodes.OK).json({
                 status: 'success',
-                msg: "خانه پیدا شد",
-                house
+                msg: "غذا پیدا شد",
+                food
             })
         } else {
             return res.status(StatusCodes.BAD_REQUEST).json({
                 status: 'failure',
-                msg: "خانه پیدا نشد"
+                msg: "غذا پیدا نشد"
             })
         }
     } catch (error) {
@@ -706,31 +708,36 @@ exports.getHouse = async (req, res) => {
 
 
 // # description -> HTTP VERB -> Accesss -> Access Type
-// # cook create house -> POST -> Cook -> PRIVATE
-// @route = /api/cooks/houses
-exports.createHouse = async (req, res) => {
+// # cook create food -> POST -> Cook -> PRIVATE
+// @route = /api/foods
+exports.createFood = async (req, res) => {
     try {
-        let images = [];
-        if (req.files.images) {
-            req.files.images.forEach((e) => {
-                images.push(e.filename);
+        let photos = [];
+        if (req.files.photos) {
+            req.files.photos.forEach((e) => {
+                photos.push(e.filename);
             });
         }
 
-        let house = await House.create({
-            cook: req.cook.id,
+        let food = await Food.create({
+            chef: req.cook._id,
             name: req.body.name,
-            province: req.body.province,
-            city: req.body.city,
-            cover: req.files.cover[0].filename,
-            images,
+            price: req.body.price,
+            description: req.body.description,
+            category: req.body.category,
+            countInDay: req.body.countInDay,
+            days: req.body.days,
+            startHour: req.body.startHour,
+            endHour: req.body.endHour,
+            photo: req.files.photo[0].filename,
+            photos,
         })
 
-        if (house) {
+        if (food) {
             res.status(StatusCodes.OK).json({
                 status: 'success',
-                msg: 'ملک ایجاد شد',
-                house
+                msg: 'غذا ایجاد شد',
+                food
             });
         }
     } catch (error) {
@@ -745,50 +752,31 @@ exports.createHouse = async (req, res) => {
 
 
 // # description -> HTTP VERB -> Accesss -> Access Type
-// # cook update house -> GET -> Cook -> PRIVATE
-// @route = /api/cooks/houses/:houseId/update-house
-exports.updateHouse = async (req, res) => {
+// # cook update food -> PUT -> Cook -> PRIVATE
+// @route = /api/foods/:foodId/update-food
+exports.updateFood = async (req, res) => {
     try {
-        let house = await House.findByIdAndUpdate(req.params.houseId, {
+        let food = await Food.findByIdAndUpdate(req.params.foodId, {
             name: req.body.name,
-            province: req.body.province,
-            city: req.body.city,
-            postalCode: req.body.postalCode,
-            housePhone: req.body.housePhone,
-            meters: req.body.meters,
-            description: req.body.description,
-            year: req.body.year,
-            capacity: req.body.capacity,
-            startDay: req.body.startDay,
-            endDay: req.body.endDay,
-            houseRoles: req.body.houseRoles,
-            critrias: req.body.critrias,
-            houseType: req.body.houseType,
-            checkIn: req.body.checkIn,
-            checkOut: req.body.checkOut,
-            floor: req.body.floor,
-            options: req.body.options,
-            heating: req.body.heating,
-            cooling: req.body.cooling,
-            parking: req.body.parking,
-            bill: req.body.bill,
             price: req.body.price,
-            houseNumber: req.body.houseNumber,
-            hobbies: req.body.hobbies,
-            enviornment: req.body.enviornment,
-            ownerType: req.body.ownerType,
+            description: req.body.description,
+            category: req.body.category,
+            countInDay: req.body.countInDay,
+            days: req.body.days,
+            startHour: req.body.startHour,
+            endHour: req.body.endHour,
         }, { new: true })
 
-        if (house) {
+        if (food) {
             res.status(StatusCodes.OK).json({
                 status: 'success',
-                msg: 'خانه ویرایش شد',
-                house,
+                msg: 'غذا ویرایش شد',
+                food,
             })
         } else {
             res.status(StatusCodes.BAD_REQUEST).json({
                 status: 'failure',
-                msg: 'خانه ویرایش نشد',
+                msg: 'غذا ویرایش نشد',
             })
         }
     } catch (error) {
@@ -802,20 +790,20 @@ exports.updateHouse = async (req, res) => {
 }
 
 // # description -> HTTP VERB -> Accesss -> Access Type
-// # cook update house cover -> PUT -> Cook -> PRIVATE
-// @route = /api/cooks/houses/:houseId/update-cover
-exports.updateCover = async (req, res) => {
+// # cook update food photo -> PUT -> Cook -> PRIVATE
+// @route = /api/foods/:foodId/update-photo
+exports.updateFoodPhoto = async (req, res) => {
     try {
-        let houseCover = await House.findById(req.params.houseId)
+        let foodPhoto = await Food.findById(req.params.foodId)
 
-        if (houseCover) {
-            houseCover.cover = req.file.filename
-            await houseCover.save().then((data) => {
+        if (foodPhoto) {
+            foodPhoto.photo = req.file.filename
+            await foodPhoto.save().then((data) => {
                 if (data) {
                     res.status(StatusCodes.OK).json({
                         status: "success",
                         msg: "تصویر ویرایش شد",
-                        houseCover
+                        foodPhoto
                     })
                 }
             }).catch((error) => {
@@ -844,23 +832,23 @@ exports.updateCover = async (req, res) => {
 }
 
 // # description -> HTTP VERB -> Accesss -> Access Type
-// # cook update house images -> PUT -> Cook -> PRIVATE
-// @route = /api/cooks/houses/:houseId/update-images
-exports.updateImages = async (req, res) => {
+// # cook update food photos -> PUT -> Cook -> PRIVATE
+// @route = /api/foods/:foodId/update-food-photos
+exports.updateFoodPhotos = async (req, res) => {
     try {
-        await House.findByIdAndUpdate(req.params.houseId, {
-            images: req.file.filename,
-        }).then((ads) => {
-            if (ads) {
+        await Food.findByIdAndUpdate(req.params.foodId, {
+            photos: req.file.filename,
+        }).then((food) => {
+            if (food) {
                 return res.status(StatusCodes.OK).json({
                     status: 'success',
-                    msg: "تصاویر خانه ویرایش شدند",
-                    ads
+                    msg: "تصاویر غذا ویرایش شدند",
+                    food
                 })
             } else {
                 return res.status(StatusCodes.BAD_REQUEST).json({
                     status: 'failure',
-                    msg: "تصاویر خانه ویرایش نشدند",
+                    msg: "تصاویر غذا ویرایش نشدند",
                 })
             }
         });
@@ -875,11 +863,42 @@ exports.updateImages = async (req, res) => {
 }
 
 // # description -> HTTP VERB -> Accesss -> Access Type
+// # delete cook food -> DELETE -> Cook -> PRIVATE
+// @route = /api/cooks/foods/:foodId
+exports.deleteFood = async (req, res) => {
+    try {
+        await Food.findByIdAndDelete(req.params.foodId).then((food) => {
+            if (food) {
+                return res.status(StatusCodes.OK).json({
+                    status: 'success',
+                    msg: "غذا حذف شد",
+                    food
+                })
+            } else {
+                return res.status(StatusCodes.BAD_REQUEST).json({
+                    status: 'failure',
+                    msg: "غذا حذف نشد"
+                })
+            }
+        })
+
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
+
+// # description -> HTTP VERB -> Accesss -> Access Type
 // # cook update house map -> PUT -> Cook -> PRIVATE
-// @route = /api/cooks/houses/:houseId/update-map
+// @route = /api/foods/:foodId/update-map
 exports.updateMap = async (req, res) => {
     try {
-        let house = await House.findByIdAndUpdate(req.params.houseId, {
+        let house = await Food.findByIdAndUpdate(req.params.foodId, {
             lat: req.body.lat,
             lng: req.body.lng,
         }, { new: true })
