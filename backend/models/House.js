@@ -5,7 +5,7 @@ const validator = require('validator');
 const reviewSchema = mongoose.Schema(
     {
         name: { type: String, required: true },
-        rating: { type: Number, required: true },
+        rating: { type: Number, required: true, min: 1, max: 5 },
         comment: { type: String, required: true },
         user: {
             type: mongoose.Schema.Types.ObjectId,
@@ -123,17 +123,17 @@ const houseSchema = new mongoose.Schema({
 
     heating: {
         type: Boolean,
-        default:false
+        default: false
     },
 
     cooling: {
         type: Boolean,
-        default:false
+        default: false
     },
 
     parking: {
         type: Boolean,
-        default:false
+        default: false
     },
 
     bill: {
@@ -141,7 +141,8 @@ const houseSchema = new mongoose.Schema({
     },
 
     price: {
-        type: String,
+        type: Number,
+        required: true
     },
 
     address: {
@@ -164,7 +165,15 @@ const houseSchema = new mongoose.Schema({
         type: String,
     },
 
+    // change by adsmin
     isActive: {
+        type: Boolean,
+        default: true,
+        required: true
+    },
+
+    // change by house owner
+    isAvailable: {
         type: Boolean,
         default: true,
         required: true

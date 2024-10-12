@@ -5,6 +5,24 @@ const Booking = require("../../models/Booking")
 const Owner = require("../../models/Owner")
 const BusTicket = require("../../models/BusTicket")
 
+// const calculateBookignHousePrice = (housePrice, guestsCount, checkInDate, checkOutDate) => {
+//     //    return housePrice * guestsCount * 
+//     let checkInMounth = checkInDate.split('-')[1]
+//     let checkOutMounth = checkOutDate.split('-')[1]
+//     let checkInDay = checkInDate.split('-')[2]
+//     let checkOutDay = checkOutDate.split('-')[2]
+//     let daysDiffer = 0
+
+
+//     if(checkOutMounth === checkInMounth){
+//         daysDiffer = checkOutDay - checkInDay
+//     }else if(checkOutMounth > checkInMounth){
+//         daysDiffer = checkOutDay - checkInDay
+
+//     }
+// }
+
+
 exports.getMe = async (req, res) => {
     try {
         let user = await User.findById(req.user._id).populate('favorites').select('-password')
@@ -196,35 +214,37 @@ exports.searchHouses = async (req, res) => {
 
 // # description -> HTTP VERB -> Accesss -> Access Type
 // # get favorites houses -> GET -> USER -> PRIVATE
-// @route = /api/users/houses/search-houses
+// @route = /api/users/houses/favorite-houses
 exports.getFavoriteHouses = async (req, res) => {
-    res.send(req.user._id)
-    // try {
-    //     let user = await User.findById(req.user._id).populate('favoriteHouses')
-    //     if (user.favoriteHouses.length > 0) {
-    //         return res.status(StatusCodes.OK).json({
-    //             status: 'success',
-    //             msg: "خانه ها پیدا شدند",
-    //             count: user.favoriteHouses.length,
-    //             houses: user.favoriteHouses
-    //         })
-    //     } else {
-    //         return res.status(StatusCodes.BAD_REQUEST).json({
-    //             status: 'failure',
-    //             msg: "خانه ها پیدا نشدند"
-    //         })
-    //     }
-    // } catch (error) {
-    //     console.error(error);
-    //     console.error(error.message);
-    //     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-    //         status: 'failure',
-    //         msg: "خطای داخلی سرور",
-    //         error
-    //     });
-    // }
+    try {
+        let user = await User.findById(req.user._id).populate('favoriteHouses')
+        if (user.favoriteHouses.length > 0) {
+            return res.status(StatusCodes.OK).json({
+                status: 'success',
+                msg: "خانه ها پیدا شدند",
+                count: user.favoriteHouses.length,
+                houses: user.favoriteHouses
+            })
+        } else {
+            return res.status(StatusCodes.BAD_REQUEST).json({
+                status: 'failure',
+                msg: "خانه ها پیدا نشدند"
+            })
+        }
+    } catch (error) {
+        console.error(error);
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
 }
 
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # get single favorite house -> GET -> USER -> PRIVATE
+// @route = /api/users/houses/favorite-houses/:houseId
 exports.getFavoriteHouse = async (req, res) => {
     try {
         let user = await User.findById(req.user._id).populate('favoriteHouses')
@@ -301,13 +321,14 @@ exports.addFavoriteHouse = async (req, res) => {
     }
 }
 
-
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # delete house from favorites list -> DELETE -> USER -> PRIVATE
+// @route = /api/users/houses/add-favorite-house
 exports.deleteFavoriteHouse = async (req, res) => {
     try {
-        let user = await User.findById(req.user._id).populate('favorites')
+        let user = await User.findById(req.user._id).populate('favoriteHouses')
         if (user.favoriteHouses.length > 0) {
-            let filterHouses = user.favoriteHouses.filter(f => f._id != req.body.house)
-
+            let filterHouses = user.favoriteHouses.filter(f => f._id != req.params.houseId)
             user.favoriteHouses = filterHouses
 
             let newUser = await user.save()
@@ -340,7 +361,9 @@ exports.deleteFavoriteHouse = async (req, res) => {
     }
 }
 
-
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # booking house -> POST -> USER -> PRIVATE
+// @route = /api/users/houses/book-house
 exports.bookHouse = async (req, res) => {
 
     try {
@@ -354,6 +377,8 @@ exports.bookHouse = async (req, res) => {
         let differ = checkOutMounth - checkInMounth
 
         let countDays = 0;
+
+
 
 
         // function compare() {
@@ -377,36 +402,43 @@ exports.bookHouse = async (req, res) => {
         // }
 
 
-        if (house) {
+        if (!house || !house.isActive || !house.isAvailable) {
+            res.status(StatusCodes.NOT_FOUND).json({
+                status: 'failure',
+                msg: "اقامتگاه پیدا نشد",
+            });
+        }
+        else {
+            // let totalBookingHousePrice = calculateBookignHousePrice(house.price, req.body.guests, req.body.checkIn, req.body.checkOut)
+
             let newBooking = await Booking.create({
                 user: req.user._id,
                 owner: house.owner,
                 house: house._id,
                 // price: Number(house.price) * Number(req.body.guests) * Number(checkOutMounth > checkInMounth ? (checkOutDay > checkInDay ?  (checkOutDay - checkInDay  + 30) : (((checkOutDay - checkInDay) * (-1))  + 30)) : (checkOutMounth == checkInMounth ? (1) : ((checkOutDay - checkInDay)))),
-                price: Number(house.price),
+                // price: Number(house.price),
+                price: Number(house.price) * Number(req.body.guests) * Number(checkOutDay - checkInDay),
                 checkIn: req.body.checkIn,
                 checkOut: req.body.checkOut,
                 guests: req.body.guests,
             })
 
             if (newBooking) {
-                res.status(StatusCodes.CREATED).json({
-                    status: 'success',
-                    msg: "اقامتگاه رزرو شد",
-                    booking: newBooking
-                });
+                house.isAvailable = false
+                await house.save().then((data) => {
+                    res.status(StatusCodes.CREATED).json({
+                        status: 'success',
+                        msg: "اقامتگاه رزرو شد",
+                        booking: newBooking,
+                        house: house
+                    });
+                })
             } else {
                 res.status(StatusCodes.BAD_REQUEST).json({
                     status: 'failure',
                     msg: "اقامتگاه رزرو نشد",
                 });
             }
-        }
-        else {
-            res.status(StatusCodes.NOT_FOUND).json({
-                status: 'failure',
-                msg: "اقامتگاه پیدا نشد",
-            });
         }
 
 
@@ -420,7 +452,10 @@ exports.bookHouse = async (req, res) => {
     }
 }
 
-exports.myHouseBookings = async (req, res) => {
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # get user booking houses -> GET -> USER -> PRIVATE
+// @route = /api/users/houses/bookings
+exports.houseBookings = async (req, res) => {
     try {
         let bookings = await Booking.find({ user: req.user._id }).populate("owner house")
 
@@ -435,6 +470,35 @@ exports.myHouseBookings = async (req, res) => {
             return res.status(StatusCodes.NOT_FOUND).json({
                 status: 'failure',
                 msg: "رزروها پیدا نشدند"
+            })
+        }
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # get user booking houses -> GET -> USER -> PRIVATE
+// @route = /api/users/houses/bookings/:bookingId
+exports.houseBooking = async (req, res) => {
+    try {
+        let booking = await Booking.find({ user: req.user._id, _id: req.params.bookingId }).populate("owner house")
+
+        if (booking) {
+            return res.status(StatusCodes.OK).json({
+                status: 'success',
+                msg: "رزرو پیدا شد",
+                booking: booking
+            })
+        } else {
+            return res.status(StatusCodes.NOT_FOUND).json({
+                status: 'failure',
+                msg: "رزرو پیدا نشد"
             })
         }
     } catch (error) {
@@ -523,39 +587,39 @@ exports.cancelHouseBooking = async (req, res) => {
     }
 }
 
-
-
-
-
-
 // # description -> HTTP VERB -> Accesss -> Access Type
-// # owner add review to house -> PUT -> Owner -> PRIVATE
-// @route = /api/owners/houses/:houseId/add-review
+// # add review to house -> PUT -> Owner -> PRIVATE
+// @route = /api/users/houses/:houseId/add-review
 exports.addReviewToHouse = async (req, res) => {
     try {
         let review = {
+            user: req.user._id,
             name: req.body.name,
-            rating: req.body.rating,
             comment: req.body.comment,
-            user: req.user._id
+            rating: req.body.rating,
         }
 
         let house = await House.findByIdAndUpdate(req.params.houseId, {
-            reviews: [...reviews, review]
+            $push: {
+                reviews: review
+            }
         }, { new: true })
 
         if (house) {
-            res.status(200).json({
+            res.status(StatusCodes.OK).json({
                 status: 'success',
-                msg: 'نقشه ویرایش شد',
+                msg: 'نظر افزوده شد',
                 house,
             })
         } else {
-            res.status(403).json({
-                msg: 'نقشه ویرایش نشد',
+            res.status(StatusCodes.BAD_REQUEST).json({
+                msg: 'نظر افزوده نشد',
             })
         }
+
+
     } catch (error) {
+        console.error(error);
         console.error(error.message);
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
             status: 'failure',
@@ -564,6 +628,11 @@ exports.addReviewToHouse = async (req, res) => {
         });
     }
 }
+
+
+// ********************* foods *********************
+
+
 
 
 // ********************* notifications *********************
