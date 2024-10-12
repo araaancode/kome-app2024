@@ -74,6 +74,12 @@ const userSchema = new mongoose.Schema({
       ref: 'House',
     }
   ],
+  favoriteFoods: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Food',
+    }
+  ],
 }, { timestamps: true });
 
 userSchema.pre('save', async function (next) {

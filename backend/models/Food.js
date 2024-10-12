@@ -32,6 +32,10 @@ const foodSchema = new mongoose.Schema({
         type: Boolean,
         default: true,
     },
+    isActive: {
+        type: Boolean,
+        default: true,
+    },
     createdAt: {
         type: Date,
         default: Date.now,

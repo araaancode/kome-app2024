@@ -11,11 +11,11 @@ const { userUpload } = require("../../utils/upload")
 
 
 // profile
-router.get('/me', protect, userCtrls.getMe)
-router.put('/update-profile', protect, userCtrls.updateProfile)
-router.put('/update-avatar', protect, userUpload.single('avatar'), userCtrls.updateAvatar)
+// router.get('/me', protect, userCtrls.getMe)
+// router.put('/update-profile', protect, userCtrls.updateProfile)
+// router.put('/update-avatar', protect, userUpload.single('avatar'), userCtrls.updateAvatar)
 
-// // houses
+// houses
 router.get('/houses', userCtrls.getHouses)
 router.get('/houses/:houseId', userCtrls.getHouse)
 router.post('/houses/search-houses', userCtrls.searchHouses)
@@ -32,8 +32,12 @@ router.put('/houses/bookings/:bookingId/cancel-booking', protect, userCtrls.canc
 router.put('/houses/:houseId/add-review', protect, userCtrls.addReviewToHouse)
 
 // foods
-// router.get('/foods',userCtrls.getFoods)
-
+router.get('/foods', userCtrls.getFoods)
+router.get('/foods/:foodId', userCtrls.getFood)
+router.put('/foods/add-favorite-food', protect, userCtrls.addFavoriteFood)
+router.put('/foods/order-food', protect, userCtrls.orderFood)
+router.post('/foods/search-foods', userCtrls.searchFoods)
+router.delete('/foods/:foodId/delete-favorite-food', protect, userCtrls.deleteFavoriteFood)
 
 
 // 

@@ -3,6 +3,8 @@ const House = require("../../models/House")
 const User = require("../../models/User")
 const Booking = require("../../models/Booking")
 const Owner = require("../../models/Owner")
+const Food = require("../../models/Food")
+const OrderFood = require("../../models/OrderFood")
 const BusTicket = require("../../models/BusTicket")
 
 // const calculateBookignHousePrice = (housePrice, guestsCount, checkInDate, checkOutDate) => {
@@ -323,7 +325,7 @@ exports.addFavoriteHouse = async (req, res) => {
 
 // # description -> HTTP VERB -> Accesss -> Access Type
 // # delete house from favorites list -> DELETE -> USER -> PRIVATE
-// @route = /api/users/houses/add-favorite-house
+// @route = /api/users/houses/delete-favorite-house
 exports.deleteFavoriteHouse = async (req, res) => {
     try {
         let user = await User.findById(req.user._id).populate('favoriteHouses')
@@ -511,6 +513,9 @@ exports.houseBooking = async (req, res) => {
     }
 }
 
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # confirm booking house -> PUT -> USER -> PRIVATE
+// @route = /api/users/houses/bookings/:bookingId/confirm-booking
 exports.confirmHouseBooking = async (req, res) => {
     try {
         let bookings = await Booking.find({ user: req.user._id })
@@ -549,6 +554,9 @@ exports.confirmHouseBooking = async (req, res) => {
     }
 }
 
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # cancel booking house -> PUT -> USER -> PRIVATE
+// @route = /api/users/houses/bookings/:bookingId/cancel-booking
 exports.cancelHouseBooking = async (req, res) => {
     try {
         let bookings = await Booking.find({ user: req.user._id })
@@ -588,7 +596,7 @@ exports.cancelHouseBooking = async (req, res) => {
 }
 
 // # description -> HTTP VERB -> Accesss -> Access Type
-// # add review to house -> PUT -> Owner -> PRIVATE
+// # add review to house -> PUT -> User -> PRIVATE
 // @route = /api/users/houses/:houseId/add-review
 exports.addReviewToHouse = async (req, res) => {
     try {
@@ -631,9 +639,220 @@ exports.addReviewToHouse = async (req, res) => {
 
 
 // ********************* foods *********************
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # get all foods -> GET -> User -> PRIVATE
+// @route = /api/users/foods
+exports.getFoods = async (req, res) => {
+    try {
+        let foods = await Food.find({ isActive: true, isAvailable: true })
+
+        if (foods) {
+            return res.status(StatusCodes.OK).json({
+                status: 'success',
+                msg: "غذاها پیدا شدند",
+                count: foods.length,
+                foods: foods
+            })
+        } else {
+            return res.status(400).json({
+                status: 'failure',
+                msg: "غذاها پیدا نشدند"
+            })
+        }
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # get single food -> GET -> User -> PRIVATE
+// @route = /api/users/foods/:foodId
+exports.getFood = async (req, res) => {
+    try {
+        let food = await Food.findById({ _id: req.params.foodId, isActive: true, isAvailable: true })
+
+        if (food) {
+            return res.status(StatusCodes.OK).json({
+                status: 'success',
+                msg: "غذا پیدا شد",
+                food: food
+            })
+        } else {
+            return res.status(400).json({
+                status: 'failure',
+                msg: "غذا پیدا نشد"
+            })
+        }
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # add house to favorites list -> PUT -> USER -> PRIVATE
+// @route = /api/users/foods/add-favorite-food
+exports.addFavoriteFood = async (req, res) => {
+    try {
+
+        let user = await User.findById({ _id: req.user._id }).select('-password')
+
+        if (user) {
+            if (!user.favoriteFoods.includes(req.body.food)) {
+                user.favoriteFoods.push(req.body.food)
+            }
+
+            else if (user.favoriteFoods.includes(req.body.food)) {
+                user.favoriteFoods = user.favoriteFoods.filter((item) => item != req.body.house)
+            }
+
+            let newUser = await user.save()
+
+            if (newUser) {
+                return res.status(StatusCodes.OK).json({
+                    status: 'success',
+                    msg: "غذا به لیست مورد علاقه اضافه شد",
+                    newUser
+                });
+            }
 
 
+        }
 
+
+    } catch (error) {
+        console.log(error);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # order food -> POST -> USER -> PRIVATE
+// @route = /api/users/foods/order-food
+exports.orderFood = async (req, res) => {
+    try {
+        let findFood = await Food.findById({ _id: req.body.food })
+        if (findFood) {
+            let newOrderFood = await OrderFood.create({
+                user: req.user._id,
+                foods: {
+                    food: req.body.food,
+                    quantity: req.body.quantity,
+                },
+                totalPrice: findFood.price * req.body.quantity,
+                address: req.body.address,
+            })
+            if (newOrderFood) {
+                res.status(StatusCodes.CREATED).json({
+                    status: 'success',
+                    msg: "سفارش غذا ثبت شد",
+                    order: newOrderFood
+                });
+            } else {
+                res.status(StatusCodes.BAD_REQUEST).json({
+                    status: 'failure',
+                    msg: "سفارش غذا ثبت نشد",
+                });
+            }
+        } else {
+            res.status(StatusCodes.BAD_REQUEST).json({
+                status: 'failure',
+                msg: "غذا پیدا نشد",
+            });
+        }
+
+    } catch (error) {
+        console.log(error);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # search foods -> GET -> USER -> PRIVATE
+// @route = /api/users/foods/search-foods
+exports.searchFoods = async (req, res) => {
+    try {
+        let foods = await Food.find({ name: req.body.name, isActive: true, isAvailable: true })
+        if (foods.length > 0) {
+            res.status(StatusCodes.OK).json({
+                status: 'success',
+                msg: "غذاها پیدا شدند",
+                count: foods.length,
+                foods: foods
+            });
+        } else {
+            res.status(StatusCodes.NOT_FOUND).json({
+                status: 'failure',
+                msg: "غذا یافت نشدند",
+            });
+        }
+
+    } catch (error) {
+        console.error(error);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # delete food from favorites list -> PUT -> USER -> PRIVATE
+// @route = /api/users/foods/delete-favorite-food/:foodId
+exports.deleteFavoriteFood = async (req, res) => {
+    try {
+        let user = await User.findById(req.user._id).populate('favoriteFoods')
+        if (user.favoriteFoods.length > 0) {
+            let filterFoods = user.favoriteFoods.filter(f => f._id != req.params.foodId)
+            user.favoriteFoods = filterFoods
+
+            let newUser = await user.save()
+
+            if (newUser) {
+                res.status(StatusCodes.OK).json({
+                    status: 'success',
+                    msg: "غذا حذف شد",
+                    newUser
+                });
+            } else {
+                res.status(StatusCodes.BAD_REQUEST).json({
+                    status: 'failure',
+                    msg: "غذا حذف نشد",
+                });
+            }
+        } else {
+            return res.status(StatusCodes.BAD_REQUEST).json({
+                status: 'failure',
+                msg: "غذا حذف نشد"
+            })
+        }
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
 
 // ********************* notifications *********************
 
