@@ -164,7 +164,7 @@ const houseSchema = new mongoose.Schema({
         type: String,
     },
 
-    active: {
+    isActive: {
         type: Boolean,
         default: true,
         required: true

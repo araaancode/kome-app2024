@@ -30,6 +30,7 @@ exports.getMe = async (req, res) => {
     }
 }
 
+// ********************* profile *********************
 // # description -> HTTP VERB -> Accesss
 // # update user profile -> PUT -> user
 exports.updateProfile = async (req, res) => {
@@ -103,9 +104,14 @@ exports.updateAvatar = async (req, res) => {
     }
 }
 
+// ********************* houses *********************
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # user get houses -> GET -> USER -> PRIVATE
+// @route = /api/users/houses
 exports.getHouses = async (req, res) => {
     try {
-        let houses = await House.find({})
+        let houses = await House.find({ isActive: true }).populate('owner')
         if (houses.length > 0) {
             return res.status(StatusCodes.OK).json({
                 status: 'success',
@@ -129,10 +135,14 @@ exports.getHouses = async (req, res) => {
     }
 }
 
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # user get single house -> GET -> USER -> PRIVATE
+// @route = /api/users/houses/:houseId
 exports.getHouse = async (req, res) => {
     try {
         let house = await House.findById(req.params.houseId)
-        if (house) {
+
+        if (house && house.isActive) {
             return res.status(StatusCodes.OK).json({
                 status: 'success',
                 msg: "خانه پیدا شد",
@@ -154,27 +164,18 @@ exports.getHouse = async (req, res) => {
     }
 }
 
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # user search houses -> POST -> USER -> PRIVATE
+// @route = /api/users/houses/search-houses
 exports.searchHouses = async (req, res) => {
-    let { city, checkIn, checkOut, guests } = req.body
-
     try {
-        let houses = await House.find({})
-
-        let findHouses = []
-
-        for (let i = 0; i < houses.length; i++) {
-            if (houses[i].city === city) {
-                findHouses.push(houses[i]);
-            }
-        }
-
-
-        if (findHouses.length > 0) {
+        let houses = await House.find({ city: req.body.city, isActive: true })
+        if (houses.length > 0) {
             res.status(StatusCodes.OK).json({
                 status: 'success',
-                msg: "اقامتگاه پیدا شد",
-                count: findHouses.length,
-                houses: findHouses
+                msg: "اقامتگاه هاپیدا شد",
+                count: houses.length,
+                houses: houses
             });
         } else {
             res.status(StatusCodes.NOT_FOUND).json({
@@ -192,6 +193,153 @@ exports.searchHouses = async (req, res) => {
         });
     }
 }
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # get favorites houses -> GET -> USER -> PRIVATE
+// @route = /api/users/houses/search-houses
+exports.getFavoriteHouses = async (req, res) => {
+    res.send(req.user._id)
+    // try {
+    //     let user = await User.findById(req.user._id).populate('favoriteHouses')
+    //     if (user.favoriteHouses.length > 0) {
+    //         return res.status(StatusCodes.OK).json({
+    //             status: 'success',
+    //             msg: "خانه ها پیدا شدند",
+    //             count: user.favoriteHouses.length,
+    //             houses: user.favoriteHouses
+    //         })
+    //     } else {
+    //         return res.status(StatusCodes.BAD_REQUEST).json({
+    //             status: 'failure',
+    //             msg: "خانه ها پیدا نشدند"
+    //         })
+    //     }
+    // } catch (error) {
+    //     console.error(error);
+    //     console.error(error.message);
+    //     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+    //         status: 'failure',
+    //         msg: "خطای داخلی سرور",
+    //         error
+    //     });
+    // }
+}
+
+exports.getFavoriteHouse = async (req, res) => {
+    try {
+        let user = await User.findById(req.user._id).populate('favoriteHouses')
+        if (user.favoriteHouses.length > 0) {
+            let house = user.favoriteHouses.find(f => f._id == req.params.houseId)
+
+            if (house) {
+                return res.status(StatusCodes.OK).json({
+                    status: 'success',
+                    msg: "خانه پیدا شد",
+                    house
+                })
+            } else {
+                return res.status(StatusCodes.OK).json({
+                    status: 'success',
+                    msg: "خانه پیدا نشد",
+                })
+            }
+
+        } else {
+            return res.status(StatusCodes.BAD_REQUEST).json({
+                status: 'failure',
+                msg: "خانه پیدا نشد"
+            })
+        }
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # add house to favorites list -> PUT -> USER -> PRIVATE
+// @route = /api/users/houses/add-favorite-house
+exports.addFavoriteHouse = async (req, res) => {
+    try {
+
+        let user = await User.findById({ _id: req.user._id }).select('-password')
+
+        if (user) {
+            if (!user.favoriteHouses.includes(req.body.house)) {
+                user.favoriteHouses.push(req.body.house)
+            }
+
+            else if (user.favoriteHouses.includes(req.body.house)) {
+                user.favoriteHouses = user.favoriteHouses.filter((item) => item != req.body.house)
+            }
+
+            let newUser = await user.save()
+
+            if (newUser) {
+                return res.status(StatusCodes.OK).json({
+                    status: 'success',
+                    msg: "خانه به لیست مورد علاقه اضافه شد",
+                    newUser
+                });
+            }
+
+
+        }
+
+
+    } catch (error) {
+        console.log(error);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
+
+exports.deleteFavoriteHouse = async (req, res) => {
+    try {
+        let user = await User.findById(req.user._id).populate('favorites')
+        if (user.favoriteHouses.length > 0) {
+            let filterHouses = user.favoriteHouses.filter(f => f._id != req.body.house)
+
+            user.favoriteHouses = filterHouses
+
+            let newUser = await user.save()
+
+            if (newUser) {
+                res.status(StatusCodes.OK).json({
+                    status: 'success',
+                    msg: "خانه حذف شد",
+                    newUser
+                });
+            } else {
+                res.status(StatusCodes.BAD_REQUEST).json({
+                    status: 'failure',
+                    msg: "خانه حذف نشد",
+                });
+            }
+        } else {
+            return res.status(StatusCodes.BAD_REQUEST).json({
+                status: 'failure',
+                msg: "خانه ها حذف نشد"
+            })
+        }
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
 
 exports.bookHouse = async (req, res) => {
 
@@ -272,19 +420,168 @@ exports.bookHouse = async (req, res) => {
     }
 }
 
+exports.myHouseBookings = async (req, res) => {
+    try {
+        let bookings = await Booking.find({ user: req.user._id }).populate("owner house")
+
+        if (bookings) {
+            return res.status(StatusCodes.OK).json({
+                status: 'success',
+                msg: "رزروها پیدا شدند",
+                count: bookings.length,
+                bookings: bookings
+            })
+        } else {
+            return res.status(StatusCodes.NOT_FOUND).json({
+                status: 'failure',
+                msg: "رزروها پیدا نشدند"
+            })
+        }
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
+exports.confirmHouseBooking = async (req, res) => {
+    try {
+        let bookings = await Booking.find({ user: req.user._id })
+        let findBooking = bookings.find(booking => booking._id == req.params.bookingId)
+
+        if (findBooking) {
+            findBooking.isConfirmed = true
+            await findBooking.save().then((booking) => {
+                return res.status(StatusCodes.OK).json({
+                    status: 'success',
+                    msg: "رزرو تایید شد",
+                    booking: booking
+                })
+            }).catch(() => {
+                return res.status(StatusCodes.BAD_REQUEST).json({
+                    status: 'failure',
+                    msg: "رزرو تایید نشد",
+                })
+            })
+
+        } else {
+            return res.status(StatusCodes.NOT_FOUND).json({
+                status: 'failure',
+                msg: "رزرو پیدا نشد"
+            })
+        }
+
+
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
+exports.cancelHouseBooking = async (req, res) => {
+    try {
+        let bookings = await Booking.find({ user: req.user._id })
+        let findBooking = bookings.find(booking => booking._id == req.params.bookingId)
+
+        if (findBooking) {
+            findBooking.isConfirmed = false
+            await findBooking.save().then((booking) => {
+                return res.status(StatusCodes.OK).json({
+                    status: 'success',
+                    msg: "رزرو لغو شد",
+                    booking: booking
+                })
+            }).catch(() => {
+                return res.status(StatusCodes.BAD_REQUEST).json({
+                    status: 'failure',
+                    msg: "رزرو لغو نشد",
+                })
+            })
+
+        } else {
+            return res.status(StatusCodes.NOT_FOUND).json({
+                status: 'failure',
+                msg: "رزرو پیدا نشد"
+            })
+        }
+
+
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
+
+
+
+
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # owner add review to house -> PUT -> Owner -> PRIVATE
+// @route = /api/owners/houses/:houseId/add-review
+exports.addReviewToHouse = async (req, res) => {
+    try {
+        let review = {
+            name: req.body.name,
+            rating: req.body.rating,
+            comment: req.body.comment,
+            user: req.user._id
+        }
+
+        let house = await House.findByIdAndUpdate(req.params.houseId, {
+            reviews: [...reviews, review]
+        }, { new: true })
+
+        if (house) {
+            res.status(200).json({
+                status: 'success',
+                msg: 'نقشه ویرایش شد',
+                house,
+            })
+        } else {
+            res.status(403).json({
+                msg: 'نقشه ویرایش نشد',
+            })
+        }
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
+
+// ********************* notifications *********************
+
 exports.notifications = (req, res) => {
     res.send("user notifications")
 }
 
+
+// ********************* finance *********************
 exports.finance = (req, res) => {
     res.send("user finance")
 }
 
 
-exports.myTickets = (req, res) => {
-    res.send("user my tickets")
-}
 
+
+// ********************* bus and bus ticket *********************
 
 // const Booking = require('../models/Booking');
 // const Bus = require('../models/Bus');
@@ -316,9 +613,7 @@ exports.myTickets = (req, res) => {
 //     res.status(500).json({ msg: 'Server error' });
 //   }
 // };
-
-
-exports.createBusTicket = async(req, res) => {
+exports.createBusTicket = async (req, res) => {
     try {
         await BusTicket.create({
             driver: req.body.driver,
@@ -350,170 +645,7 @@ exports.createBusTicket = async(req, res) => {
     }
 }
 
-exports.myBookings = async (req, res) => {
-    try {
-        let bookings = await Booking.find({ user: req.user._id }).populate("owner house")
-
-        if (bookings) {
-            return res.status(StatusCodes.OK).json({
-                status: 'success',
-                msg: "رزروها پیدا شدند",
-                count: bookings.length,
-                bookings: bookings
-            })
-        } else {
-            return res.status(StatusCodes.NOT_FOUND).json({
-                status: 'failure',
-                msg: "رزروها پیدا نشدند"
-            })
-        }
-    } catch (error) {
-        console.error(error.message);
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-            status: 'failure',
-            msg: "خطای داخلی سرور",
-            error
-        });
-    }
-}
-
-exports.getFavorites = async (req, res) => {
-    try {
-        let user = await User.findById(req.user._id).populate('favorites')
-        if (user.favorites.length > 0) {
-            return res.status(StatusCodes.OK).json({
-                status: 'success',
-                msg: "خانه ها پیدا شدند",
-                count: user.favorites.length,
-                houses: user.favorites
-            })
-        } else {
-            return res.status(StatusCodes.BAD_REQUEST).json({
-                status: 'failure',
-                msg: "خانه ها پیدا نشدند"
-            })
-        }
-    } catch (error) {
-        console.error(error.message);
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-            status: 'failure',
-            msg: "خطای داخلی سرور",
-            error
-        });
-    }
-}
-
-exports.getFavorite = async (req, res) => {
-    try {
-        let user = await User.findById(req.user._id).populate('favorites')
-        if (user.favorites.length > 0) {
-            let house = user.favorites.find(f => f._id == req.params.houseId)
-
-            if (house) {
-                return res.status(StatusCodes.OK).json({
-                    status: 'success',
-                    msg: "خانه پیدا شد",
-                    house
-                })
-            } else {
-                return res.status(StatusCodes.OK).json({
-                    status: 'success',
-                    msg: "خانه پیدا نشد",
-                })
-            }
-
-        } else {
-            return res.status(StatusCodes.BAD_REQUEST).json({
-                status: 'failure',
-                msg: "خانه پیدا نشد"
-            })
-        }
-    } catch (error) {
-        console.error(error.message);
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-            status: 'failure',
-            msg: "خطای داخلی سرور",
-            error
-        });
-    }
-}
-
-
-exports.handleFavorite = async (req, res) => {
-    try {
-
-        let user = await User.findById({ _id: req.user._id }).select('-password')
-
-        if (user) {
-            if (!user.favorites.includes(req.body.house)) {
-               user.favorites.push(req.body.house)
-            }
-
-            else if (user.favorites.includes(req.body.house)) {
-                user.favorites = user.favorites.filter((item) => item != req.body.house)
-            }
-
-            let newUser = await user.save()
-
-            if (newUser) {
-                return res.status(StatusCodes.OK).json({
-                    status: 'success',
-                    msg: "خانه به لیست مورد علاقه اضافه شد",
-                    newUser
-                });
-            }
-
-
-        }
-
-
-    } catch (error) {
-        console.log(error);
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-            status: 'failure',
-            msg: "خطای داخلی سرور",
-            error
-        });
-    }
-}
-
-exports.deleteFavorite = async (req, res) => {
-    try {
-        let user = await User.findById(req.user._id).populate('favorites')
-        if (user.favorites.length > 0) {
-            let filterHouses = user.favorites.filter(f => f._id != req.body.house)
-
-            user.favorites = filterHouses
-
-            let newUser = await user.save()
-
-            if (newUser) {
-                res.status(StatusCodes.OK).json({
-                    status: 'success',
-                    msg: "خانه حذف شد",
-                    newUser
-                });
-            } else {
-                res.status(StatusCodes.BAD_REQUEST).json({
-                    status: 'failure',
-                    msg: "خانه حذف نشد",
-                });
-            }
-        } else {
-            return res.status(StatusCodes.BAD_REQUEST).json({
-                status: 'failure',
-                msg: "خانه ها حذف نشد"
-            })
-        }
-    } catch (error) {
-        console.error(error.message);
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-            status: 'failure',
-            msg: "خطای داخلی سرور",
-            error
-        });
-    }
-}
+// ********************* owners *********************
 
 exports.getOwners = async (req, res) => {
     try {
@@ -566,116 +698,4 @@ exports.getOwner = async (req, res) => {
     }
 }
 
-exports.confirmBooking = async (req, res) => {
-    try {
-        let bookings = await Booking.find({ user: req.user._id })
-        let findBooking = bookings.find(booking => booking._id == req.params.bookingId)
 
-        if (findBooking) {
-            findBooking.isConfirmed = true
-            await findBooking.save().then((booking) => {
-                return res.status(StatusCodes.OK).json({
-                    status: 'success',
-                    msg: "رزرو تایید شد",
-                    booking: booking
-                })
-            }).catch(() => {
-                return res.status(StatusCodes.BAD_REQUEST).json({
-                    status: 'failure',
-                    msg: "رزرو تایید نشد",
-                })
-            })
-
-        } else {
-            return res.status(StatusCodes.NOT_FOUND).json({
-                status: 'failure',
-                msg: "رزرو پیدا نشد"
-            })
-        }
-
-
-    } catch (error) {
-        console.error(error.message);
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-            status: 'failure',
-            msg: "خطای داخلی سرور",
-            error
-        });
-    }
-}
-
-exports.cancelBooking = async (req, res) => {
-    try {
-        let bookings = await Booking.find({ user: req.user._id })
-        let findBooking = bookings.find(booking => booking._id == req.params.bookingId)
-
-        if (findBooking) {
-            findBooking.isConfirmed = false
-            await findBooking.save().then((booking) => {
-                return res.status(StatusCodes.OK).json({
-                    status: 'success',
-                    msg: "رزرو لغو شد",
-                    booking: booking
-                })
-            }).catch(() => {
-                return res.status(StatusCodes.BAD_REQUEST).json({
-                    status: 'failure',
-                    msg: "رزرو لغو نشد",
-                })
-            })
-
-        } else {
-            return res.status(StatusCodes.NOT_FOUND).json({
-                status: 'failure',
-                msg: "رزرو پیدا نشد"
-            })
-        }
-
-
-    } catch (error) {
-        console.error(error.message);
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-            status: 'failure',
-            msg: "خطای داخلی سرور",
-            error
-        });
-    }
-}
-
-
-// # description -> HTTP VERB -> Accesss -> Access Type
-// # owner add review to house -> PUT -> Owner -> PRIVATE
-// @route = /api/owners/houses/:houseId/add-review
-exports.addReviewToHouse = async (req, res) => {
-    try {
-        let review = {
-            name:req.body.name,
-            rating:req.body.rating,
-            comment:req.body.comment,
-            user:req.user._id
-        }
-        
-        let house = await House.findByIdAndUpdate(req.params.houseId, {
-            reviews: [...reviews, review]
-        }, { new: true })
-
-        if (house) {
-            res.status(200).json({
-                status: 'success',
-                msg: 'نقشه ویرایش شد',
-                house,
-            })
-        } else {
-            res.status(403).json({
-                msg: 'نقشه ویرایش نشد',
-            })
-        }
-    } catch (error) {
-        console.error(error.message);
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-            status: 'failure',
-            msg: "خطای داخلی سرور",
-            error
-        });
-    }
-}

@@ -68,7 +68,7 @@ const userSchema = new mongoose.Schema({
   token: {
     type: String,
   },
-  favorites: [
+  favoriteHouses: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'House',
