@@ -91,7 +91,6 @@ function getRandomIranianPhoneNumber() {
     return iranianPhoneNumber;
 }
 
-
 function generateRandomHouseImage() {
     const apiKey = 'tqMsEOfDWYkmAJBdiJ66SLHP7-jwTwYyHdB1PY94kak'; // Replace with your Unsplash API key
     const url = `https://api.unsplash.com/photos/random?query=cottage&client_id=${apiKey}`;

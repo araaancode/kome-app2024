@@ -4,6 +4,7 @@ const User = require("../../models/User")
 const Booking = require("../../models/Booking")
 const Owner = require("../../models/Owner")
 const Food = require("../../models/Food")
+const Bus = require("../../models/Bus")
 const OrderFood = require("../../models/OrderFood")
 const BusTicket = require("../../models/BusTicket")
 
@@ -712,7 +713,7 @@ exports.addFavoriteFood = async (req, res) => {
             }
 
             else if (user.favoriteFoods.includes(req.body.food)) {
-                user.favoriteFoods = user.favoriteFoods.filter((item) => item != req.body.house)
+                user.favoriteFoods = user.favoriteFoods.filter((item) => item != req.body.food)
             }
 
             let newUser = await user.save()
@@ -816,12 +817,12 @@ exports.searchFoods = async (req, res) => {
 
 // # description -> HTTP VERB -> Accesss -> Access Type
 // # delete food from favorites list -> PUT -> USER -> PRIVATE
-// @route = /api/users/foods/delete-favorite-food/:foodId
+// @route = /api/users/foods/delete-favorite-food
 exports.deleteFavoriteFood = async (req, res) => {
     try {
         let user = await User.findById(req.user._id).populate('favoriteFoods')
         if (user.favoriteFoods.length > 0) {
-            let filterFoods = user.favoriteFoods.filter(f => f._id != req.params.foodId)
+            let filterFoods = user.favoriteFoods.filter(f => f._id != req.body.foodId)
             user.favoriteFoods = filterFoods
 
             let newUser = await user.save()
@@ -855,7 +856,206 @@ exports.deleteFavoriteFood = async (req, res) => {
 }
 
 // ********************* notifications *********************
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # get all active and available buses -> GET -> USER -> PUBLIC
+// @route = /api/users/buses
+exports.getBuses = async (req, res) => {
+    try {
+        let buses = await Bus.find({ isActive: true, isAvailable: true })
 
+        if (buses) {
+            return res.status(StatusCodes.OK).json({
+                status: 'success',
+                msg: "اتوبوس ها پیدا شدند",
+                count: buses.length,
+                buses: buses
+            })
+        } else {
+            return res.status(400).json({
+                status: 'failure',
+                msg: "اتوبوس ها پیدا نشدند"
+            })
+        }
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # get single active and available bus -> GET -> USER -> PUBLIC
+// @route = /api/users/buses/:busId
+exports.getBus = async (req, res) => {
+    try {
+        let bus = await Bus.findOne({ _id: req.params.busId, isActive: true, isAvailable: true })
+
+        if (bus) {
+            return res.status(StatusCodes.OK).json({
+                status: 'success',
+                msg: "اتوبوس پیدا شد",
+                bus: bus
+            })
+        } else {
+            return res.status(400).json({
+                status: 'failure',
+                msg: "اتوبوس پیدا نشد"
+            })
+        }
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # add bus to favorites list -> PUT -> USER -> PRIVATE
+// @route = /api/users/buses/add-favorite-bus
+exports.addFavoriteBus = async (req, res) => {
+    try {
+        let user = await User.findById({ _id: req.user._id }).select('-password')
+        if (user && req.body.bus) {
+            if (!user.favoriteBuses.includes(req.body.bus)) {
+                user.favoriteBuses.push(req.body.bus)
+                let newUser = await user.save()
+
+                if (newUser) {
+                    return res.status(StatusCodes.OK).json({
+                        status: 'success',
+                        msg: "اتوبوس به لیست مورد علاقه اضافه شد",
+                        newUser
+                    });
+                }
+            } else {
+                return res.status(StatusCodes.BAD_REQUEST).json({
+                    status: 'failure',
+                    msg: "اتوبوس در لیست مورد علاقه وجود دارد. نمیتوانید دوباره آن را اضافه کنید!!!",
+                });
+            }
+        } else {
+            return res.status(StatusCodes.BAD_REQUEST).json({
+                status: 'failure',
+                msg: "اتوبوس به لیست مورد علاقه اضافه نشد",
+            });
+        }
+
+
+    } catch (error) {
+        console.log(error);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # delete bus from favorites list -> PUT -> USER -> PRIVATE
+// @route = /api/users/buses/delete-favorite-bus
+exports.deleteFavoriteBus = async (req, res) => {
+    try {
+        let user = await User.findById(req.user._id).populate('favoriteFoods')
+        if (user.favoriteBuses.length > 0) {
+            let filterBuses = user.favoriteBuses.filter(f => f._id != req.body.bus)
+            user.favoriteBuses = filterBuses
+
+            let newUser = await user.save()
+
+            if (newUser) {
+                res.status(StatusCodes.OK).json({
+                    status: 'success',
+                    msg: "اتوبوس حذف شد",
+                    newUser
+                });
+            } else {
+                res.status(StatusCodes.BAD_REQUEST).json({
+                    status: 'failure',
+                    msg: "اتوبوس حذف نشد",
+                });
+            }
+        } else {
+            return res.status(StatusCodes.BAD_REQUEST).json({
+                status: 'failure',
+                msg: "اتوبوس حذف نشد"
+            })
+        }
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # search buses -> POST -> USER -> PUBLIC
+// @route = /api/users/buses/search-buses
+exports.searchBuses = async (req, res) => {
+    try {
+
+        let buses = await Bus.find({ name: req.body.bus, isActive: true })
+        if (buses.length > 0) {
+            res.status(StatusCodes.OK).json({
+                status: 'success',
+                msg: "اتوبوس هاپیدا شد",
+                count: buses.length,
+                buses: buses
+            });
+        } else {
+            res.status(StatusCodes.NOT_FOUND).json({
+                status: 'failure',
+                msg: "اتوبوسی یافت نشد",
+            });
+        }
+
+    } catch (error) {
+        console.error(error);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # search available bus tickets -> POST -> USER -> PUBLIC
+// @route = /api/users/buses/search-bus-tickets
+exports.searchBusTickes = async (req, res) => {
+    try {
+
+        let buses = await Bus.find({ isActive: true, isAvailable: true }).populate('driver')
+
+    } catch (error) {
+        console.error(error);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # search buses -> POST -> USER -> PUBLIC
+// @route = /api/users/buses/search-buses
+exports.bookBus = async (req, res) => {
+    res.send("book bus")
+}
+
+
+// ********************* notifications *********************
 exports.notifications = (req, res) => {
     res.send("user notifications")
 }

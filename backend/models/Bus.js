@@ -55,9 +55,14 @@ const busSchema = new mongoose.Schema({
     },
     photo: String,
     photos: [{ type: String }],
-    active: {
+    isActive: {
         type: Boolean,
-        default: false,
+        default: true,
+        required: true
+    },
+    isAvailable: {
+        type: Boolean,
+        default: true,
         required: true
     },
     options: [

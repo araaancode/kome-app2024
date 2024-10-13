@@ -16,15 +16,18 @@ const drivingLicenseSchema = new mongoose.Schema({
     required: [true, " کد ملی راننده باید وارد شود"],
     trim: true,
     min: 10,
-    max: 10
+    max: 10,
+    // unique:true,
   },
   dateOfIssue: {
     type: Date,
     required: [true, "  تاریخ صدور گواهینامه باید وارد شود"],
+    default: Date.now()
   },
   birthDate: {
     type: Date,
     required: [true, "  تاریخ تولد باید وارد شود"],
+    default: Date.now()
   },
   licenseNumber: {
     type: String,
@@ -33,6 +36,7 @@ const drivingLicenseSchema = new mongoose.Schema({
   crediteDate: {
     type: Date,
     required: [true, "  شماره گواهینامه باید وارد شود"],
+    default: Date.now()
   },
 })
 
@@ -102,25 +106,39 @@ const driverSchema = new mongoose.Schema({
     type: String,
   },
 
-  arrival: {
-    type: String,
-    default: false
-  },
   isArrived: {
     type: Boolean,
     default: false
   },
-  cities: [{
+
+  firstCity: {
     type: String,
-  }],
+  },
+  lastCity: {
+    type: String,
+  },
+
   movingDate: {
     type: Date,
     default: Date.now()
   },
-  hour: {
+
+  returningDate: {
     type: Date,
     default: Date.now()
   },
+
+  startHour: { // ساعت حرکت از مبدا
+    type: Date,
+    default: Date.now()
+  },
+
+  endHour: { // ساعت رسیدن به مقصد
+    type: Date,
+    default: Date.now()
+  },
+
+
 
   drivingLicense: drivingLicenseSchema,
 

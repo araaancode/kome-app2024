@@ -54,7 +54,12 @@ const busTicketSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
         required: true
-    }
+    },
+    ticketType: {
+        type: String,
+        enum:['oneSide','twoSide'],
+        default: false,
+    },
 }, { timestamps: true });
 
 

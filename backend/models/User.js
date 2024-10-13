@@ -80,6 +80,12 @@ const userSchema = new mongoose.Schema({
       ref: 'Food',
     }
   ],
+  favoriteBuses: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Bus',
+    }
+  ],
 }, { timestamps: true });
 
 userSchema.pre('save', async function (next) {

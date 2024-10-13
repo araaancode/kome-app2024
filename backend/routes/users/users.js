@@ -39,6 +39,13 @@ router.put('/foods/order-food', protect, userCtrls.orderFood)
 router.post('/foods/search-foods', userCtrls.searchFoods)
 router.delete('/foods/:foodId/delete-favorite-food', protect, userCtrls.deleteFavoriteFood)
 
+// buses
+router.get('/buses', userCtrls.getBuses)
+router.get('/buses/:busId', userCtrls.getBus)
+router.put('/buses/add-favorite-bus', protect, userCtrls.addFavoriteBus)
+router.put('/buses/delete-favorite-bus', protect, userCtrls.deleteFavoriteBus)
+router.post('/buses/search-buses', userCtrls.searchBuses)
+router.post('/buses/book-bus', userCtrls.bookBus)
 
 // 
 // router.get('/notifications', userCtrls.notifications)
