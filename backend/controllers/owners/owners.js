@@ -166,7 +166,7 @@ exports.notifications = async (req, res) => {
 }
 
 // # description -> HTTP VERB -> Accesss -> Access Type
-// # get single driver notification -> GET -> Driver -> PRIVATE
+// # get single Owner notification -> GET -> Owner -> PRIVATE
 // @route = /api/owners/notifications/:ntfId
 exports.notification = async (req, res) => {
     try {
@@ -195,7 +195,7 @@ exports.notification = async (req, res) => {
 
 
 // # description -> HTTP VERB -> Accesss -> Access Type
-// # create notification for driver -> POST -> Driver -> PRIVATE
+// # create notification for Owner -> POST -> Owner -> PRIVATE
 // @route = /api/owners/notifications
 exports.createNotification = async (req, res) => {
     try {
@@ -222,7 +222,7 @@ exports.createNotification = async (req, res) => {
 
 
 // # description -> HTTP VERB -> Accesss -> Access Type
-// # mark driver notification -> GET -> Driver -> PRIVATE
+// # mark Owner notification -> PUT -> Owner -> PRIVATE
 // @route = /api/owners/notifications/:ntfId/mark-notification
 exports.markNotification = async (req, res) => {
     try {
@@ -284,7 +284,7 @@ exports.allAds = async (req, res) => {
 
 
 // # description -> HTTP VERB -> Accesss -> Access Type
-// # get single driver ads -> GET -> A -> PRIVATE
+// # get single Owner ads -> GET -> A -> PRIVATE
 // @route = /api/owners/notifications/:adsId
 exports.singleAds = async (req, res) => {
     try {

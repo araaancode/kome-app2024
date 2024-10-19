@@ -7,7 +7,7 @@ const Food = require("../../models/Food")
 const Bus = require("../../models/Bus")
 const OrderFood = require("../../models/OrderFood")
 const BusTicket = require("../../models/BusTicket");
-const { locales } = require('validator/lib/isFloat');
+const UserNotification = require("../../models/UserNotification");
 
 // const calculateBookignHousePrice = (housePrice, guestsCount, checkInDate, checkOutDate) => {
 //     //    return housePrice * guestsCount * 
@@ -1543,35 +1543,152 @@ exports.bookBus = async (req, res) => {
     }
 }
 
-exports.updateBusAfterArrived=async(req,res)=>{
+exports.updateBusAfterArrived = async (req, res) => {
     res.send("updateBusAfterArrived")
 }
 
-exports.updateDriverAfterArrived=async(req,res)=>{
+exports.updateDriverAfterArrived = async (req, res) => {
     res.send("updateBusAfterArrived")
 }
 
-exports.updateUserAfterArrived=async(req,res)=>{
+exports.updateUserAfterArrived = async (req, res) => {
     res.send("updateBusAfterArrived")
 }
 
-exports.updateTicketAfterArrived=async(req,res)=>{
+exports.updateTicketAfterArrived = async (req, res) => {
     res.send("updateBusAfterArrived")
 }
 
 
 // ********************* notifications *********************
-exports.notifications = (req, res) => {
-    res.send("user notifications")
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # get all user notifications -> GET -> Driver -> PRIVATE
+// @route = /api/users/notifications
+exports.notifications = async (req, res) => {
+    try {
+        let notifications = await UserNotification.find({})
+        let findUserNotifications = []
+
+        for (let i = 0; i < notifications.length; i++) {
+            if (JSON.stringify(notifications[i].reciever) == JSON.stringify(req.user._id)) {
+                findUserNotifications.push(notifications[i])
+            }
+        }
+
+        if (findUserNotifications && findUserNotifications.length > 0) {
+            return res.status(StatusCodes.OK).json({
+                status: 'success',
+                msg: "اعلان ها پیدا شد",
+                count: findUserNotifications.length,
+                findUserNotifications
+            })
+        } else {
+            return res.status(StatusCodes.BAD_REQUEST).json({
+                status: 'failure',
+                msg: "اعلان ها پیدا نشد"
+            })
+        }
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
 }
+
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # get single user notification -> GET -> User -> PRIVATE
+// @route = /api/users/notifications/:ntfId
+exports.notification = async (req, res) => {
+    try {
+        let notification = await UserNotification.findById(req.params.ntfId)
+        if (notification) {
+            return res.status(StatusCodes.OK).json({
+                status: 'success',
+                msg: "اعلان پیدا شد",
+                notification
+            })
+        } else {
+            return res.status(StatusCodes.BAD_REQUEST).json({
+                status: 'failure',
+                msg: "اعلان پیدا نشد"
+            })
+        }
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # create notification for user -> POST -> User -> PRIVATE
+// @route = /api/users/notifications
+exports.createNotification = async (req, res) => {
+    try {
+        await UserNotification.create({
+            title: req.body.title,
+            message: req.body.message,
+            reciever: req.user._id,
+        }).then((data) => {
+            res.status(StatusCodes.CREATED).json({
+                status: 'success',
+                msg: "اعلان ساخته شد",
+                data
+            })
+        })
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # mark user notification -> PUT -> User -> PRIVATE
+// @route = /api/users/notifications/:ntfId/mark-notification
+exports.markNotification = async (req, res) => {
+    try {
+        await UserNotification.findByIdAndUpdate(req.params.ntfId, { read: true }, { new: true }).then((nft) => {
+            if (nft) {
+                return res.status(StatusCodes.OK).json({
+                    status: 'success',
+                    msg: "اعلان خوانده شد",
+                    nft
+                })
+            } else {
+                return res.status(StatusCodes.BAD_REQUEST).json({
+                    status: 'failure',
+                    msg: "اعلان خوانده نشد"
+                })
+            }
+        })
+
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
 
 
 // ********************* finance *********************
 exports.finance = (req, res) => {
     res.send("user finance")
 }
-
-
 
 
 // ********************* bus and bus ticket *********************

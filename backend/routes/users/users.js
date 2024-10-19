@@ -51,15 +51,13 @@ router.post('/buses/search-two-side-bus-tickets', userCtrls.searchTwoSideBusTick
 router.put('/buses/delete-favorite-bus', protect, userCtrls.deleteFavoriteBus)
 
 
-// 
-// router.get('/notifications', userCtrls.notifications)
-// router.get('/finance', protect, userCtrls.finance)
+// notifications
+router.get('/notifications', protect, userCtrls.notifications)
+router.get('/notifications/:ntfId', protect, userCtrls.notification)
+router.post('/notifications', protect, userCtrls.createNotification)
+router.put('/notifications/:ntfId/mark-notification', protect, userCtrls.markNotification)
 
-
-
-
-// bus 
-// router.get('/my-tickets', userCtrls.myTickets)
+// advertisments
 
 
 // router.get('/owners', userCtrls.getOwners)
