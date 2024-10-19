@@ -6,7 +6,8 @@ const Owner = require("../../models/Owner")
 const Food = require("../../models/Food")
 const Bus = require("../../models/Bus")
 const OrderFood = require("../../models/OrderFood")
-const BusTicket = require("../../models/BusTicket")
+const BusTicket = require("../../models/BusTicket");
+const { locales } = require('validator/lib/isFloat');
 
 // const calculateBookignHousePrice = (housePrice, guestsCount, checkInDate, checkOutDate) => {
 //     //    return housePrice * guestsCount * 
@@ -24,6 +25,17 @@ const BusTicket = require("../../models/BusTicket")
 
 //     }
 // }
+
+const determineSeatNumbers = (pL, capacity, seats) => {
+    subtrack = capacity - seats
+    let seatNums = []
+
+    for (let i = 0; i < pL; i++) {
+        seatNums.push((i + 1) + subtrack)
+    }
+
+    return seatNums;
+}
 
 
 exports.getMe = async (req, res) => {
@@ -1031,11 +1043,104 @@ exports.searchBuses = async (req, res) => {
 
 // # description -> HTTP VERB -> Accesss -> Access Type
 // # search available bus tickets -> POST -> USER -> PUBLIC
-// @route = /api/users/buses/search-bus-tickets
-exports.searchBusTickes = async (req, res) => {
+// @route = /api/users/buses/search-one-side-bus-tickets
+exports.searchOneSideBusTickes = async (req, res) => {
     try {
 
-        let buses = await Bus.find({ isActive: true, isAvailable: true }).populate('driver')
+        let buses = await Bus.find({ isActive: true, isAvailable: true }).populate('driver').select('-password')
+
+        let userFirstCity = req.body.firstCity
+        let userLastCity = req.body.lastCity
+        let userCount = req.body.count
+        let userMovingDate = req.body.movingDate
+        let userReturningDate = req.body.returningDate
+
+
+        let results = []
+
+
+        buses.forEach((bus) => {
+            if (bus.driver.firstCity === userFirstCity && bus.driver.lastCity === userLastCity) {
+                if (bus.seats >= userCount) {
+                    if (bus.driver.movingDate.toLocaleDateString().split('/')[1] == userMovingDate.split('-')[2]) {
+                        results.push(bus)
+                    }
+                }
+            }
+        })
+
+
+        if (results.length > 0) {
+            res.status(StatusCodes.OK).json({
+                status: 'success',
+                msg: "بلیط های اتوبوس پیدا شدند",
+                count: results.length,
+                buses: results
+            })
+        } else {
+            res.status(StatusCodes.NOT_FOUND).json({
+                status: 'failure',
+                msg: "بلیط های اتوبوس پیدا نشدند",
+            })
+        }
+
+
+    } catch (error) {
+        console.error(error);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # search available bus tickets -> POST -> USER -> PUBLIC
+// @route = /api/users/buses/search-two-side-bus-tickets
+exports.searchTwoSideBusTickes = async (req, res) => {
+    try {
+
+        let buses = await Bus.find({ isActive: true, isAvailable: true }).populate('driver').select('-password')
+
+        let userFirstCity = req.body.firstCity
+        let userLastCity = req.body.lastCity
+        let userCount = req.body.count
+        let userMovingDate = req.body.movingDate
+        let userReturningDate = req.body.returningDate
+
+
+        let results = []
+
+
+        buses.forEach((bus) => {
+            if (bus.driver.firstCity === userFirstCity && bus.driver.lastCity === userLastCity) {
+                if (bus.seats >= userCount) {
+                    if (bus.driver.movingDate.toLocaleDateString().split('/')[1] == userMovingDate.split('-')[2]) {
+                        if (bus.driver.returningDate.toLocaleDateString().split('/')[1] == userReturningDate.split('-')[2]) {
+                            results.push(bus)
+
+                        }
+                    }
+                }
+            }
+        })
+
+
+        if (results.length > 0) {
+            res.status(StatusCodes.OK).json({
+                status: 'success',
+                msg: "بلیط های اتوبوس پیدا شدند",
+                count: results.length,
+                buses: results
+            })
+        } else {
+            res.status(StatusCodes.NOT_FOUND).json({
+                status: 'failure',
+                msg: "بلیط های اتوبوس پیدا نشدند",
+            })
+        }
+
 
     } catch (error) {
         console.error(error);
@@ -1051,7 +1156,407 @@ exports.searchBusTickes = async (req, res) => {
 // # search buses -> POST -> USER -> PUBLIC
 // @route = /api/users/buses/search-buses
 exports.bookBus = async (req, res) => {
-    res.send("book bus")
+    try {
+
+        let ticketType = req.body.ticketType
+        let passengers = req.body.passengers
+
+        // user bus tickets
+        let busTickets = await BusTicket.find({ user: req.user._id })
+        // all active and available buses
+        let buses = await Bus.find({ isActive: true, isAvailable: true }).populate('driver')
+        let userMovingDate = req.body.movingDate
+        let userReturningDate = req.body.returningDate
+        let count = req.body.count
+        let userFirstCity = req.body.firstCity
+        let userLastCity = req.body.lastCity
+        let userStartHour = req.body.startHour
+        let userEndHour = req.body.endHour
+        let userStartMin = req.body.startMin
+        let userEndMin = req.body.endMin
+        let userBus = req.body.bus
+
+        let validTickets = []
+
+        if (busTickets && busTickets.length > 0) {
+            // *** run bus expiretion date validation ***
+            const now = new Date();
+            // Update each ticket's validity based on expirationDate
+            for (const ticket of busTickets) {
+                if (ticket.movingDate < now) {
+
+                    // If the expiration date has passed, mark the ticket as invalid
+                    ticket.isValid = false;
+                    ticket.isExpired = true;
+                    await ticket.save();
+                }
+            }
+
+
+            for (const ticket of busTickets) {
+                if (ticket.isValid && !ticket.isExpired) {
+                    validTickets.push(ticket)
+                }
+            }
+
+            //    if user has valid ticket, ticket must not registered, otherwise ticket ti can registered
+            if (validTickets && validTickets.length > 0) {
+                res.status(StatusCodes.BAD_REQUEST).json(
+                    {
+                        status: 'failure',
+                        msg: "شما نمیتوانید بلیط بگیرید. هنوز بلیط های قبلی شما منقضی نشده اند",
+                    }
+                )
+            } else {
+                // if user has no valid tickets they can take ticket
+                if (ticketType === "oneSide") {
+                    // *** run one side algorithm ***
+                    let bus = await Bus.findOne({ _id: userBus, isActive: true, isAvailable: true }).populate('driver')
+                    if (bus) {
+                        // #1 first of all check if user first city is the same with the driver first city
+                        // #2  check if user last city is the same with the driver last city
+                        if (userFirstCity === bus.driver.firstCity && userLastCity === bus.driver.lastCity && count <= bus.seats && bus.driver.movingDate.toLocaleDateString().split('/')[1] == userMovingDate.split('-')[2]) {
+                            let ticketStartHour = new Date();
+                            ticketStartHour.setHours(userStartHour)
+                            ticketStartHour.setMinutes(userStartMin)
+
+                            let ticketEndHour = new Date();
+                            ticketEndHour.setHours(userEndHour)
+                            ticketStartHour.setMinutes(userEndMin)
+
+                            let newBusTicket = await BusTicket.create({
+                                bus: req.body.bus,
+                                user: req.user._id,
+                                driver: bus.driver,
+                                passengers: req.body.passengers,
+                                firstCity: req.body.firstCity,
+                                lastCity: req.body.lastCity,
+                                movingDate: req.body.movingDate,
+                                // returningDate: req.body.returningDate,
+                                startHour: ticketStartHour,
+                                endHour: ticketEndHour,
+                                ticketPrice: Number(Object.keys(passengers).length) * Number(bus.price),
+                                seatNumbers: determineSeatNumbers(req.body.passengers.length, bus.capacity, bus.seats),
+                                ticketType,
+                                count: req.body.count
+                            })
+
+                            bus.seats -= Number(req.body.passengers.length)
+
+                            if (bus.seats === 0) {
+                                bus.isAvailable = false
+                                await bus.save()
+                                if (newBusTicket) {
+                                    await bus.save()
+
+                                    console.log("notification and sms send for user and driver");
+
+                                    res.status(StatusCodes.CREATED).json({
+                                        status: 'success',
+                                        msg: "بلیط اتوبوس صادر شد",
+                                        ticket: newBusTicket,
+                                    })
+
+                                }
+                            } else {
+                                await bus.save()
+                                if (newBusTicket) {
+                                    await bus.save()
+
+                                    console.log("notification and sms send for user and driver");
+
+                                    res.status(StatusCodes.CREATED).json({
+                                        status: 'success',
+                                        msg: "بلیط اتوبوس صادر شد",
+                                        ticket: newBusTicket,
+                                    })
+
+                                }
+                            }
+                        } else {
+                            res.status(StatusCodes.NOT_FOUND).json({
+                                msg: "بلیط اتوبوس صادر نشد",
+                            })
+                        }
+
+                    } else {
+                        res.status(StatusCodes.NOT_FOUND).json({
+                            msg: "اتوبوس پیدا نشد",
+                        })
+                    }
+
+
+                } else if (ticketType === "twoSide") {
+                    // run two side algorithm
+                    let bus = await Bus.findOne({ _id: userBus }).populate('driver')
+
+                    if (bus) {
+                        // #1 first of all check if user first city is the same with the driver first city
+                        // #2  check if user last city is the same with the driver last city
+                        if (userFirstCity === bus.driver.firstCity && userLastCity === bus.driver.lastCity && count <= bus.seats && bus.driver.movingDate.toLocaleDateString().split('/')[1] == userMovingDate.split('-')[2] && bus.driver.returningDate.toLocaleDateString().split('/')[1] == userReturningDate.split('-')[2]) {
+
+                            let ticketStartHour = new Date();
+                            ticketStartHour.setHours(userStartHour)
+                            ticketStartHour.setMinutes(userStartMin)
+
+                            let ticketEndHour = new Date();
+                            ticketEndHour.setHours(userEndHour)
+                            ticketStartHour.setMinutes(userEndMin)
+
+                            let newBusTicket = await BusTicket.create({
+                                bus: req.body.bus,
+                                user: req.user._id,
+                                driver: bus.driver,
+                                passengers: req.body.passengers,
+                                firstCity: req.body.firstCity,
+                                lastCity: req.body.lastCity,
+                                movingDate: req.body.movingDate,
+                                returningDate: req.body.returningDate,
+                                startHour: ticketStartHour,
+                                endHour: ticketEndHour,
+                                ticketPrice: Number(Object.keys(passengers).length) * Number(bus.price),
+                                seatNumbers: determineSeatNumbers(req.body.passengers.length, bus.capacity, bus.seats),
+                                ticketType,
+                                count: req.body.count
+                            })
+
+                            bus.seats -= Number(req.body.passengers.length)
+
+                            if (bus.seats === 0) {
+                                bus.isAvailable = false
+                                await bus.save()
+                                if (newBusTicket) {
+                                    await bus.save()
+
+                                    console.log("notification and sms send for user and driver");
+
+                                    res.status(StatusCodes.CREATED).json({
+                                        status: 'success',
+                                        msg: "بلیط اتوبوس صادر شد",
+                                        ticket: newBusTicket,
+                                    })
+
+                                }
+                            } else {
+                                await bus.save()
+                                if (newBusTicket) {
+                                    await bus.save()
+
+                                    console.log("notification and sms send for user and driver");
+
+                                    res.status(StatusCodes.CREATED).json({
+                                        status: 'success',
+                                        msg: "بلیط اتوبوس صادر شد",
+                                        ticket: newBusTicket,
+                                    })
+
+                                }
+                            }
+                        } else {
+                            res.status(StatusCodes.NOT_FOUND).json({
+                                msg: "بلیط اتوبوس صادر نشد ",
+                            })
+                        }
+
+                    } else {
+                        res.status(StatusCodes.NOT_FOUND).json({
+                            msg: "اتوبوس پیدا نشد",
+                        })
+                    }
+                }
+            }
+
+
+
+        } else {
+            if (ticketType === "oneSide") {
+                // *** run one side algorithm ***
+                let bus = await Bus.findOne({ _id: userBus }).populate('driver')
+
+                if (bus) {
+                    // #1 first of all check if user first city is the same with the driver first city
+                    // #2  check if user last city is the same with the driver last city
+                    if (userFirstCity === bus.driver.firstCity && userLastCity === bus.driver.lastCity && count <= bus.seats && bus.driver.movingDate.toLocaleDateString().split('/')[1] == userMovingDate.split('-')[2]) {
+
+                        let ticketStartHour = new Date();
+                        ticketStartHour.setHours(userStartHour)
+                        ticketStartHour.setMinutes(userStartMin)
+
+                        let ticketEndHour = new Date();
+                        ticketEndHour.setHours(userEndHour)
+                        ticketStartHour.setMinutes(userEndMin)
+
+                        let newBusTicket = await BusTicket.create({
+                            bus: req.body.bus,
+                            user: req.user._id,
+                            driver: bus.driver,
+                            passengers: req.body.passengers,
+                            firstCity: req.body.firstCity,
+                            lastCity: req.body.lastCity,
+                            movingDate: req.body.movingDate,
+                            // returningDate: req.body.returningDate,
+                            startHour: ticketStartHour,
+                            endHour: ticketEndHour,
+                            ticketPrice: Number(Object.keys(passengers).length) * Number(bus.price),
+                            seatNumbers: determineSeatNumbers(req.body.passengers.length, bus.capacity, bus.seats),
+                            ticketType,
+                            count: req.body.count
+                        })
+
+                        bus.seats -= Number(req.body.passengers.length)
+
+                        if (bus.seats === 0) {
+                            bus.isAvailable = false
+                            await bus.save()
+                            if (newBusTicket) {
+                                await bus.save()
+
+                                console.log("notification and sms send for user and driver");
+
+                                res.status(StatusCodes.CREATED).json({
+                                    status: 'success',
+                                    msg: "بلیط اتوبوس صادر شد",
+                                    ticket: newBusTicket,
+                                })
+
+                            }
+                        } else {
+                            await bus.save()
+                            if (newBusTicket) {
+                                await bus.save()
+
+                                console.log("notification and sms send for user and driver");
+
+                                res.status(StatusCodes.CREATED).json({
+                                    status: 'success',
+                                    msg: "بلیط اتوبوس صادر شد",
+                                    ticket: newBusTicket,
+                                })
+
+                            }
+                        }
+                    } else {
+                        res.status(StatusCodes.NOT_FOUND).json({
+                            msg: "بلیط اتوبوس  صادر نشد",
+                        })
+                    }
+
+                } else {
+                    res.status(StatusCodes.NOT_FOUND).json({
+                        msg: "اتوبوس پیدا نشد",
+                    })
+                }
+
+
+            } else if (ticketType === "twoSide") {
+                // *** run two side algorithm ***
+                let bus = await Bus.findOne({ _id: userBus }).populate('driver')
+
+
+                if (bus) {
+                    // #1 first of all check if user first city is the same with the driver first city
+                    // #2  check if user last city is the same with the driver last city
+                    if (userFirstCity === bus.driver.firstCity && userLastCity === bus.driver.lastCity && count <= bus.seats && bus.driver.movingDate.toLocaleDateString().split('/')[1] == userMovingDate.split('-')[2] && bus.driver.returningDate.toLocaleDateString().split('/')[1] == userReturningDate.split('-')[2]) {
+
+                        let ticketStartHour = new Date();
+                        ticketStartHour.setHours(userStartHour)
+                        ticketStartHour.setMinutes(userStartMin)
+
+                        let ticketEndHour = new Date();
+                        ticketEndHour.setHours(userEndHour)
+                        ticketStartHour.setMinutes(userEndMin)
+
+                        let newBusTicket = await BusTicket.create({
+                            bus: req.body.bus,
+                            user: req.user._id,
+                            driver: bus.driver,
+                            passengers: req.body.passengers,
+                            firstCity: req.body.firstCity,
+                            lastCity: req.body.lastCity,
+                            movingDate: req.body.movingDate,
+                            returningDate: req.body.returningDate,
+                            startHour: ticketStartHour,
+                            endHour: ticketEndHour,
+                            ticketPrice: Number(Object.keys(passengers).length) * Number(bus.price),
+                            seatNumbers: determineSeatNumbers(req.body.passengers.length, bus.capacity, bus.seats),
+                            ticketType,
+                            count: req.body.count
+                        })
+
+                        bus.seats -= Number(req.body.passengers.length)
+
+                        if (bus.seats === 0) {
+                            bus.isAvailable = false
+                            await bus.save()
+                            if (newBusTicket) {
+                                await bus.save()
+
+                                console.log("notification and sms send for user and driver");
+
+                                res.status(StatusCodes.CREATED).json({
+                                    status: 'success',
+                                    msg: "بلیط اتوبوس صادر شد",
+                                    ticket: newBusTicket,
+                                })
+
+                            }
+                        } else {
+                            await bus.save()
+                            if (newBusTicket) {
+                                await bus.save()
+
+                                console.log("notification and sms send for user and driver");
+
+                                res.status(StatusCodes.CREATED).json({
+                                    status: 'success',
+                                    msg: "بلیط اتوبوس صادر شد",
+                                    ticket: newBusTicket,
+                                })
+
+                            }
+                        }
+                    } else {
+                        res.status(StatusCodes.NOT_FOUND).json({
+                            msg: "بلیط اتوبوس صادر نشد ",
+                        })
+                    }
+
+                } else {
+                    res.status(StatusCodes.NOT_FOUND).json({
+                        msg: "اتوبوس پیدا نشد",
+                    })
+                }
+            }
+
+        }
+
+
+
+
+    } catch (error) {
+        console.error(error);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
+exports.updateBusAfterArrived=async(req,res)=>{
+    res.send("updateBusAfterArrived")
+}
+
+exports.updateDriverAfterArrived=async(req,res)=>{
+    res.send("updateBusAfterArrived")
+}
+
+exports.updateUserAfterArrived=async(req,res)=>{
+    res.send("updateBusAfterArrived")
+}
+
+exports.updateTicketAfterArrived=async(req,res)=>{
+    res.send("updateBusAfterArrived")
 }
 
 
@@ -1101,37 +1606,9 @@ exports.finance = (req, res) => {
 //     res.status(500).json({ msg: 'Server error' });
 //   }
 // };
-exports.createBusTicket = async (req, res) => {
-    try {
-        await BusTicket.create({
-            driver: req.body.driver,
-            passengers: req.body.passengers,
-            bus: req.body.bus,
-            // user: req.user._id,
-            user: "6704340bbe3bc73cd9a92af8",
-            movingDate: req.body.movingDate,
-            hour: req.body.hour,
-            firstCity: req.body.firstCity,
-            lastCity: req.body.lastCity,
-            ticketPrice: req.body.ticketPrice,
-            seatNumbers: req.body.seatNumbers,
 
-        }).then((data) => {
-            res.status(StatusCodes.CREATED).json({
-                status: 'success',
-                msg: "بلیط اتوبوس صادر شد",
-                data
-            })
-        })
-    } catch (error) {
-        console.error(error);
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-            status: 'failure',
-            msg: "خطای داخلی سرور",
-            error
-        });
-    }
-}
+
+
 
 // ********************* owners *********************
 

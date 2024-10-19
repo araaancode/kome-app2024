@@ -45,7 +45,11 @@ router.get('/buses/:busId', userCtrls.getBus)
 router.put('/buses/add-favorite-bus', protect, userCtrls.addFavoriteBus)
 router.put('/buses/delete-favorite-bus', protect, userCtrls.deleteFavoriteBus)
 router.post('/buses/search-buses', userCtrls.searchBuses)
-router.post('/buses/book-bus', userCtrls.bookBus)
+router.post('/buses/book-bus', protect, userCtrls.bookBus)
+router.post('/buses/search-one-side-bus-tickets', userCtrls.searchOneSideBusTickes)
+router.post('/buses/search-two-side-bus-tickets', userCtrls.searchTwoSideBusTickes)
+router.put('/buses/delete-favorite-bus', protect, userCtrls.deleteFavoriteBus)
+
 
 // 
 // router.get('/notifications', userCtrls.notifications)
@@ -56,7 +60,6 @@ router.post('/buses/book-bus', userCtrls.bookBus)
 
 // bus 
 // router.get('/my-tickets', userCtrls.myTickets)
-// router.post('/create-bus-ticket', userCtrls.createBusTicket)
 
 
 // router.get('/owners', userCtrls.getOwners)

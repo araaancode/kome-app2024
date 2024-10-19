@@ -10,10 +10,15 @@ const busTicketSchema = new mongoose.Schema({
     },
     passengers: [
         {
-            type: mongoose.Schema.ObjectId,
-            ref: 'User',
-            required: true
-        }
+            name: { type: String, required: true },
+            nationalCode: { type: Number, required: true },
+            price: { type: Number, required: true },
+            ticketOwner: {
+                type: mongoose.Schema.Types.ObjectId,
+                required: true,
+                ref: 'User',
+            },
+        },
     ],
     bus:
     {
@@ -31,7 +36,15 @@ const busTicketSchema = new mongoose.Schema({
         type: Date,
         default: Date.now()
     },
-    hour: {
+    returningDate: {
+        type: Date,
+        default: Date.now()
+    },
+    startHour: {
+        type: Date,
+        default: Date.now()
+    },
+    endHour: {
         type: Date,
         default: Date.now()
     },
@@ -57,9 +70,28 @@ const busTicketSchema = new mongoose.Schema({
     },
     ticketType: {
         type: String,
-        enum:['oneSide','twoSide'],
+        enum: ['oneSide', 'twoSide'],
         default: false,
     },
+
+    // passengers count
+    count: {
+        type: Number,
+        default: 0,
+        required: true
+    },
+
+    isValid:{
+        type: Boolean,
+        default: true,
+        required: true
+    },
+    isExpired:{
+        type: Boolean,
+        default: false,
+        required: true
+    }
+
 }, { timestamps: true });
 
 
