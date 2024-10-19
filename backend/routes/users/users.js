@@ -57,7 +57,12 @@ router.get('/notifications/:ntfId', protect, userCtrls.notification)
 router.post('/notifications', protect, userCtrls.createNotification)
 router.put('/notifications/:ntfId/mark-notification', protect, userCtrls.markNotification)
 
-// advertisments
+// support tickets 
+router.get('/support-tickets', protect, userCtrls.supportTickets)
+router.get('/support-tickets/:stId', protect, userCtrls.supportTicket)
+router.post('/support-tickets', protect, userCtrls.createSupportTicket)
+router.put('/support-tickets/:stId/read', protect, userCtrls.readSupportTicket)
+router.put('/support-tickets/:stId/add-comment', protect, userCtrls.addCommentsToSupportTicket)
 
 
 // router.get('/owners', userCtrls.getOwners)

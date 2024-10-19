@@ -8,6 +8,7 @@ const Bus = require("../../models/Bus")
 const OrderFood = require("../../models/OrderFood")
 const BusTicket = require("../../models/BusTicket");
 const UserNotification = require("../../models/UserNotification");
+const UserSupportTicket = require("../../models/UserSupportTicket");
 
 // const calculateBookignHousePrice = (housePrice, guestsCount, checkInDate, checkOutDate) => {
 //     //    return housePrice * guestsCount * 
@@ -1685,45 +1686,180 @@ exports.markNotification = async (req, res) => {
 
 
 
+// ********************* support tickets *********************
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # get all users support tickets -> GET -> user -> PRIVATE
+// @route = /api/users/support-tickets
+exports.supportTickets = async (req, res) => {
+    try {
+        let tickets = await UserSupportTicket.find({user:req.user._id})
+        if (tickets) {
+            return res.status(StatusCodes.OK).json({
+                status: 'success',
+                msg: "تیکت های پشتیبانی پیدا شد",
+                count: tickets.length,
+                tickets
+            })
+        } else {
+            return res.status(StatusCodes.BAD_REQUEST).json({
+                status: 'failure',
+                msg: "تیکت های پشتیبانی پیدا نشد"
+            })
+        }
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # get single users support ticket -> GET -> user -> PRIVATE
+// @route = /api/users/support-tickets/:stId
+exports.supportTicket = async (req, res) => {
+    try {
+        let ticket = await UserSupportTicket.findById(req.params.stId)
+        if (ticket) {
+            return res.status(StatusCodes.OK).json({
+                status: 'success',
+                msg: "تیکت پشتیبانی پیدا شد",
+                ticket
+            })
+        } else {
+            return res.status(StatusCodes.BAD_REQUEST).json({
+                status: 'failure',
+                msg: "تیکت پشتیبانی پیدا نشد"
+            })
+        }
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # create users support ticket -> POST -> user -> PRIVATE
+// @route = /api/users/support-tickets
+exports.createSupportTicket = async (req, res) => {
+    try {
+        await UserSupportTicket.create({
+            title: req.body.title,
+            description: req.body.description,
+            user: req.user._id,
+            assignedTo: req.user._id,
+        }).then((data) => {
+            res.status(StatusCodes.CREATED).json({
+                status: 'success',
+                msg: "تیکت پشتیبانی ساخته شد",
+                data
+            })
+        })
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # read support ticket -> PUT -> user -> PRIVATE
+// @route = /api/users/support-tickets/:stId/read
+exports.readSupportTicket = async (req, res) => {
+    try {
+        await UserSupportTicket.findByIdAndUpdate(req.params.stId, {
+            isRead: true
+        }, { new: true }).then((ticket) => {
+            if (ticket) {
+                return res.status(StatusCodes.OK).json({
+                    status: 'success',
+                    msg: "تیکت خوانده شد",
+                    ticket
+                })
+            } else {
+                return res.status(StatusCodes.BAD_REQUEST).json({
+                    status: 'failure',
+                    msg: "تیکت خوانده نشد"
+                })
+            }
+        })
+
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # add comments to support ticket -> PUT -> User -> PRIVATE
+// @route = /api/users/support-tickets/:stId/add-comment
+exports.addCommentsToSupportTicket = async (req, res) => {
+    try {
+        let supportTicketFound = await UserSupportTicket.findById(req.params.stId)
+        if (supportTicketFound) {
+            let comments = {
+                user: req.user._id,
+                comment: req.body.comment
+            }
+
+            supportTicketFound.comments.push(comments)
+
+
+            await supportTicketFound.save().then((ticket) => {
+                return res.status(StatusCodes.OK).json({
+                    status: 'success',
+                    msg: "پاسخ گویی به تیکت",
+                    ticket
+                })
+            }).catch((error) => {
+                console.log(error);
+                return res.status(StatusCodes.BAD_REQUEST).json({
+                    status: 'failure',
+                    msg: "عدم پاسخ گویی به تیکت",
+                    error
+                })
+            })
+        } else {
+            return res.status(StatusCodes.NOT_FOUND).json({
+                status: 'failure',
+                msg: "تیکت پیدا نشد"
+            })
+        }
+
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
+
+
 // ********************* finance *********************
 exports.finance = (req, res) => {
     res.send("user finance")
 }
-
-
-// ********************* bus and bus ticket *********************
-
-// const Booking = require('../models/Booking');
-// const Bus = require('../models/Bus');
-
-// exports.bookTicket = async (req, res) => {
-//   try {
-//     const { busId, seatsBooked } = req.body;
-//     const bus = await Bus.findById(busId);
-
-//     if (!bus) return res.status(404).json({ msg: 'Bus not found' });
-//     if (bus.availableSeats < seatsBooked)
-//       return res.status(400).json({ msg: 'Not enough seats available' });
-
-//     const totalPrice = bus.price * seatsBooked;
-
-//     bus.availableSeats -= seatsBooked;
-//     await bus.save();
-
-//     const booking = new Booking({
-//       user: req.user.id,
-//       bus: busId,
-//       seatsBooked,
-//       totalPrice,
-//     });
-
-//     await booking.save();
-//     res.status(201).json({ msg: 'Ticket booked successfully' });
-//   } catch (err) {
-//     res.status(500).json({ msg: 'Server error' });
-//   }
-// };
-
 
 
 

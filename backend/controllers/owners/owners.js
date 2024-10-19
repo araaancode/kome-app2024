@@ -325,7 +325,7 @@ exports.createAds = async (req, res) => {
     try {
         await OwnerAds.create({
             owner: req.owner._id,
-            company: "6702a7927bfdbe2dde087edd",
+            company: req.body.company,
             title: req.body.title,
             description: req.body.description,
             price: req.body.price,
