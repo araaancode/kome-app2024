@@ -27,7 +27,9 @@ const userAuthRoutes = require("./routes/users/auth")
 const userRoutes = require("./routes/users/users")
 
 const adminAuthRoutes = require("./routes/admins/auth")
-// const adminRoutes = require("./routes/admins/admins")
+const adminRoutes = require("./routes/admins/admins")
+
+
 // const adminUserRoutes = require("./routes/admins/users")
 // const adminDriverRoutes = require("./routes/admins/drivers")
 // const adminOwnerRoutes = require("./routes/admins/owners")
@@ -83,6 +85,7 @@ app.use('/api/users', userRoutes)
 
 // *** admins endpoints ***
 app.use('/api/admins/auth', adminAuthRoutes)
+app.use('/api/admins', adminRoutes)
 // app.use('/api/admins/drivers', adminDriverRoutes)
 // app.use('/api/admins/users', adminUserRoutes)
 // app.use('/api/admins/owners', adminOwnerRoutes)
@@ -92,7 +95,6 @@ app.use('/api/admins/auth', adminAuthRoutes)
 // app.use('/api/admins/buses', adminBusRoutes)
 // app.use('/api/admins/buses-tickets', adminBusesTicketRoutes)
 // app.use('/api/admins/support-tickets', adminSupportTicketRoutes)
-// app.use('/api/admins', adminRoutes)
 
 // *** drivers endpoints ***
 app.use('/api/drivers/auth', driverAuthRoutes)

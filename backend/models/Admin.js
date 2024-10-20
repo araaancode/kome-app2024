@@ -70,12 +70,6 @@ const adminSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
-  favorites: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'House',
-    }
-  ],
 }, { timestamps: true });
 
 adminSchema.pre('save', async function (next) {

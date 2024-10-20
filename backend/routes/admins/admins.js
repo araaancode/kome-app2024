@@ -8,14 +8,15 @@ const authAdmin = require("../../middlewares/authAdmin")
 
 const { adminUpload } = require("../../utils/upload")
 
+// profile
 router.get('/me', authAdmin, adminCtrls.getMe)
 router.put('/update-profile', authAdmin, adminCtrls.updateProfile)
-
 router.put('/update-avatar', authAdmin, adminUpload.single('avatar'), adminCtrls.updateAvatar)
 
-router.post('/notifications', authAdmin, adminCtrls.createNotification)
+// notifications
 router.get('/notifications', authAdmin, adminCtrls.getNotifications)
 router.get('/notifications/:notificationId', authAdmin, adminCtrls.getNotification)
+router.post('/notifications', adminCtrls.createNotification)
 router.put('/notifications/:notificationId/mark', authAdmin, adminCtrls.markNotification)
 
 // router.get('/notifications/:notificationId', adminCtrls.getNotification)

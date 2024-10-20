@@ -2,13 +2,13 @@ const { StatusCodes } = require('http-status-codes');
 const Admin = require("../../models/Admin")
 const AdminNotification = require("../../models/AdminNotification")
 
-
+// *********************** profile ***********************
 // # description -> HTTP VERB -> Accesss -> Access Type
 // # get admin profile -> GET -> Admin -> PRIVATE
 // @route = /api/admins/me
 exports.getMe = async (req, res) => {
     try {
-        let admin = await Admin.findById(req.admin._id)
+        let admin = await Admin.findById(req.admin._id).select('-password')
         if (admin) {
             return res.status(StatusCodes.OK).json({
                 status: 'success',
@@ -76,61 +76,38 @@ exports.updateProfile = async (req, res) => {
 // # update admin avatar -> PUT -> Admin -> PRIVATE
 // @route = /api/admins/update-avatar
 exports.updateAvatar = async (req, res) => {
-    res.send(req.file);
-    // try {
-    //     await Admin.findByIdAndUpdate(
-    //         req.admin._id,
-    //         {
-    //             avatar: req.file.filename,
-    //         },
-    //         { new: true }
-    //     ).then((admin) => {
-    //         if (admin) {
-    //             res.status(StatusCodes.OK).json({
-    //                 msg: 'آواتار ادمین ویرایش شد',
-    //                 admin,
-    //             })
-    //         }
-    //     }).catch(err => {
-    //         console.log(err)
-    //         res.status(StatusCodes.BAD_REQUEST).json({
-    //             msg: 'آواتار ادمین ویرایش نشد',
-    //             err,
-    //         })
-    //     })
-    // } catch (error) {
-    //     console.log(error);
-    //     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-    //         msg: "خطای داخلی سرور",
-    //         error: error
-    //     })
-    // }
+    try {
+        await Admin.findByIdAndUpdate(
+            req.admin._id,
+            {
+                avatar: req.file.filename,
+            },
+            { new: true }
+        ).then((admin) => {
+            if (admin) {
+                res.status(StatusCodes.OK).json({
+                    msg: 'آواتار ادمین ویرایش شد',
+                    admin,
+                })
+            }
+        }).catch(err => {
+            console.log(err)
+            res.status(StatusCodes.BAD_REQUEST).json({
+                msg: 'آواتار ادمین ویرایش نشد',
+                err,
+            })
+        })
+    } catch (error) {
+        console.log(error);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            msg: "خطای داخلی سرور",
+            error: error
+        })
+    }
 }
 
 
-// # description -> HTTP VERB -> Accesss -> Access Type
-// # create admin notification -> PUT -> Admin -> PRIVATE
-// @route = /api/admins/notifications
-exports.createNotification = async (req, res) => {
-    try {
-        const { title, message, reciever } = req.body;
-        const notification = new AdminNotification({ title, message, reciever });
-        await notification.save();
-        res.status(StatusCodes.CREATED).json({
-            status: 'success',
-            success: true,
-            data: notification,
-            msg: 'اعلان ایجاد شد',
-        });
-    } catch (err) {
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-            status: 'failure',
-            success: false,
-            msg: 'اعلان ایجاد نشد',
-        });
-    }
-};
-
+// *********************** notifications ***********************
 // # description -> HTTP VERB -> Accesss -> Access Type
 // # get admin notifications -> GET -> Admin -> PRIVATE
 // @route = /api/admins/notifications
@@ -168,6 +145,29 @@ exports.getNotification = async(req, res) => {
 }
 
 // # description -> HTTP VERB -> Accesss -> Access Type
+// # create admin notification -> PUT -> Admin -> PRIVATE
+// @route = /api/admins/notifications
+exports.createNotification = async (req, res) => {
+    try {
+        const { title, message, reciever } = req.body;
+        const notification = new AdminNotification({ title, message, reciever });
+        await notification.save();
+        res.status(StatusCodes.CREATED).json({
+            status: 'success',
+            success: true,
+            data: notification,
+            msg: 'اعلان ایجاد شد',
+        });
+    } catch (err) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            success: false,
+            msg: 'اعلان ایجاد نشد',
+        });
+    }
+};
+
+// # description -> HTTP VERB -> Accesss -> Access Type
 // # mark notification as read -> PUT -> Admin -> PRIVATE
 // @route = /api/admins/notifications/:notification/mark
 exports.markNotification = async (req, res) => {
@@ -196,6 +196,9 @@ exports.markNotification = async (req, res) => {
     }
 }
 
+
+
+// 
 // # description -> HTTP VERB -> Accesss -> Access Type
 // # get admin finance -> GET -> Admin -> PRIVATE
 // @route = /api/admins/finance
