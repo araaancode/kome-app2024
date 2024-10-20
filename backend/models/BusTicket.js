@@ -68,11 +68,16 @@ const busTicketSchema = new mongoose.Schema({
         default: false,
         required: true
     },
+    isConfirmed: {
+        type: Boolean,
+        default: false,
+        required: true
+    },
     ticketType: {
-        type: String,
+       type: String,
         enum: ['oneSide', 'twoSide'],
         default: false,
-    },
+    }, 
 
     // passengers count
     count: {

@@ -6,6 +6,7 @@ const orderFoodSchema = new mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',
         },
+
         foods: [
             {
                 food: {
@@ -25,11 +26,13 @@ const orderFoodSchema = new mongoose.Schema(
             type: Number,
             required: true,
         },
+
         orderStatus: {
             type: String,
-            enum: ['Pending', 'Preparing', 'Completed', 'Cancelled'],
+            enum: ['Pending', 'Preparing', 'Completed', 'Cancelled','Confirmed'],
             default: 'Pending',
         },
+
         address: {
             type: String,
             required: true,

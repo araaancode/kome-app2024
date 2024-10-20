@@ -832,10 +832,11 @@ exports.searchFoods = async (req, res) => {
 // # delete food from favorites list -> PUT -> USER -> PRIVATE
 // @route = /api/users/foods/delete-favorite-food
 exports.deleteFavoriteFood = async (req, res) => {
+
     try {
         let user = await User.findById(req.user._id).populate('favoriteFoods')
         if (user.favoriteFoods.length > 0) {
-            let filterFoods = user.favoriteFoods.filter(f => f._id != req.body.foodId)
+            let filterFoods = user.favoriteFoods.filter(f => f._id != req.body.food)
             user.favoriteFoods = filterFoods
 
             let newUser = await user.save()
@@ -868,7 +869,127 @@ exports.deleteFavoriteFood = async (req, res) => {
     }
 }
 
-// ********************* notifications *********************
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # get all food orders -> GET -> USER -> PRIVATE
+// @route = /api/users/foods/orders
+exports.getAllOrderFoods = async (req, res) => {
+    try {
+        let orderFoods = await OrderFood.find({ user: req.user._id })
+
+        if (orderFoods) {
+            return res.status(StatusCodes.OK).json({
+                status: 'success',
+                msg: " سفارش های غذا پیدا شدند",
+                count: orderFoods.length,
+                orderFoods: orderFoods
+            })
+        } else {
+            return res.status(400).json({
+                status: 'failure',
+                msg: " سفارش های غذا پیدا نشدند"
+            })
+        }
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # get single food order -> GET -> USER -> PRIVATE
+// @route = /api/users/foods/orders/:orderId
+exports.getSingleOrderFood = async (req, res) => {
+    try {
+        let orderFood = await OrderFood.find({ user: req.user._id, _id: req.params.orderId })
+
+        if (orderFood) {
+            return res.status(StatusCodes.OK).json({
+                status: 'success',
+                msg: " سفارش غذا پیدا شدند",
+                orderFood: orderFood
+            })
+        } else {
+            return res.status(400).json({
+                status: 'failure',
+                msg: " سفارش غذا پیدا نشدند"
+            })
+        }
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # confirm order food -> PUT -> USER -> PRIVATE
+// @route = /api/users/foods/orders/:orderId/confirm
+exports.confirmOrderFood = async (req, res) => {
+    try {
+
+        await OrderFood.findByIdAndUpdate(req.params.orderId, { orderStatus: 'Confirmed' }, { new: true }).then((order) => {
+            if (order) {
+                return res.status(StatusCodes.OK).json({
+                    status: 'success',
+                    msg: "سفارش غذا تایید شد",
+                    order
+                })
+            } else {
+                return res.status(StatusCodes.BAD_REQUEST).json({
+                    status: 'failure',
+                    msg: "سفارش غذا تایید نشد"
+                })
+            }
+        })
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # cancel order food -> PUT -> USER -> PRIVATE
+// @route = /api/users/foods/orders/:orderId/cancel
+exports.cancelOrderFood = async (req, res) => {
+    try {
+
+        await OrderFood.findByIdAndUpdate(req.params.orderId, { orderStatus: 'Cancelled' }, { new: true }).then((order) => {
+            if (order) {
+                return res.status(StatusCodes.OK).json({
+                    status: 'success',
+                    msg: "سفارش غذا لغو شد",
+                    order
+                })
+            } else {
+                return res.status(StatusCodes.BAD_REQUEST).json({
+                    status: 'failure',
+                    msg: "سفارش غذا لغو نشد"
+                })
+            }
+        })
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
+
+// ********************* buses *********************
 // # description -> HTTP VERB -> Accesss -> Access Type
 // # get all active and available buses -> GET -> USER -> PUBLIC
 // @route = /api/users/buses
@@ -1560,6 +1681,109 @@ exports.updateTicketAfterArrived = async (req, res) => {
     res.send("updateBusAfterArrived")
 }
 
+exports.getAllBusTickets = async (req, res) => {
+    try {
+        let busTickets = await BusTicket.find({})
+        if (busTickets && busTickets.length > 0) {
+            res.status(StatusCodes.OK).json({
+                status: 'success',
+                msg: "بلیط های اتوبوس پیدا شدند",
+                count: busTickets.length,
+                tickets: busTickets
+            });
+        } else {
+            res.status(StatusCodes.NOT_FOUND).json({
+                status: 'failure',
+                msg: "بلیط های اتوبوس پیدا نشدند",
+            });
+        }
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
+exports.getSingleBusTicket = async (req, res) => {
+    try {
+        let busTicket = await BusTicket.findById({ _id: req.params.ticketId })
+        if (busTicket) {
+            res.status(StatusCodes.OK).json({
+                status: 'success',
+                msg: "بلیط اتوبوس پیدا شد",
+                tickets: busTicket
+            });
+        } else {
+            res.status(StatusCodes.NOT_FOUND).json({
+                status: 'failure',
+                msg: "بلیط اتوبوس پیدا نشد",
+            });
+        }
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
+exports.confirmBusTicket = async (req, res) => {
+    try {
+        await BusTicket.findByIdAndUpdate(req.params.ticketId, { isCanceled: false, isConfirmed: true }, { new: true }).then((busTicket) => {
+            if (busTicket) {
+                return res.status(StatusCodes.OK).json({
+                    status: 'success',
+                    msg: "بلیط اتوبوس تایید شد",
+                    busTicket
+                })
+            } else {
+                return res.status(StatusCodes.BAD_REQUEST).json({
+                    status: 'failure',
+                    msg: "بلیط اتوبوس تایید نشد",
+                })
+            }
+        })
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
+exports.cancelBusTicket = async (req, res) => {
+    try {
+        await BusTicket.findByIdAndUpdate(req.params.ticketId, { isCanceled: true, isConfirmed: false }, { new: true }).then((busTicket) => {
+            if (busTicket) {
+                return res.status(StatusCodes.OK).json({
+                    status: 'success',
+                    msg: "بلیط اتوبوس لغو شد",
+                    busTicket
+                })
+            } else {
+                return res.status(StatusCodes.BAD_REQUEST).json({
+                    status: 'failure',
+                    msg: "بلیط اتوبوس لغو نشد",
+                })
+            }
+        })
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
 
 // ********************* notifications *********************
 // # description -> HTTP VERB -> Accesss -> Access Type
@@ -1693,7 +1917,7 @@ exports.markNotification = async (req, res) => {
 // @route = /api/users/support-tickets
 exports.supportTickets = async (req, res) => {
     try {
-        let tickets = await UserSupportTicket.find({user:req.user._id})
+        let tickets = await UserSupportTicket.find({ user: req.user._id })
         if (tickets) {
             return res.status(StatusCodes.OK).json({
                 status: 'success',
