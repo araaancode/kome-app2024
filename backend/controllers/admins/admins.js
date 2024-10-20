@@ -1,6 +1,8 @@
 const { StatusCodes } = require('http-status-codes');
 const Admin = require("../../models/Admin")
 const AdminNotification = require("../../models/AdminNotification")
+const User = require("../../models/User")
+const UserSupportTicket = require("../../models/UserSupportTicket")
 
 // *********************** profile ***********************
 // # description -> HTTP VERB -> Accesss -> Access Type
@@ -130,9 +132,9 @@ exports.getNotifications = async (req, res) => {
 // # description -> HTTP VERB -> Accesss -> Access Type
 // # get admin single notification -> GET -> Admin -> PRIVATE
 // @route = /api/admins/notifications/:notificationId
-exports.getNotification = async(req, res) => {
+exports.getNotification = async (req, res) => {
     try {
-        const notification = await AdminNotification.findById({ _id:req.params.notificationId })
+        const notification = await AdminNotification.findById({ _id: req.params.notificationId })
         res.status(StatusCodes.OK).json({
             status: 'success',
             msg: 'اعلان دریافت شد ',
@@ -196,9 +198,244 @@ exports.markNotification = async (req, res) => {
     }
 }
 
+// *********************** users ***********************
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # get all users -> GET -> Admin -> PRIVATE
+// @route = /api/admins/users
+exports.getUsers = async (req, res) => {
+    try {
+        const users = await User.find({}).select('-password')
+        if (users) {
+            res.status(StatusCodes.OK).json({
+                status: 'success',
+                msg: ' کاربران پیدا شدند ',
+                success: true,
+                count: users.length,
+                data: users,
+            });
+        } else {
+            res.status(StatusCodes.NOT_FOUND).json({
+                status: 'failure',
+                msg: ' کاربری وجود ندارد ',
+                success: false,
+            });
+        }
+
+    } catch (err) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            success: false,
+            msg: "خطای داخلی سرور",
+            error: err.message
+        });
+    }
+}
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # get single user -> GET -> Admin -> PRIVATE
+// @route = /api/admins/users/:userId
+exports.getUser = async (req, res) => {
+    try {
+        const user = await User.findById({ _id: req.params.userId }).select('-password')
+        if (user) {
+            res.status(StatusCodes.OK).json({
+                status: 'success',
+                msg: ' کاربر پیدا شد ',
+                success: true,
+                user,
+            });
+        } else {
+            res.status(StatusCodes.NOT_FOUND).json({
+                status: 'failure',
+                msg: ' کاربری وجود ندارد ',
+                success: false,
+            });
+        }
+
+    } catch (err) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            success: false,
+            msg: "خطای داخلی سرور",
+            error: err.message
+        });
+    }
+}
 
 
-// 
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # active user -> PUT -> Admin -> PRIVATE
+// @route = /api/admins/users/:userId/active
+exports.activeUser = async (req, res) => {
+    try {
+        await User.findByIdAndUpdate(req.params.userId, { isActive: true }, { new: true }).then((user) => {
+            if (user) {
+                res.status(StatusCodes.OK).json({
+                    status: 'success',
+                    msg: ' کاربر فعال شد ',
+                    success: true,
+                    user,
+                });
+            } else {
+                res.status(StatusCodes.NOT_FOUND).json({
+                    status: 'failure',
+                    msg: 'کاربر هنوز غیر فعال است',
+                    success: false,
+                });
+            }
+        })
+    } catch (err) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            success: false,
+            msg: "خطای داخلی سرور",
+            error: err.message
+        });
+    }
+}
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # deActive user -> PUT -> Admin -> PRIVATE
+// @route = /api/admins/users/:userId/deactive
+exports.deActiveUser = async (req, res) => {
+    try {
+        await User.findByIdAndUpdate(req.params.userId, { isActive: false }, { new: true }).then((user) => {
+            if (user) {
+                res.status(StatusCodes.OK).json({
+                    status: 'success',
+                    msg: ' کاربر غیر شد ',
+                    success: true,
+                    user,
+                });
+            } else {
+                res.status(StatusCodes.NOT_FOUND).json({
+                    status: 'failure',
+                    msg: 'کاربر هنوز فعال است',
+                    success: false,
+                });
+            }
+        })
+    } catch (err) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            success: false,
+            msg: "خطای داخلی سرور",
+            error: err.message
+        });
+    }
+}
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # get all user support tickets that user send to admin -> GET -> Admin -> PRIVATE
+// @route = /api/admins/users/support-tickets/:userId
+exports.getAllUserSupportTickets = async (req, res) => {
+    try {
+        const supportTickets = await UserSupportTicket.find({ user: req.params.userId })
+        if (supportTickets) {
+            res.status(StatusCodes.OK).json({
+                status: 'success',
+                msg: ' تیکت های پشتیبانی کاربر پیدا شدند ',
+                success: true,
+                count: supportTickets.length,
+                data: supportTickets,
+            });
+        } else {
+            res.status(StatusCodes.NOT_FOUND).json({
+                status: 'failure',
+                msg: ' کاربری وجود ندارد ',
+                success: false,
+            });
+        }
+
+    } catch (err) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            success: false,
+            msg: "خطای داخلی سرور",
+            error: err.message
+        });
+    }
+}
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # get single support ticket -> GET -> Admin -> PRIVATE
+// @route = /api/admins/users/support-tickets/:userId/:stId
+exports.getSingleUserSupportTicket = async (req, res) => {
+    try {
+        const supportTicket = await UserSupportTicket.find({ user: req.params.userId, _id: req.params.stId })
+        if (supportTicket) {
+            res.status(StatusCodes.OK).json({
+                status: 'success',
+                msg: ' تیکت پشتیبانی کاربر پیدا شد ',
+                success: true,
+                data: supportTicket,
+            });
+        } else {
+            res.status(StatusCodes.NOT_FOUND).json({
+                status: 'failure',
+                msg: ' کاربری وجود ندارد ',
+                success: false,
+            });
+        }
+
+    } catch (err) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            success: false,
+            msg: "خطای داخلی سرور",
+            error: err.message
+        });
+    }
+}
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # add comment to user support ticket -> PUT -> Admin -> PRIVATE
+// @route = /api/admins/users/support-tickets/:userId/:stId/add-comment
+exports.addCommentToUserSupportTicket = async (req, res) => {
+    try {
+        let supportTicketFound = await UserSupportTicket.findOne({ user:req.params.userId,_id: req.params.stId })
+        if (supportTicketFound) {
+
+            let comments = {
+                admin: req.admin._id,
+                comment: req.body.comment
+            }
+
+            supportTicketFound.comments.push(comments)
+
+
+            await supportTicketFound.save().then((ticket) => {
+                return res.status(StatusCodes.OK).json({
+                    status: 'success',
+                    msg: " تیکت شما پاسخ داده شد",
+                    ticket
+                })
+            }).catch((error) => {
+                console.log(error);
+                return res.status(StatusCodes.BAD_REQUEST).json({
+                    status: 'failure',
+                    msg: "عدم پاسخ گویی به تیکت",
+                    error
+                })
+            })
+        } else {
+            return res.status(StatusCodes.NOT_FOUND).json({
+                status: 'failure',
+                msg: "تیکت پیدا نشد"
+            })
+        }
+
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
+// *******************************************************
 // # description -> HTTP VERB -> Accesss -> Access Type
 // # get admin finance -> GET -> Admin -> PRIVATE
 // @route = /api/admins/finance
@@ -209,12 +446,12 @@ exports.finance = (req, res) => {
 // # description -> HTTP VERB -> Accesss -> Access Type
 // # get admin finance -> GET -> SUPER Admin -> PRIVATE
 // @route = /api/admins/change-admin-role
-exports.changeAdminRole = async(req, res) => {
+exports.changeAdminRole = async (req, res) => {
     try {
         await Admin.findByIdAndUpdate(
             req.admin._id,
             {
-               role:req.body.role,
+                role: req.body.role,
             },
             { new: true }
         ).then((user) => {
@@ -276,7 +513,7 @@ exports.getAdmins = async (req, res) => {
 // # description -> HTTP VERB -> Accesss -> Access Type
 // # get single admins -> GET -> SUPER Admin -> PRIVATE
 // @route = /api/admins/:adminId
-exports.getAdmin = async(req, res) => {
+exports.getAdmin = async (req, res) => {
     try {
         let admin = await Admin.findById(req.params.adminId)
         if (admin) {

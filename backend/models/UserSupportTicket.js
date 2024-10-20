@@ -33,7 +33,10 @@ const userSupportTicketSchema = new Schema({
   user: {
     type: Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+  },
+  admin: {
+    type: Schema.Types.ObjectId,
+    ref: 'Admin',
   },
   assignedTo: {
     type: Schema.Types.ObjectId,
@@ -44,6 +47,10 @@ const userSupportTicketSchema = new Schema({
     user: {
       type: Schema.Types.ObjectId,
       ref: 'User'
+    },
+    admin: {
+      type: Schema.Types.ObjectId,
+      ref: 'Admin'
     },
     comment: {
       type: String,

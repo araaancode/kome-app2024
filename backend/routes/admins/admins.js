@@ -19,7 +19,16 @@ router.get('/notifications/:notificationId', authAdmin, adminCtrls.getNotificati
 router.post('/notifications', adminCtrls.createNotification)
 router.put('/notifications/:notificationId/mark', authAdmin, adminCtrls.markNotification)
 
-// router.get('/notifications/:notificationId', adminCtrls.getNotification)
+// users
+router.get('/users', authAdmin, adminCtrls.getUsers)
+router.get('/users/:userId', authAdmin, adminCtrls.getUser)
+router.put('/users/:userId/active', authAdmin, adminCtrls.activeUser)
+router.put('/users/:userId/deactive', authAdmin, adminCtrls.deActiveUser)
+
+router.get('/users/support-tickets/:userId', authAdmin, adminCtrls.getAllUserSupportTickets)
+router.get('/users/support-tickets/:userId/:stId', authAdmin, adminCtrls.getSingleUserSupportTicket)
+router.put('/users/support-tickets/:userId/:stId/add-comment', authAdmin, adminCtrls.addCommentToUserSupportTicket)
+
 
 router.get('/finance', authAdmin, adminCtrls.finance)
 router.put('/change-admin-role', authAdmin, adminCtrls.changeAdminRole)
