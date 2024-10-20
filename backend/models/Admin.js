@@ -63,6 +63,9 @@ const adminSchema = new mongoose.Schema({
   passwordChangedAt: Date,
   passwordResetToken: String,
   passwordResetExpires: Date,
+  token: {
+    type: String,
+  },
   active: {
     type: Boolean,
     default: true,
@@ -100,12 +103,11 @@ adminSchema.pre(/^find/, function (next) {
   next();
 });
 
-adminSchema.methods.correctPassword = async function (
-  candidatePassword,
-  userPassword
-) {
-  return await bcrypt.compare(candidatePassword, userPassword);
+
+adminSchema.methods.matchPassword = async function (enteredPassword) {
+  return await bcrypt.compare(enteredPassword, this.password);
 };
+
 
 adminSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
   if (this.passwordChangedAt) {

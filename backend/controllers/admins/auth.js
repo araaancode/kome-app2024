@@ -1,8 +1,16 @@
-const OTP = require("../../models/OTP")
-const Admin = require("../../models/Admin")
-const { StatusCodes } = require('http-status-codes');
+const crypto = require('crypto');
+const { promisify } = require('util');
 const randKey = require("random-key");
-const jwt = require("jsonwebtoken")
+const jwt = require('jsonwebtoken');
+const Admin = require('../../models/Admin');
+const Token = require('../../models/Token');
+const OTP = require("../../models/OTP")
+const { StatusCodes } = require("http-status-codes")
+const bcrypt = require("bcryptjs")
+
+
+const { sendEmail, sendSuccessEmail } = require("../../utils/sendMail")
+
 
 const signToken = id => {
     return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -10,12 +18,53 @@ const signToken = id => {
     });
 };
 
-const createSendToken = (admin, authStatus, msg, statusCode, req, res) => {   // authStatus -> success or failure
+const sendOTPCode = async (phone, admin, req, res) => {
+    const code = randKey.generateDigits(5);
+    let otp = await OTP.findOne({ phone })
+
+    if (otp) {
+        otp.code = code;
+        otp.save().then((data) => {
+            if (data) {
+                res.status(StatusCodes.CREATED).json({
+                    msg: "کد تایید ارسال شد",
+                    data
+                })
+            }
+
+        }).catch((error) => {
+            res.status(StatusCodes.BAD_REQUEST).json({
+                msg: "کد تایید ارسال نشد",
+                error
+            })
+        })
+    } else {
+        let newOtp = await OTP.create({
+            phone: phone,
+            code
+        })
+
+        if (newOtp) {
+            res.status(StatusCodes.CREATED).json({
+                msg: "کد تایید جدید ساخته شد",
+                code: newOtp
+            })
+        } else {
+            res.status(StatusCodes.BAD_REQUEST).json({
+                msg: "کد تایید ساخته نشد"
+            })
+        }
+
+    }
+
+};
+
+const createSendToken = (admin, statusCode, statusMsg, msg, req, res) => {
     const token = signToken(admin._id);
 
     res.cookie('jwt', token, {
         expires: new Date(
-            Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+            Date.now() + 24 * 60 * 60 * 1000
         ),
         httpOnly: true,
         secure: req.secure || req.headers['x-forwarded-proto'] === 'https'
@@ -25,7 +74,7 @@ const createSendToken = (admin, authStatus, msg, statusCode, req, res) => {   //
     admin.password = undefined;
 
     res.status(statusCode).json({
-        status: authStatus,
+        status: statusMsg,
         msg,
         token,
         data: {
@@ -34,61 +83,47 @@ const createSendToken = (admin, authStatus, msg, statusCode, req, res) => {   //
     });
 };
 
+exports.register = async (req, res, next) => {
+    try {
+        let { name, username, phone, email, password } = req.body
 
-const sendOTPCode = async (phone, req, res) => {
-    const code = randKey.generateDigits(5);
-    let otp = await OTP.findOne({ phone })
-
-
-    if (otp) {
-        otp.code = code;
-        otp.save().then((data) => {
-            res.status(200).json(data)
-        }).catch((error) => {
-            res.status(400).json(error)
-        })
-    } else {
-        let newOtp = await OTP.create({
-            phone: phone,
-            code
-        })
-
-        if (newOtp) {
-            res.status(201).json({
-                msg: "otp code created",
-                code: newOtp
+        if (!name || !username || !phone || !email || !password) {
+            res.status(StatusCodes.BAD_REQUEST).json({
+                status: 'failure',
+                msg: "همه فیلدها باید وارد شوند!",
             })
         } else {
-            res.status(400).json({
-                msg: "otp code not created"
-            })
+            let findAdmin = await Admin.findOne({ phone: req.body.phone })
+
+            if (findAdmin) {
+                res.status(StatusCodes.BAD_REQUEST).json({
+                    status: 'failure',
+                    msg: "ادمین وجود دارد. وارد سایت شوید!",
+                })
+            } else {
+                let newAdmin = await Admin.create({
+                    name: req.body.name,
+                    username: req.body.username,
+                    phone: req.body.phone,
+                    email: req.body.email,
+                    password: req.body.password,
+                })
+
+                if (newAdmin) {
+                    res.status(StatusCodes.CREATED).json({
+                        status: 'success',
+                        msg: "ادمین با موفقیت ثبت نام شد",
+                        _id: newAdmin._id,
+                        name: newAdmin.name,
+                        phone: newAdmin.phone,
+                        email: newAdmin.email,
+                        username: newAdmin.username,
+                        avatar: newAdmin.avatar,
+                        role: newAdmin.role,
+                    })
+                }
+            }
         }
-
-    }
-
-};
-
-
-// *** admins auth ***
-// # description -> HTTP VERB -> Accesss -> Access Type
-// # admin login -> POST -> admin -> PRIVATE
-// @route = /api/admins/auth/login
-exports.login = async (req, res) => {
-    let { phone, password } = req.body
-
-    try {
-
-        let admin = await Admin.findOne({ phone }).select('+password');
-
-
-        if (!admin || !(await admin.correctPassword(password, admin.password))) {
-            return res.status(StatusCodes.UNAUTHORIZED).json({
-                status: 'failure',
-                msg: "شماره تلفن یا پسورد نادرست است"
-            })
-        }
-        createSendToken(admin, 'success', 'ادمین با موفقیت وارد سایت شد', 201, req, res)
-
 
     } catch (error) {
         console.error(error.message);
@@ -101,45 +136,52 @@ exports.login = async (req, res) => {
 
 }
 
-// *** admins auth ***
-// # description -> HTTP VERB -> Accesss -> Access Type
-// # admin login -> POST -> admin -> PRIVATE
-// @route = /api/admins/auth/register
-exports.register = async (req, res) => {
-    let { phone, password } = req.body
-
-    if (!phone || !password) {
-        return res.status(StatusCodes.BAD_REQUEST).json({
-            status: 'failure',
-            msg: "همه فیلدها باید وارد شود"
-        })
-    }
-
+exports.login = async (req, res, next) => {
     try {
-        let admin = await Admin.findOne({ phone: phone })
+        if (!req.body.phone || !req.body.password) {
+            res.status(StatusCodes.BAD_REQUEST).json({ status: 'failure', msg: 'لطفا همه فیلدها را وارد کنید' })
+        }
+
+
+        let admin = await Admin.findOne({ phone: req.body.phone })
 
         if (admin) {
-            return res.status(StatusCodes.BAD_REQUEST).json({
+            if (await admin.matchPassword(req.body.password)) {
+                res.status(200).json({
+                    status: 'success',
+                    msg: 'ادمین با موفقیت وارد سایت شد',
+                    _id: admin._id,
+                    name: admin.name,
+                    phone: admin.phone,
+                    email: admin.email,
+                    adminname: admin.adminname,
+                    avatar: admin.avatar,
+                    role: admin.role,
+                })
+
+            } else {
+                res.status(StatusCodes.BAD_REQUEST).json({
+                    status: 'failure',
+                    msg: 'گذرواژه نادرست است',
+                })
+            }
+        }
+        else {
+            res.status(StatusCodes.NOT_FOUND).json({
                 status: 'failure',
-                msg: "ادمین وجود دارد. باید وارد سایت شوید!"
+                msg: 'ادمین یافت نشد, ثبت نام کنید',
             })
         }
-
-        let newadmin = await Admin.create({ phone, password })
-
-        if (newadmin) {
-            createSendToken(newadmin, 'success', 'ادمین با موفقیت ثبت نام شد', 201, req, res)
-        }
-
     } catch (error) {
-        console.error(error.message);
+        console.log(error);
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
             status: 'failure',
-            msg: "خطای داخلی سرور",
-            error
-        });
+            msg: 'خطای داخلی سرور',
+            error,
+        })
     }
 }
+
 
 
 exports.sendOtp = async (req, res) => {
@@ -148,20 +190,20 @@ exports.sendOtp = async (req, res) => {
         let admin = await Admin.findOne({ phone })
 
         if (admin) {
-            await sendOTPCode(phone, req, res)
-        } else {
-            res.status(404).json({
-                stauts: 'success',
-                msg: "admin not found",
+            await sendOTPCode(phone, admin, req, res)
+        }
+        else {
+            res.status(StatusCodes.BAD_REQUEST).json({
+                msg: "ادمین یافت نشد",
             })
         }
     } catch (error) {
         console.error(error.message);
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-            status: 'failure',
-            msg: "خطای داخلی سرور",
-            error
-        });
+        // res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        //   status: 'failure',
+        //   msg: "خطای داخلی سرور",
+        //   error
+        // });
     }
 }
 
@@ -171,10 +213,11 @@ exports.verifyOtp = async (req, res) => {
 
         let adminOtp = await OTP.findOne({ phone })
         let admin = await Admin.findOne({ phone })
+
         if (adminOtp.code === code) {
-            createSendToken(admin, 'success', "کد تایید شد", 200, req, res)
+            createSendToken(admin, StatusCodes.OK, 'success', 'کد تایید با موفقیت ارسال شد', req, res)
         } else {
-            res.status(404).json({
+            res.status(StatusCodes.BAD_REQUEST).json({
                 msg: "کد وارد شده اشتباه است!"
             })
         }
@@ -194,16 +237,87 @@ exports.logout = (req, res) => {
         httpOnly: true
     });
     res.status(200).json({ status: 'success' });
+};
+
+
+exports.forgotPassword = async (req, res) => {
+    try {
+        let admin = await Admin.findOne({ email: req.body.email })
+
+        if (admin) {
+            let token = admin.token
+
+            if (token) {
+                admin.token = ""
+                await admin.save()
+            } else {
+                let newToken = crypto.randomBytes(32).toString('hex') // raw token
+                let hashedToken = await bcrypt.hash(newToken, 12) // cooked token
+
+                let link = `${process.env.currentURL}/reset-password?token=${newToken}&adminId=${admin._id}`
+                sendEmail(admin, link)
+
+                admin.token = hashedToken
+                await admin.save().then((data) => {
+                    if (data) {
+                        res.status(201).json({ msg: 'لطفا ایمیل خود را بررسی کنید' })
+                    }
+                }).catch(err => {
+                    res.status(403).json({ msg: 'مشکل در فرستادن ایمیل', err })
+                })
+            }
+        } else {
+            res.status(404).json({
+                msg: 'چنین ایمیلی وجود ندارد',
+            })
+        }
+    }
+
+    catch (error) {
+        console.log(error)
+        res.status(403).json({
+            msg: 'خطایی وجود دارد، دوباره امتحان کنید',
+            error,
+            msgCode: 3
+        })
+    }
 }
 
-exports.forgotPassword = (req, res) => {
-    res.send("admins forgot password")
-}
+exports.resetPassword = async (req, res) => {
+    let { adminId, token, password, confirmPassword } = req.body
 
-exports.resetPassword = (req, res) => {
-    res.send("admins reset password")
-}
+    let findAdmin = await Admin.findOne({ _id: adminId })
+    passwordResetToken = findAdmin.token
 
-exports.changePassword = (req, res) => {
-    res.send("admins change password")
+    if (!passwordResetToken) {
+        throw new Error('Invalid or expired password reset token')
+    }
+
+    const isValid = await bcrypt.compare(token, passwordResetToken)
+
+    if (!isValid) {
+        throw new Error('Invalid or expired password reset token')
+    }
+
+    if (password === confirmPassword) {
+        const hash = await bcrypt.hash(password, 12)
+
+
+        await Admin.findByIdAndUpdate(adminId, {
+            password: hash,
+            token: ""
+        }, { new: true }).then((data) => {
+            if (data) {
+                res.status(StatusCodes.OK).json({
+                    msg: 'گذرواژه با موفقیت تغییر کرد',
+                })
+            }
+        }).catch(err => {
+            res.status(StatusCodes.BAD_REQUEST).json({ msg: 'خطایی وجود دارد', err })
+        })
+
+        let link = `${process.env.currentURL}/login`
+        sendSuccessEmail(findAdmin, link)
+
+    }
 }
