@@ -40,6 +40,13 @@ router.get('/cooks/:cookId/support-tickets/:stId', authAdmin, adminCtrls.getSing
 router.put('/cooks/:cookId/support-tickets/:stId/add-comment', authAdmin, adminCtrls.addCommentToCookSupportTicket)
 
 // owners
+router.get('/owners', authAdmin, adminCtrls.getOwners)
+router.get('/owners/:ownerId', authAdmin, adminCtrls.getOwner)
+router.put('/owners/:ownerId/active', authAdmin, adminCtrls.activeOwner)
+router.put('/owners/:ownerId/deactive', authAdmin, adminCtrls.deActiveOwner)
+router.get('/owners/:ownerId/support-tickets', authAdmin, adminCtrls.getAllOwnerSupportTickets)
+router.get('/owners/:ownerId/support-tickets/:stId', authAdmin, adminCtrls.getSingleOwnerSupportTicket)
+router.put('/owners/:ownerId/support-tickets/:stId/add-comment', authAdmin, adminCtrls.addCommentToOwnerSupportTicket)
 
 router.get('/finance', authAdmin, adminCtrls.finance)
 router.put('/change-admin-role', authAdmin, adminCtrls.changeAdminRole)

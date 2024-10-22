@@ -4,7 +4,9 @@ const AdminNotification = require("../../models/AdminNotification")
 const User = require("../../models/User")
 const UserSupportTicket = require("../../models/UserSupportTicket")
 const Cook = require("../../models/Cook")
-const CookSupportTicket = require("../../models/CookSupportTicket")
+const CookSupportTicket = require("../../models/CookSupportTicket");
+const Owner = require("../../models/Owner");
+const OwnerSupportTicket = require('../../models/OwnerSupportTicket');
 
 // *********************** profile ***********************
 // # description -> HTTP VERB -> Accesss -> Access Type
@@ -676,6 +678,252 @@ exports.addCommentToCookSupportTicket = async (req, res) => {
         });
     }
 }
+
+
+
+
+// *********************** owners ***********************
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # get all owners -> GET -> Admin -> PRIVATE
+// @route = /api/admins/owners
+exports.getOwners = async (req, res) => {
+    try {
+        const owners = await Owner.find({}).select('-password')
+        if (owners) {
+            res.status(StatusCodes.OK).json({
+                status: 'success',
+                msg: ' مالک ها پیدا شدند ',
+                success: true,
+                count: owners.length,
+                owners,
+            });
+        } else {
+            res.status(StatusCodes.NOT_FOUND).json({
+                status: 'failure',
+                msg: ' ملک داری وجود ندارد ',
+                success: false,
+            });
+        }
+
+    } catch (err) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            success: false,
+            msg: "خطای داخلی سرور",
+            error: err.message
+        });
+    }
+}
+
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # get all owners -> GET -> Admin -> PRIVATE
+// @route = /api/admins/owners/:ownerId
+exports.getOwner = async (req, res) => {
+    try {
+        const owner = await Owner.findById({ _id: req.params.ownerId }).select('-password')
+        if (owner) {
+            res.status(StatusCodes.OK).json({
+                status: 'success',
+                msg: ' ملک دار پیدا شد ',
+                success: true,
+                owner,
+            });
+        } else {
+            res.status(StatusCodes.NOT_FOUND).json({
+                status: 'failure',
+                msg: ' ملک داری وجود ندارد ',
+                success: false,
+            });
+        }
+
+    } catch (err) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            success: false,
+            msg: "خطای داخلی سرور",
+            error: err.message
+        });
+    }
+}
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # active owner -> PUT -> Admin -> PRIVATE
+// @route = /api/admins/owners/:ownerId/active
+exports.activeOwner = async (req, res) => {
+    try {
+        await Owner.findByIdAndUpdate(req.params.ownerId, { isActive: true }, { new: true }).then((owner) => {
+            if (owner) {
+                res.status(StatusCodes.OK).json({
+                    status: 'success',
+                    msg: ' ملک دار فعال شد ',
+                    success: true,
+                    owner,
+                });
+            } else {
+                res.status(StatusCodes.NOT_FOUND).json({
+                    status: 'failure',
+                    msg: 'ملک دار هنوز غیر فعال است',
+                    success: false,
+                });
+            }
+        })
+    } catch (err) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            success: false,
+            msg: "خطای داخلی سرور",
+            error: err.message
+        });
+    }
+}
+
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # active owner -> PUT -> Admin -> PRIVATE
+// @route = /api/admins/owners/:ownerId/deactive
+exports.deActiveOwner = async (req, res) => {
+    try {
+        await Owner.findByIdAndUpdate(req.params.ownerId, { isActive: false }, { new: true }).then((owner) => {
+            if (owner) {
+                res.status(StatusCodes.OK).json({
+                    status: 'success',
+                    msg: ' ملک دار غیر فعال شد ',
+                    success: true,
+                    owner,
+                });
+            } else {
+                res.status(StatusCodes.NOT_FOUND).json({
+                    status: 'failure',
+                    msg: 'ملک دار هنوز فعال است',
+                    success: false,
+                });
+            }
+        })
+    } catch (err) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            success: false,
+            msg: "خطای داخلی سرور",
+            error: err.message
+        });
+    }
+}
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # get all owner support tickets that owner send to admin -> GET -> Admin -> PRIVATE
+// @route = /api/admins/owners/:ownerId/support-tickets
+exports.getAllOwnerSupportTickets = async (req, res) => {
+    try {
+        const supportTickets = await OwnerSupportTicket.find({ owner: req.params.ownerId })
+        if (supportTickets) {
+            res.status(StatusCodes.OK).json({
+                status: 'success',
+                msg: ' تیکت های پشتیبانی ملک دار پیدا شدند ',
+                success: true,
+                count: supportTickets.length,
+                data: supportTickets,
+            });
+        } else {
+            res.status(StatusCodes.NOT_FOUND).json({
+                status: 'failure',
+                msg: ' ملک داری وجود ندارد ',
+                success: false,
+            });
+        }
+
+    } catch (err) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            success: false,
+            msg: "خطای داخلی سرور",
+            error: err.message
+        });
+    }
+}
+
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # get single support ticket -> GET -> Admin -> PRIVATE
+// @route = /api/admins/owners/support-tickets/:ownerId/:stId
+exports.getSingleOwnerSupportTicket = async (req, res) => {
+    try {
+        const supportTicket = await OwnerSupportTicket.find({ owner: req.params.ownerId, _id: req.params.stId })
+        if (supportTicket) {
+            res.status(StatusCodes.OK).json({
+                status: 'success',
+                msg: ' تیکت پشتیبانی ملک دار پیدا شد ',
+                success: true,
+                data: supportTicket[0],
+            });
+        } else {
+            res.status(StatusCodes.NOT_FOUND).json({
+                status: 'failure',
+                msg: 'تیکت پشتیبانی برای ملک دار وجود ندارد ',
+                success: false,
+            });
+        }
+
+    } catch (err) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            success: false,
+            msg: "خطای داخلی سرور",
+            error: err.message
+        });
+    }
+}
+
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # add comment to owner support ticket -> PUT -> Admin -> PRIVATE
+// @route = /api/admins/owners/:ownerId/support-tickets/:stId/add-comment
+exports.addCommentToOwnerSupportTicket = async (req, res) => {
+    try {
+        let supportTicketFound = await OwnerSupportTicket.findOne({ owner: req.params.ownerId, _id: req.params.stId })
+        if (supportTicketFound) {
+
+            let comments = {
+                admin: req.admin._id,
+                comment: req.body.comment
+            }
+
+            supportTicketFound.comments.push(comments)
+
+
+            await supportTicketFound.save().then((ticket) => {
+                return res.status(StatusCodes.OK).json({
+                    status: 'success',
+                    msg: " تیکت شما پاسخ داده شد",
+                    ticket
+                })
+            }).catch((error) => {
+                console.log(error);
+                return res.status(StatusCodes.BAD_REQUEST).json({
+                    status: 'failure',
+                    msg: "عدم پاسخ گویی به تیکت",
+                    error
+                })
+            })
+        } else {
+            return res.status(StatusCodes.NOT_FOUND).json({
+                status: 'failure',
+                msg: "تیکت پیدا نشد"
+            })
+        }
+
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
+
+
 
 // *******************************************************
 // # description -> HTTP VERB -> Accesss -> Access Type
