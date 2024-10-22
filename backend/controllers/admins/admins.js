@@ -435,6 +435,40 @@ exports.addCommentToUserSupportTicket = async (req, res) => {
     }
 }
 
+// *********************** cooks ***********************
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # get all cooks -> GET -> Admin -> PRIVATE
+// @route = /api/admins/cooks
+exports.getCooks = async (req, res) => {
+    try {
+        const cooks = await Cook.find({}).select('-password')
+        if (cooks) {
+            res.status(StatusCodes.OK).json({
+                status: 'success',
+                msg: ' آشپزها پیدا شدند ',
+                success: true,
+                count: cooks.length,
+                data: cooks,
+            });
+        } else {
+            res.status(StatusCodes.NOT_FOUND).json({
+                status: 'failure',
+                msg: ' آشپزی وجود ندارد ',
+                success: false,
+            });
+        }
+
+    } catch (err) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            success: false,
+            msg: "خطای داخلی سرور",
+            error: err.message
+        });
+    }
+}
+
+
 // *******************************************************
 // # description -> HTTP VERB -> Accesss -> Access Type
 // # get admin finance -> GET -> Admin -> PRIVATE

@@ -30,6 +30,9 @@ router.get('/users/support-tickets/:userId/:stId', authAdmin, adminCtrls.getSing
 router.put('/users/support-tickets/:userId/:stId/add-comment', authAdmin, adminCtrls.addCommentToUserSupportTicket)
 
 
+// cooks
+
+
 router.get('/finance', authAdmin, adminCtrls.finance)
 router.put('/change-admin-role', authAdmin, adminCtrls.changeAdminRole)
 router.get('/', authAdmin, adminCtrls.getAdmins)
