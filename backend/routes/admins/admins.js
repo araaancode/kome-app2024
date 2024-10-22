@@ -48,6 +48,17 @@ router.get('/owners/:ownerId/support-tickets', authAdmin, adminCtrls.getAllOwner
 router.get('/owners/:ownerId/support-tickets/:stId', authAdmin, adminCtrls.getSingleOwnerSupportTicket)
 router.put('/owners/:ownerId/support-tickets/:stId/add-comment', authAdmin, adminCtrls.addCommentToOwnerSupportTicket)
 
+// drivers
+router.get('/drivers', authAdmin, adminCtrls.getDrivers)
+router.get('/drivers/:driverId', authAdmin, adminCtrls.getDriver)
+router.put('/drivers/:driverId/active', authAdmin, adminCtrls.activeDriver)
+router.put('/drivers/:driverId/deactive', authAdmin, adminCtrls.deActiveDriver)
+router.get('/drivers/:driverId/support-tickets', authAdmin, adminCtrls.getAllDriverSupportTickets)
+router.get('/drivers/:driverId/support-tickets/:stId', authAdmin, adminCtrls.getSingleDriverSupportTicket)
+router.put('/drivers/:driverId/support-tickets/:stId/add-comment', authAdmin, adminCtrls.addCommentToDriverSupportTicket)
+
+
+
 router.get('/finance', authAdmin, adminCtrls.finance)
 router.put('/change-admin-role', authAdmin, adminCtrls.changeAdminRole)
 router.get('/', authAdmin, adminCtrls.getAdmins)

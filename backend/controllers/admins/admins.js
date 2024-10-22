@@ -7,6 +7,9 @@ const Cook = require("../../models/Cook")
 const CookSupportTicket = require("../../models/CookSupportTicket");
 const Owner = require("../../models/Owner");
 const OwnerSupportTicket = require('../../models/OwnerSupportTicket');
+const Driver = require("../../models/Driver");
+const DriverSupportTicket = require("../../models/DriverSupportTicket");
+
 
 // *********************** profile ***********************
 // # description -> HTTP VERB -> Accesss -> Access Type
@@ -922,7 +925,245 @@ exports.addCommentToOwnerSupportTicket = async (req, res) => {
     }
 }
 
+// *********************** drivers ***********************
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # get all drivers -> GET -> Admin -> PRIVATE
+// @route = /api/admins/drivers
+exports.getDrivers = async (req, res) => {
+    try {
+        const drivers = await Driver.find({}).select('-password')
+        if (drivers) {
+            res.status(StatusCodes.OK).json({
+                status: 'success',
+                msg: ' راننده ها پیدا شدند ',
+                success: true,
+                count: drivers.length,
+                drivers,
+            });
+        } else {
+            res.status(StatusCodes.NOT_FOUND).json({
+                status: 'failure',
+                msg: ' راننده داری وجود ندارد ',
+                success: false,
+            });
+        }
 
+    } catch (err) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            success: false,
+            msg: "خطای داخلی سرور",
+            error: err.message
+        });
+    }
+}
+
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # get all drivers -> GET -> Admin -> PRIVATE
+// @route = /api/admins/drivers/:driverId
+exports.getDriver = async (req, res) => {
+    try {
+        const driver = await Driver.findById({ _id: req.params.driverId }).select('-password')
+        if (driver) {
+            res.status(StatusCodes.OK).json({
+                status: 'success',
+                msg: ' راننده پیدا شد ',
+                success: true,
+                driver,
+            });
+        } else {
+            res.status(StatusCodes.NOT_FOUND).json({
+                status: 'failure',
+                msg: ' راننده وجود ندارد ',
+                success: false,
+            });
+        }
+
+    } catch (err) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            success: false,
+            msg: "خطای داخلی سرور",
+            error: err.message
+        });
+    }
+}
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # active driver -> PUT -> Admin -> PRIVATE
+// @route = /api/admins/drivers/:driverId/active
+exports.activeDriver = async (req, res) => {
+    try {
+        await Driver.findByIdAndUpdate(req.params.driverId, { isActive: true }, { new: true }).then((driver) => {
+            if (driver) {
+                res.status(StatusCodes.OK).json({
+                    status: 'success',
+                    msg: ' راننده فعال شد ',
+                    success: true,
+                    driver,
+                });
+            } else {
+                res.status(StatusCodes.NOT_FOUND).json({
+                    status: 'failure',
+                    msg: 'راننده هنوز غیر فعال است',
+                    success: false,
+                });
+            }
+        })
+    } catch (err) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            success: false,
+            msg: "خطای داخلی سرور",
+            error: err.message
+        });
+    }
+}
+
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # active driver -> PUT -> Admin -> PRIVATE
+// @route = /api/admins/drivers/:driverId/deactive
+exports.deActiveDriver = async (req, res) => {
+    try {
+        await Driver.findByIdAndUpdate(req.params.driverId, { isActive: false }, { new: true }).then((driver) => {
+            if (driver) {
+                res.status(StatusCodes.OK).json({
+                    status: 'success',
+                    msg: ' راننده غیر فعال شد ',
+                    success: true,
+                    driver,
+                });
+            } else {
+                res.status(StatusCodes.NOT_FOUND).json({
+                    status: 'failure',
+                    msg: 'راننده هنوز فعال است',
+                    success: false,
+                });
+            }
+        })
+    } catch (err) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            success: false,
+            msg: "خطای داخلی سرور",
+            error: err.message
+        });
+    }
+}
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # get all driver support tickets that driver send to admin -> GET -> Admin -> PRIVATE
+// @route = /api/admins/drivers/:driverId/support-tickets
+exports.getAllDriverSupportTickets = async (req, res) => {
+    try {
+        const supportTickets = await DriverSupportTicket.find({ driver: req.params.driverId })
+        if (supportTickets) {
+            res.status(StatusCodes.OK).json({
+                status: 'success',
+                msg: ' تیکت های پشتیبانی راننده پیدا شدند ',
+                success: true,
+                count: supportTickets.length,
+                data: supportTickets,
+            });
+        } else {
+            res.status(StatusCodes.NOT_FOUND).json({
+                status: 'failure',
+                msg: ' راننده وجود ندارد',
+                success: false,
+            });
+        }
+
+    } catch (err) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            success: false,
+            msg: "خطای داخلی سرور",
+            error: err.message
+        });
+    }
+}
+
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # get single support ticket -> GET -> Admin -> PRIVATE
+// @route = /api/admins/drivers/support-tickets/:driverId/:stId
+exports.getSingleDriverSupportTicket = async (req, res) => {
+    try {
+        const supportTicket = await DriverSupportTicket.find({ driver: req.params.driverId, _id: req.params.stId })
+        if (supportTicket) {
+            res.status(StatusCodes.OK).json({
+                status: 'success',
+                msg: ' تیکت پشتیبانی پیدا شد ',
+                success: true,
+                data: supportTicket[0],
+            });
+        } else {
+            res.status(StatusCodes.NOT_FOUND).json({
+                status: 'failure',
+                msg: 'تیکت پشتیبانی برای وجود ندارد ',
+                success: false,
+            });
+        }
+
+    } catch (err) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            success: false,
+            msg: "خطای داخلی سرور",
+            error: err.message
+        });
+    }
+}
+
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # add comment to driver support ticket -> PUT -> Admin -> PRIVATE
+// @route = /api/admins/drivers/:driverId/support-tickets/:stId/add-comment
+exports.addCommentToDriverSupportTicket = async (req, res) => {
+    try {
+        let supportTicketFound = await DriverSupportTicket.findOne({ driver: req.params.driverId, _id: req.params.stId })
+        if (supportTicketFound) {
+
+            let comments = {
+                admin: req.admin._id,
+                comment: req.body.comment
+            }
+
+            supportTicketFound.comments.push(comments)
+
+
+            await supportTicketFound.save().then((ticket) => {
+                return res.status(StatusCodes.OK).json({
+                    status: 'success',
+                    msg: " تیکت شما پاسخ داده شد",
+                    ticket
+                })
+            }).catch((error) => {
+                console.log(error);
+                return res.status(StatusCodes.BAD_REQUEST).json({
+                    status: 'failure',
+                    msg: "عدم پاسخ گویی به تیکت",
+                    error
+                })
+            })
+        } else {
+            return res.status(StatusCodes.NOT_FOUND).json({
+                status: 'failure',
+                msg: "تیکت پیدا نشد"
+            })
+        }
+
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
 
 
 // *******************************************************
