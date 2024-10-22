@@ -10,6 +10,8 @@ const OwnerSupportTicket = require('../../models/OwnerSupportTicket');
 const Driver = require("../../models/Driver");
 const DriverSupportTicket = require("../../models/DriverSupportTicket");
 const Food = require('../../models/Food');
+const Bus = require('../../models/Bus');
+
 
 
 // *********************** profile ***********************
@@ -1273,6 +1275,126 @@ exports.deActiveFood = async (req, res) => {
                 res.status(StatusCodes.NOT_FOUND).json({
                     status: 'failure',
                     msg: 'غذا هنوز غیر فعال است',
+                    success: false,
+                });
+            }
+        })
+    } catch (err) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            success: false,
+            msg: "خطای داخلی سرور",
+            error: err.message
+        });
+    }
+}
+
+// *********************** buses ***********************
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # get all buses -> GET -> Admin -> PRIVATE
+// @route = /api/admins/buses
+exports.getBuses = async (req, res) => {
+    try {
+        let buses = await Bus.find({})
+        if (buses) {
+            return res.status(StatusCodes.OK).json({
+                status: 'success',
+                msg: "اتوبوس ها پیدا شدند",
+                count: buses.length,
+                buses: buses
+            })
+        } else {
+            return res.status(StatusCodes.BAD_REQUEST).json({
+                status: 'failure',
+                msg: "اتوبوس ها پیدا نشدند"
+            })
+        }
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # get all buses -> GET -> Admin -> PRIVATE
+// @route = /api/admins/buses/:busId
+exports.getBus = async (req, res) => {
+    try {
+        let bus = await Bus.findById(req.params.busId)
+        if (bus) {
+            return res.status(StatusCodes.OK).json({
+                status: 'success',
+                msg: "اتوبوس پیدا شد",
+                bus
+            })
+        } else {
+            return res.status(StatusCodes.BAD_REQUEST).json({
+                status: 'failure',
+                msg: "اتوبوس پیدا نشد"
+            })
+        }
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # active bus -> PUT -> Admin -> PRIVATE
+// @route = /api/admins/buses/:busId/active
+exports.activeBus = async (req, res) => {
+    try {
+        await Bus.findByIdAndUpdate(req.params.busId, { isActive: true }, { new: true }).then((bus) => {
+            if (bus) {
+                res.status(StatusCodes.OK).json({
+                    status: 'success',
+                    msg: ' اتوبوس فعال شد ',
+                    success: true,
+                    bus,
+                });
+            } else {
+                res.status(StatusCodes.NOT_FOUND).json({
+                    status: 'failure',
+                    msg: 'اتوبوس هنوز غیر فعال است',
+                    success: false,
+                });
+            }
+        })
+    } catch (err) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            success: false,
+            msg: "خطای داخلی سرور",
+            error: err.message
+        });
+    }
+}
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # deactive bus -> PUT -> Admin -> PRIVATE
+// @route = /api/admins/buses/:busId/deactive
+exports.deActiveBus = async (req, res) => {
+    try {
+        await Bus.findByIdAndUpdate(req.params.busId, { isActive: true }, { new: true }).then((bus) => {
+            if (bus) {
+                res.status(StatusCodes.OK).json({
+                    status: 'success',
+                    msg: ' اتوبوس غیر فعال شد ',
+                    success: true,
+                    bus,
+                });
+            } else {
+                res.status(StatusCodes.NOT_FOUND).json({
+                    status: 'failure',
+                    msg: 'اتوبوس هنوز غیر فعال است',
                     success: false,
                 });
             }

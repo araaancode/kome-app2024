@@ -63,6 +63,12 @@ router.get('/foods/:foodId', authAdmin, adminCtrls.getFood)
 router.put('/foods/:foodId/active', authAdmin, adminCtrls.activeFood)
 router.put('/foods/:foodId/deactive', authAdmin, adminCtrls.deActiveFood)
 
+// buses
+router.get('/buses', authAdmin, adminCtrls.getBuses)
+router.get('/buses/:busId', authAdmin, adminCtrls.getBus)
+router.put('/buses/:busId/active', authAdmin, adminCtrls.activeBus)
+router.put('/buses/:busId/deactive', authAdmin, adminCtrls.deActiveBus)
+
 router.get('/finance', authAdmin, adminCtrls.finance)
 router.put('/change-admin-role', authAdmin, adminCtrls.changeAdminRole)
 router.get('/', authAdmin, adminCtrls.getAdmins)
