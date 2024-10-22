@@ -3,6 +3,8 @@ const Admin = require("../../models/Admin")
 const AdminNotification = require("../../models/AdminNotification")
 const User = require("../../models/User")
 const UserSupportTicket = require("../../models/UserSupportTicket")
+const Cook = require("../../models/Cook")
+const CookSupportTicket = require("../../models/CookSupportTicket")
 
 // *********************** profile ***********************
 // # description -> HTTP VERB -> Accesss -> Access Type
@@ -393,7 +395,7 @@ exports.getSingleUserSupportTicket = async (req, res) => {
 // @route = /api/admins/users/support-tickets/:userId/:stId/add-comment
 exports.addCommentToUserSupportTicket = async (req, res) => {
     try {
-        let supportTicketFound = await UserSupportTicket.findOne({ user:req.params.userId,_id: req.params.stId })
+        let supportTicketFound = await UserSupportTicket.findOne({ user: req.params.userId, _id: req.params.stId })
         if (supportTicketFound) {
 
             let comments = {
@@ -448,7 +450,7 @@ exports.getCooks = async (req, res) => {
                 msg: ' آشپزها پیدا شدند ',
                 success: true,
                 count: cooks.length,
-                data: cooks,
+                cooks,
             });
         } else {
             res.status(StatusCodes.NOT_FOUND).json({
@@ -468,6 +470,212 @@ exports.getCooks = async (req, res) => {
     }
 }
 
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # get all cooks -> GET -> Admin -> PRIVATE
+// @route = /api/admins/cooks/:cookId
+exports.getCook = async (req, res) => {
+    try {
+        const cook = await Cook.findById({ _id: req.params.cookId }).select('-password')
+        if (cook) {
+            res.status(StatusCodes.OK).json({
+                status: 'success',
+                msg: ' آشپز پیدا شدند ',
+                success: true,
+                cook,
+            });
+        } else {
+            res.status(StatusCodes.NOT_FOUND).json({
+                status: 'failure',
+                msg: ' آشپزی وجود ندارد ',
+                success: false,
+            });
+        }
+
+    } catch (err) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            success: false,
+            msg: "خطای داخلی سرور",
+            error: err.message
+        });
+    }
+}
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # active cook -> PUT -> Admin -> PRIVATE
+// @route = /api/admins/cooks/:cookId/active
+exports.activeCook = async (req, res) => {
+    try {
+        await Cook.findByIdAndUpdate(req.params.cookId, { isActive: true }, { new: true }).then((cook) => {
+            if (cook) {
+                res.status(StatusCodes.OK).json({
+                    status: 'success',
+                    msg: ' آشپز فعال شد ',
+                    success: true,
+                    cook,
+                });
+            } else {
+                res.status(StatusCodes.NOT_FOUND).json({
+                    status: 'failure',
+                    msg: 'آشپز هنوز غیر فعال است',
+                    success: false,
+                });
+            }
+        })
+    } catch (err) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            success: false,
+            msg: "خطای داخلی سرور",
+            error: err.message
+        });
+    }
+}
+
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # active cook -> PUT -> Admin -> PRIVATE
+// @route = /api/admins/cooks/:cookId/deactive
+exports.deActiveCook = async (req, res) => {
+    try {
+        await Cook.findByIdAndUpdate(req.params.cookId, { isActive: false }, { new: true }).then((cook) => {
+            if (cook) {
+                res.status(StatusCodes.OK).json({
+                    status: 'success',
+                    msg: ' آشپز غیر فعال شد ',
+                    success: true,
+                    cook,
+                });
+            } else {
+                res.status(StatusCodes.NOT_FOUND).json({
+                    status: 'failure',
+                    msg: 'آشپز هنوز فعال است',
+                    success: false,
+                });
+            }
+        })
+    } catch (err) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            success: false,
+            msg: "خطای داخلی سرور",
+            error: err.message
+        });
+    }
+}
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # get all cook support tickets that cook send to admin -> GET -> Admin -> PRIVATE
+// @route = /api/admins/cooks/:cookId/support-tickets
+exports.getAllCookSupportTickets = async (req, res) => {
+    try {
+        const supportTickets = await CookSupportTicket.find({ cook: req.params.cookId })
+        if (supportTickets) {
+            res.status(StatusCodes.OK).json({
+                status: 'success',
+                msg: ' تیکت های پشتیبانی آشپز پیدا شدند ',
+                success: true,
+                count: supportTickets.length,
+                data: supportTickets,
+            });
+        } else {
+            res.status(StatusCodes.NOT_FOUND).json({
+                status: 'failure',
+                msg: ' آشپزی وجود ندارد ',
+                success: false,
+            });
+        }
+
+    } catch (err) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            success: false,
+            msg: "خطای داخلی سرور",
+            error: err.message
+        });
+    }
+}
+
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # get single support ticket -> GET -> Admin -> PRIVATE
+// @route = /api/admins/cooks/support-tickets/:cookId/:stId
+exports.getSingleCookSupportTicket = async (req, res) => {
+    try {
+        const supportTicket = await CookSupportTicket.find({ cook: req.params.cookId, _id: req.params.stId })
+        if (supportTicket) {
+            res.status(StatusCodes.OK).json({
+                status: 'success',
+                msg: ' تیکت پشتیبانی آشپز پیدا شد ',
+                success: true,
+                data: supportTicket[0],
+            });
+        } else {
+            res.status(StatusCodes.NOT_FOUND).json({
+                status: 'failure',
+                msg: ' آشپزی وجود ندارد ',
+                success: false,
+            });
+        }
+
+    } catch (err) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            success: false,
+            msg: "خطای داخلی سرور",
+            error: err.message
+        });
+    }
+}
+
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # add comment to cook support ticket -> PUT -> Admin -> PRIVATE
+// @route = /api/admins/cooks/:cookId/support-tickets/:stId/add-comment
+exports.addCommentToCookSupportTicket = async (req, res) => {
+    try {
+        let supportTicketFound = await CookSupportTicket.findOne({ cook: req.params.cookId, _id: req.params.stId })
+        if (supportTicketFound) {
+
+            let comments = {
+                admin: req.admin._id,
+                comment: req.body.comment
+            }
+
+            supportTicketFound.comments.push(comments)
+
+
+            await supportTicketFound.save().then((ticket) => {
+                return res.status(StatusCodes.OK).json({
+                    status: 'success',
+                    msg: " تیکت شما پاسخ داده شد",
+                    ticket
+                })
+            }).catch((error) => {
+                console.log(error);
+                return res.status(StatusCodes.BAD_REQUEST).json({
+                    status: 'failure',
+                    msg: "عدم پاسخ گویی به تیکت",
+                    error
+                })
+            })
+        } else {
+            return res.status(StatusCodes.NOT_FOUND).json({
+                status: 'failure',
+                msg: "تیکت پیدا نشد"
+            })
+        }
+
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
 
 // *******************************************************
 // # description -> HTTP VERB -> Accesss -> Access Type
