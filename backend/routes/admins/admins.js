@@ -57,7 +57,11 @@ router.get('/drivers/:driverId/support-tickets', authAdmin, adminCtrls.getAllDri
 router.get('/drivers/:driverId/support-tickets/:stId', authAdmin, adminCtrls.getSingleDriverSupportTicket)
 router.put('/drivers/:driverId/support-tickets/:stId/add-comment', authAdmin, adminCtrls.addCommentToDriverSupportTicket)
 
-
+// foods
+router.get('/foods', authAdmin, adminCtrls.getFoods)
+router.get('/foods/:foodId', authAdmin, adminCtrls.getFood)
+router.put('/foods/:foodId/active', authAdmin, adminCtrls.activeFood)
+router.put('/foods/:foodId/deactive', authAdmin, adminCtrls.deActiveFood)
 
 router.get('/finance', authAdmin, adminCtrls.finance)
 router.put('/change-admin-role', authAdmin, adminCtrls.changeAdminRole)

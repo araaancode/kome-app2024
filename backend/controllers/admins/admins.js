@@ -9,6 +9,7 @@ const Owner = require("../../models/Owner");
 const OwnerSupportTicket = require('../../models/OwnerSupportTicket');
 const Driver = require("../../models/Driver");
 const DriverSupportTicket = require("../../models/DriverSupportTicket");
+const Food = require('../../models/Food');
 
 
 // *********************** profile ***********************
@@ -1164,6 +1165,128 @@ exports.addCommentToDriverSupportTicket = async (req, res) => {
         });
     }
 }
+
+
+// *********************** foods ***********************
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # get all foods -> GET -> Admin -> PRIVATE
+// @route = /api/admins/foods
+exports.getFoods = async (req, res) => {
+    try {
+        let foods = await Food.find({})
+        if (foods) {
+            return res.status(StatusCodes.OK).json({
+                status: 'success',
+                msg: "غذاها پیدا شدند",
+                count: foods.length,
+                foods: foods
+            })
+        } else {
+            return res.status(StatusCodes.BAD_REQUEST).json({
+                status: 'failure',
+                msg: "غذاها پیدا نشدند"
+            })
+        }
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # get all foods -> GET -> Admin -> PRIVATE
+// @route = /api/admins/foods/:foodId
+exports.getFood = async (req, res) => {
+    try {
+        let food = await Food.findById(req.params.foodId)
+        if (food) {
+            return res.status(StatusCodes.OK).json({
+                status: 'success',
+                msg: "غذا پیدا شد",
+                food
+            })
+        } else {
+            return res.status(StatusCodes.BAD_REQUEST).json({
+                status: 'failure',
+                msg: "غذا پیدا نشد"
+            })
+        }
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # active food -> PUT -> Admin -> PRIVATE
+// @route = /api/admins/foods/:foodId/active
+exports.activeFood = async (req, res) => {
+    try {
+        await Food.findByIdAndUpdate(req.params.foodId, { isActive: true }, { new: true }).then((food) => {
+            if (food) {
+                res.status(StatusCodes.OK).json({
+                    status: 'success',
+                    msg: ' غذا فعال شد ',
+                    success: true,
+                    food,
+                });
+            } else {
+                res.status(StatusCodes.NOT_FOUND).json({
+                    status: 'failure',
+                    msg: 'غذا هنوز غیر فعال است',
+                    success: false,
+                });
+            }
+        })
+    } catch (err) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            success: false,
+            msg: "خطای داخلی سرور",
+            error: err.message
+        });
+    }
+}
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # deactive food -> PUT -> Admin -> PRIVATE
+// @route = /api/admins/foods/:foodId/deactive
+exports.deActiveFood = async (req, res) => {
+    try {
+        await Food.findByIdAndUpdate(req.params.foodId, { isActive: true }, { new: true }).then((food) => {
+            if (food) {
+                res.status(StatusCodes.OK).json({
+                    status: 'success',
+                    msg: ' غذا غیر فعال شد ',
+                    success: true,
+                    food,
+                });
+            } else {
+                res.status(StatusCodes.NOT_FOUND).json({
+                    status: 'failure',
+                    msg: 'غذا هنوز غیر فعال است',
+                    success: false,
+                });
+            }
+        })
+    } catch (err) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            success: false,
+            msg: "خطای داخلی سرور",
+            error: err.message
+        });
+    }
+}
+
 
 
 // *******************************************************
