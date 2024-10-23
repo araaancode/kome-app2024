@@ -1409,7 +1409,125 @@ exports.deActiveBus = async (req, res) => {
     }
 }
 
+// *********************** houses ***********************
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # get all houses -> GET -> Admin -> PRIVATE
+// @route = /api/admins/houses
+exports.getHouses = async (req, res) => {
+    try {
+        let houses = await Bus.find({})
+        if (houses) {
+            return res.status(StatusCodes.OK).json({
+                status: 'success',
+                msg: "خانه ها پیدا شدند",
+                count: houses.length,
+                houses: houses
+            })
+        } else {
+            return res.status(StatusCodes.BAD_REQUEST).json({
+                status: 'failure',
+                msg: "خانه ها پیدا نشدند"
+            })
+        }
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
 
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # get all houses -> GET -> Admin -> PRIVATE
+// @route = /api/admins/houses/:houseId
+exports.getHouse = async (req, res) => {
+    try {
+        let house = await House.findById(req.params.houseId)
+        if (house) {
+            return res.status(StatusCodes.OK).json({
+                status: 'success',
+                msg: "ملک پیدا شد",
+                house
+            })
+        } else {
+            return res.status(StatusCodes.BAD_REQUEST).json({
+                status: 'failure',
+                msg: "ملک پیدا نشد"
+            })
+        }
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # active house -> PUT -> Admin -> PRIVATE
+// @route = /api/admins/houses/:houseId/active
+exports.activeHouse = async (req, res) => {
+    try {
+        await House.findByIdAndUpdate(req.params.houseId, { isActive: true }, { new: true }).then((house) => {
+            if (house) {
+                res.status(StatusCodes.OK).json({
+                    status: 'success',
+                    msg: ' ملک فعال شد ',
+                    success: true,
+                    house,
+                });
+            } else {
+                res.status(StatusCodes.NOT_FOUND).json({
+                    status: 'failure',
+                    msg: 'ملک هنوز غیر فعال است',
+                    success: false,
+                });
+            }
+        })
+    } catch (err) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            success: false,
+            msg: "خطای داخلی سرور",
+            error: err.message
+        });
+    }
+}
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # deactive house -> PUT -> Admin -> PRIVATE
+// @route = /api/admins/houses/:houseId/deactive
+exports.deActiveHouse = async (req, res) => {
+    try {
+        await House.findByIdAndUpdate(req.params.houseId, { isActive: true }, { new: true }).then((house) => {
+            if (house) {
+                res.status(StatusCodes.OK).json({
+                    status: 'success',
+                    msg: ' ملک غیر فعال شد ',
+                    success: true,
+                    house,
+                });
+            } else {
+                res.status(StatusCodes.NOT_FOUND).json({
+                    status: 'failure',
+                    msg: 'ملک هنوز غیر فعال است',
+                    success: false,
+                });
+            }
+        })
+    } catch (err) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            success: false,
+            msg: "خطای داخلی سرور",
+            error: err.message
+        });
+    }
+}
 
 // *******************************************************
 // # description -> HTTP VERB -> Accesss -> Access Type
@@ -1419,13 +1537,14 @@ exports.finance = (req, res) => {
     res.send("admin finance")
 }
 
+// ********************** admins **************************
 // # description -> HTTP VERB -> Accesss -> Access Type
 // # get admin finance -> GET -> SUPER Admin -> PRIVATE
-// @route = /api/admins/change-admin-role
+// @route = /api/admins/:adminId/change-role
 exports.changeAdminRole = async (req, res) => {
     try {
         await Admin.findByIdAndUpdate(
-            req.admin._id,
+            req.params.adminId,
             {
                 role: req.body.role,
             },
@@ -1454,7 +1573,6 @@ exports.changeAdminRole = async (req, res) => {
 }
 
 
-// *** admins crud ***
 // # description -> HTTP VERB -> Accesss -> Access Type
 // # get all admins -> GET -> SUPER Admin -> PRIVATE
 // @route = /api/admins
@@ -1485,7 +1603,6 @@ exports.getAdmins = async (req, res) => {
 }
 
 
-// *** admins crud ***
 // # description -> HTTP VERB -> Accesss -> Access Type
 // # get single admins -> GET -> SUPER Admin -> PRIVATE
 // @route = /api/admins/:adminId
@@ -1515,3 +1632,89 @@ exports.getAdmin = async (req, res) => {
 }
 
 
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # create admin -> POST -> SUPER Admin -> PRIVATE
+// @route = /api/admins
+exports.createAdmin = async (req, res) => {
+    try {
+        let { name, username, phone, email, password } = req.body
+
+        if (!name || !username || !phone || !email || !password) {
+            res.status(StatusCodes.BAD_REQUEST).json({
+                status: 'failure',
+                msg: "همه فیلدها باید وارد شوند!",
+            })
+        } else {
+            let findAdmin = await Admin.findOne({ phone: req.body.phone })
+
+            if (findAdmin) {
+                res.status(StatusCodes.BAD_REQUEST).json({
+                    status: 'failure',
+                    msg: "ادمین وجود دارد. وارد سایت شوید!",
+                })
+            } else {
+                let newAdmin = await Admin.create({
+                    name: req.body.name,
+                    username: req.body.username,
+                    phone: req.body.phone,
+                    email: req.body.email,
+                    password: req.body.password,
+                    role:req.body.role
+                })
+
+                if (newAdmin) {
+                    res.status(StatusCodes.CREATED).json({
+                        status: 'success',
+                        msg: "ادمین با موفقیت ثبت نام شد",
+                        _id: newAdmin._id,
+                        name: newAdmin.name,
+                        phone: newAdmin.phone,
+                        email: newAdmin.email,
+                        username: newAdmin.username,
+                        avatar: newAdmin.avatar,
+                        role: newAdmin.role,
+                    })
+                }
+            }
+        }
+
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
+
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # delete admin -> DELETE -> SUPER Admin -> PRIVATE
+// @route = /api/admins/:adminId
+exports.deleteAdmin = async (req, res) => {
+    try {
+        let admin = await Admin.findByIdAndDelete(req.params.adminId)
+        if (admin) {
+            return res.status(StatusCodes.OK).json({
+                status: 'success',
+                msg: "ادمین حذف شد",
+                admin: admin
+            })
+        } else {
+            return res.status(StatusCodes.BAD_REQUEST).json({
+                status: 'failure',
+                msg: "ادمین حذف نشد"
+            })
+        }
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}

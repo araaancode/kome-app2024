@@ -69,9 +69,19 @@ router.get('/buses/:busId', authAdmin, adminCtrls.getBus)
 router.put('/buses/:busId/active', authAdmin, adminCtrls.activeBus)
 router.put('/buses/:busId/deactive', authAdmin, adminCtrls.deActiveBus)
 
-router.get('/finance', authAdmin, adminCtrls.finance)
-router.put('/change-admin-role', authAdmin, adminCtrls.changeAdminRole)
+// houses
+router.get('/houses', authAdmin, adminCtrls.getHouses)
+router.get('/houses/:houseId', authAdmin, adminCtrls.getHouse)
+router.put('/houses/:houseId/active', authAdmin, adminCtrls.activeHouse)
+router.put('/houses/:houseId/deactive', authAdmin, adminCtrls.deActiveHouse)
+
+// admins
 router.get('/', authAdmin, adminCtrls.getAdmins)
 router.get('/:adminId', authAdmin, adminCtrls.getAdmin)
+router.post('/', authAdmin, adminCtrls.createAdmin)
+router.put('/:adminId/change-role', authAdmin, adminCtrls.changeAdminRole)
+router.delete('/:adminId', authAdmin, adminCtrls.deleteAdmin)
+
+router.get('/finance', authAdmin, adminCtrls.finance)
 
 module.exports = router
