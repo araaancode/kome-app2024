@@ -141,18 +141,6 @@ const LoginPage = () => {
           <h2 className="text-xl font-bold text-gray-700">تایید کد</h2>
           <p className='text-gray-500 mt-1 mb-4'>کد ارسال شده را در زیر وارد کنید. </p>
           <form className="space-y-4" onSubmit={verify}>
-            {/* <div>
-              <label className="block mb-2 mt-6 text-sm font-medium text-gray-700">
-                کد تایید
-              </label>
-              <input style={{ borderRadius: '6px' }}
-                type="text"
-                name='code'
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                className="w-full text-slate-900 bg-slate-100 border border-transparent appearance-none rounded-sm p-2 outline-none focus:bg-white focus:border-blue-900"
-              />
-            </div> */}
             <div className="flex flex-col mb-6">
               <label htmlFor="phone" className="mb-1 text-xs sm:text-sm tracking-wide text-gray-600">کد یکبار مصرف</label>
               <div className="relative">
