@@ -54,7 +54,7 @@ const LoginPage = () => {
 
 
       axios.post('/api/users/auth/login', { phone, password }, config).then((data) => {
-        console.log(data.data.user);
+        console.log(data);
         axios.post('/api/users/auth/send-otp', { phone }, config).then((otpData) => {
 
           toast.info('!کد یکبار مصرف ارسال شده را در زیر وارد کنید', {
@@ -175,14 +175,15 @@ const LoginPage = () => {
         </div>
       ) : (<div className="w-full max-w-md px-10 space-y-4 bg-white rounded border">
         <div className='flex flex-col bg-white px-4 sm:px-6 md:px-6 lg:px-6 py-6 w-full max-w-md m-auto'>
-          <div className="font-medium self-center text-xl sm:text-2xl uppercase text-gray-800">ورود به حساب </div>
-          <button className="relative mt-6 border rounded-md py-2 text-sm text-gray-800 bg-gray-100 hover:bg-gray-200">
-            <span className="absolute left-0 top-0 flex items-center justify-center h-full w-10 text-blue-500"><i className="fab fa-facebook-f"></i></span>
-            <span>ورود با ایمیل</span>
-          </button>
+          <div className="font-medium self-center text-xl sm:text-2xl uppercase text-gray-800">
+            <div className="w-12 h-12 mx-3 bg-white rounded-full">
+              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" className="remixicon w-12 h-12"><path d="M22.1034 19L12.8659 3.00017C12.7782 2.84815 12.6519 2.72191 12.4999 2.63414C12.0216 2.358 11.41 2.52187 11.1339 3.00017L1.89638 19H1V21C8.33333 21 15.6667 21 23 21V19H22.1034ZM7.59991 19.0002H4.20568L11.9999 5.50017L19.7941 19.0002H16.4001L12 11L7.59991 19.0002ZM12 15.1501L14.1175 19H9.88254L12 15.1501Z"></path></svg>
+            </div>
+          </div>
+
           <div className="relative mt-10 h-px bg-gray-300">
             <div className="absolute left-0 top-0 flex justify-center w-full -mt-2">
-              <span className="bg-white px-4 text-xs text-gray-500 uppercase">یا ورود با شماره تلفن </span>
+              <span className="bg-white px-4 text-xs text-gray-500 uppercase"> ورود به کومه </span>
             </div>
           </div>
         </div>
