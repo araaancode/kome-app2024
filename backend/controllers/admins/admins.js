@@ -11,9 +11,7 @@ const Driver = require("../../models/Driver");
 const DriverSupportTicket = require("../../models/DriverSupportTicket");
 const Food = require('../../models/Food');
 const Bus = require('../../models/Bus');
-
-
-
+const House = require('../../models/House')
 // *********************** profile ***********************
 // # description -> HTTP VERB -> Accesss -> Access Type
 // # get admin profile -> GET -> Admin -> PRIVATE
@@ -334,6 +332,41 @@ exports.deActiveUser = async (req, res) => {
         });
     }
 }
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # get all user support tickets that user send to admin -> GET -> Admin -> PRIVATE
+// @route = /api/admins/users/support-tickets
+exports.getAllUsersSupportTickets = async (req, res) => {
+    try {
+        const supportTickets = await UserSupportTicket.find({}).populate('user')
+        if (supportTickets) {
+            res.status(StatusCodes.OK).json({
+                status: 'success',
+                msg: ' تیکت های پشتیبانی کاربران پیدا شدند ',
+                success: true,
+                count: supportTickets.length,
+                data: supportTickets,
+            });
+        } else {
+            res.status(StatusCodes.NOT_FOUND).json({
+                status: 'failure',
+                msg: ' کاربری وجود ندارد ',
+                success: false,
+            });
+        }
+
+    } catch (err) {
+        console.log(err);
+
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            success: false,
+            msg: "خطای داخلی سرور",
+            error: err.message
+        });
+    }
+}
+
 
 // # description -> HTTP VERB -> Accesss -> Access Type
 // # get all user support tickets that user send to admin -> GET -> Admin -> PRIVATE
@@ -1415,7 +1448,7 @@ exports.deActiveBus = async (req, res) => {
 // @route = /api/admins/houses
 exports.getHouses = async (req, res) => {
     try {
-        let houses = await Bus.find({})
+        let houses = await House.find({}).populate('owner')
         if (houses) {
             return res.status(StatusCodes.OK).json({
                 status: 'success',
@@ -1503,7 +1536,7 @@ exports.activeHouse = async (req, res) => {
 // @route = /api/admins/houses/:houseId/deactive
 exports.deActiveHouse = async (req, res) => {
     try {
-        await House.findByIdAndUpdate(req.params.houseId, { isActive: true }, { new: true }).then((house) => {
+        await House.findByIdAndUpdate(req.params.houseId, { isActive: false }, { new: true }).then((house) => {
             if (house) {
                 res.status(StatusCodes.OK).json({
                     status: 'success',
@@ -1578,7 +1611,7 @@ exports.changeAdminRole = async (req, res) => {
 // @route = /api/admins
 exports.getAdmins = async (req, res) => {
     try {
-        let admins = await Admin.find({})
+        let admins = await Admin.find({}).select('-password')
         if (admins) {
             return res.status(StatusCodes.OK).json({
                 status: 'success',
@@ -1660,7 +1693,7 @@ exports.createAdmin = async (req, res) => {
                     phone: req.body.phone,
                     email: req.body.email,
                     password: req.body.password,
-                    role:req.body.role
+                    role: req.body.role
                 })
 
                 if (newAdmin) {

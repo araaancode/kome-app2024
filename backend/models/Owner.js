@@ -76,7 +76,6 @@ const ownerSchema = new mongoose.Schema({
   isActive: {
     type: Boolean,
     default: true,
-    select: false
   },
 
   favorites: [

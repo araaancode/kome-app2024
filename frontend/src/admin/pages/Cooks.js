@@ -9,7 +9,8 @@ import { openModal } from "../features/common/modalSlice"
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
 import { setPageTitle } from '../features/common/headerSlice'
-
+import axios from "axios"
+import { RiUser3Line } from "@remixicon/react"
 
 // load icons
 import DeleteIcon from '@iconscout/react-unicons/icons/uil-trash-alt'
@@ -18,118 +19,161 @@ import EditIcon from '@iconscout/react-unicons/icons/uil-edit-alt'
 import UpdateAdmin from "../features/admins/UpdateAdmin"
 
 
+
+
 const TopSideButtons = () => {
 
-  const dispatch = useDispatch()
+    const dispatch = useDispatch()
 
-  const createNewUser = () => {
-    // dispatch(showNotification({ message: "Add New Member clicked", status: 1 }))
-    dispatch(openModal({ title: "ایجاد ادمین جدید", bodyType: MODAL_BODY_TYPES.ADD_NEW_ADMIN }))
-  }
-
-
-
-  // return (
-  //     <div className="inline-block float-right">
-  //         <button className="btn px-6 btn-sm normal-case btn-primary" onClick={() => createNewUser()}>ایجاد کاربر جدید</button>
-  //     </div>
-  // )
-}
-
-
-const TEAM_MEMBERS = [
-  { name: "راننده یک", avatar: "https://cdn-icons-png.flaticon.com/128/4035/4035183.png", email: "example@admin.test", role: "Owner", joinedOn: MomentJalali(new Date()).add(-5 * 1, 'days').format("jYYYY/jMM/jDD"), lastActive: "5 hr ago" },
-  { name: "راننده دو", avatar: "https://cdn-icons-png.flaticon.com/128/1830/1830878.png", email: "example@admin.test", role: "Admin", joinedOn: MomentJalali(new Date()).add(-5 * 2, 'days').format("jYYYY/jMM/jDD"), lastActive: "15 min ago" },
-  { name: "راننده سه", avatar: "https://cdn-icons-png.flaticon.com/128/10551/10551576.png", email: "example@admin.test", role: "Admin", joinedOn: MomentJalali(new Date()).add(-5 * 3, 'days').format("jYYYY/jMM/jDD"), lastActive: "20 hr ago" },
-  { name: "راننده چهار", avatar: "https://cdn-icons-png.flaticon.com/128/6763/6763342.png", email: "example@admin.test", role: "Manager", joinedOn: MomentJalali(new Date()).add(-5 * 4, 'days').format("jYYYY/jMM/jDD"), lastActive: "1 hr ago" },
-  { name: "راننده پنج", avatar: "https://cdn-icons-png.flaticon.com/128/2934/2934121.png", email: "example@admin.test", role: "Support", joinedOn: MomentJalali(new Date()).add(-5 * 5, 'days').format("jYYYY/jMM/jDD"), lastActive: "40 min ago" },
-  { name: "راننده شش", avatar: "https://cdn-icons-png.flaticon.com/128/5190/5190547.png", email: "example@admin.test", role: "Support", joinedOn: MomentJalali(new Date()).add(-5 * 7, 'days').format("jYYYY/jMM/jDD"), lastActive: "5 hr ago" },
-
-]
-
-const updateUser = () => {
-  alert("update user")
-}
-
-
-
-const deleteUser = () => {
-  Swal.fire({
-    title: "آیا از حذف ادمین اطمینان دارید؟",
-    showDenyButton: true,
-    showCancelButton: true,
-    confirmButtonText: "بله",
-    denyButtonText: `خیر`
-  }).then((result) => {
-    /* Read more about isConfirmed, isDenied below */
-    if (result.isConfirmed) {
-      Swal.fire("ادمین حذف شد!", "", "success");
-    } else if (result.isDenied) {
-      Swal.fire("تغییرات ذخیره نشد", "", "info");
+    const createNewUser = () => {
+        // dispatch(showNotification({ message: "Add New Member clicked", status: 1 }))
+        dispatch(openModal({ title: "ایجاد ادمین جدید", bodyType: MODAL_BODY_TYPES.ADD_NEW_ADMIN }))
     }
-  });
+
+
+
+    // return (
+    //     <div className="inline-block float-right">
+    //         <button className="btn px-6 btn-sm normal-case btn-primary" onClick={() => createNewUser()}>ایجاد آشپز جدید</button>
+    //     </div>
+    // )
 }
+
+
+const updateCook = (isActiveState, userId) => {
+    let token = localStorage.getItem("userToken")
+
+    if (isActiveState) {
+        axios.put(`/api/admins/cooks/${userId}/deactive`, {}, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+        })
+            .then((response) => {
+                console.log('response', response.data)
+                Swal.fire({
+                    title: "<small>آیا از غیر فعال کردن آشپز اطمینان دارید؟</small>",
+                    showDenyButton: true,
+                    confirmButtonText: "بله",
+                    denyButtonText: `خیر`
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Swal.fire("<small>آشپز ویرایش شد!</small>", "", "success");
+                    } else if (result.isDenied) {
+                        Swal.fire("<small>تغییرات ذخیره نشد</small>", "", "info");
+                    }
+                });
+            })
+            .catch((error) => {
+                console.log('error', error)
+                Swal.fire("<small>تغییرات ذخیره نشد</small>", "", "danger");
+            })
+    } else {
+        axios.put(`/api/admins/cooks/${userId}/active`, {}, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+        })
+            .then((response) => {
+                console.log('response', response.data)
+                Swal.fire({
+                    title: "<small>آیا از فعال کردن آشپز اطمینان دارید؟</small>",
+                    showDenyButton: true,
+                    confirmButtonText: "بله",
+                    denyButtonText: `خیر`
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Swal.fire("<small>آشپز ویرایش شد!</small>", "", "success");
+                    } else if (result.isDenied) {
+                        Swal.fire("<small>تغییرات ذخیره نشد</small>", "", "info");
+                    }
+                });
+            })
+            .catch((error) => {
+                console.log('error', error)
+                Swal.fire("تغییرات ذخیره نشد", "", "danger");
+            })
+    }
+
+}
+
+
 
 const Cooks = () => {
+    const [cooks, setCooks] = useState([])
 
-  const dispatch = useDispatch()
-  useEffect(() => {
-    dispatch(setPageTitle({ title: "غذادارها" }))
-  }, [])
-
-  const [members, setMembers] = useState(TEAM_MEMBERS)
+    useEffect(() => {
+        let token = localStorage.getItem("userToken")
+        const AuthStr = 'Bearer '.concat(token);
 
 
-  return (
-    <>
 
-      <TitleCard title="غذادارها" topMargin="mt-2" TopSideButtons={<TopSideButtons />}>
+        axios.get('/api/admins/cooks', { headers: { authorization: AuthStr } })
+            .then(response => {
+                setCooks(response.data.cooks)
+                console.log(response.data.cooks);
+            })
+            .catch((error) => {
+                console.log('error ' + error);
+            });
+    }, [])
 
-        {/* Team Member list in table format loaded constant */}
-        <div className="overflow-x-auto w-full">
-          <table className="table w-full">
-            <thead>
-              <tr>
-                <th>نام و نام خانوادگی</th>
-                <th>ایمیل</th>
-                <th>تاریخ عضویت</th>
-                <th>آخرین فعالیت</th>
-                <th>حذف</th>
-                <th>ویرایش</th>
-              </tr>
-            </thead>
-            <tbody>
-              {
-                members.map((l, k) => {
-                  return (
-                    <tr key={k}>
-                      <td>
-                        <div className="flex items-center space-x-3">
-                          <div className="avatar">
-                            <div className="mask mask-circle w-12 h-12">
-                              <img className="w-6 h-6" src={l.avatar} alt="Avatar" />
-                            </div>
-                          </div>
-                          <div>
-                            <div className="font-bold mr-3">{l.name}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td>{l.email}</td>
-                      <td>{l.joinedOn}</td>
-                      <td>{l.lastActive}</td>
-                      <td><button onClick={() => deleteUser()}><DeleteIcon /></button></td>
-                      <td><button onClick={() => updateUser()}><EditIcon /></button></td>
-                    </tr>
-                  )
-                })
-              }
-            </tbody>
-          </table>
-        </div>
-      </TitleCard>
-    </>
-  )
+
+    return (
+        <>
+
+            <TitleCard title="آشپز ها" topMargin="mt-2" TopSideButtons={<TopSideButtons />}>
+
+                <div className="overflow-x-auto w-full">
+                    <table className="table w-full">
+                        <thead>
+                            <tr>
+                                <th>نام و نام خانوادگی</th>
+                                <th>شماره تلفن</th>
+                                <th>ایمیل</th>
+                                <th>تاریخ عضویت</th>
+                                <th>وضعیت</th>
+                                <th>تغییر وضعیت</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {
+                                cooks.map((l, k) => {
+                                    return (
+                                        <tr key={k}>
+                                            <td>
+                                                <div className="flex items-center space-x-3">
+                                                    <div className="avatar">
+                                                        {/* {l.avatar === 'default.jpg' ? (<RiUser3Line />) : (
+                                                            <div className="mask mask-circle w-12 h-12">
+                                                                <img className="w-6 h-6" src={`../../../uploads/cookAvatarDir/${l.avatar}`} alt="User Avatar" />
+                                                            </div>
+                                                        )} */}
+                                                        <RiUser3Line />
+                                                    </div>
+
+                                                    <div>
+                                                        <div className="font-bold mr-3">{l.name}</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>{l.phone}</td>
+                                            <td>{l.email}</td>
+                                            <td>{new Date(l.createdAt).toLocaleDateString('fa')}</td>
+                                            <td>{l.isActive ? 'فعال' : 'غیرفعال'}</td>
+                                            <td><button onClick={() => updateCook(l.isActive, l._id)}><EditIcon /></button></td>
+                                        </tr>
+                                    )
+                                })
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </TitleCard>
+        </>
+    )
 }
 
 export default Cooks

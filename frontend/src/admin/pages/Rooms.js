@@ -9,7 +9,8 @@ import { openModal } from "../features/common/modalSlice"
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
 import { setPageTitle } from '../features/common/headerSlice'
-
+import axios from "axios"
+import { RiHome2Line, RiUser3Line } from "@remixicon/react"
 
 // load icons
 import DeleteIcon from '@iconscout/react-unicons/icons/uil-trash-alt'
@@ -24,59 +25,235 @@ const TopSideButtons = () => {
 
     const createNewUser = () => {
         // dispatch(showNotification({ message: "Add New Member clicked", status: 1 }))
-        dispatch(openModal({ title: "ایجاد اقامتگاه جدید", bodyType: MODAL_BODY_TYPES.ADD_NEW_ADMIN }))
+        dispatch(openModal({ title: "ایجاد ادمین جدید", bodyType: MODAL_BODY_TYPES.ADD_NEW_ADMIN }))
     }
 
 
 
     // return (
     //     <div className="inline-block float-right">
-    //         <button className="btn px-6 btn-sm normal-case btn-primary" onClick={() => createNewUser()}>ایجاد کاربر جدید</button>
+    //         <button className="btn px-6 btn-sm normal-case btn-primary" onClick={() => createNewUser()}>ایجاد اقامتگاه جدید</button>
     //     </div>
     // )
 }
 
+const convertCityEnglishToPersian = (city) => {
 
-const TEAM_MEMBERS = [
-    { name: "اقامتگاه یک", avatar: "https://cdn-icons-png.flaticon.com/128/2082/2082563.png", city: "تهران", owner: "مالک یک", price: 1000, lastActive: "5 hr ago" },
-    { name: "اقامتگاه دو", avatar: "https://cdn-icons-png.flaticon.com/128/1020/1020535.png", city: "ماسوله", owner: "مالک دو", price: 2000, lastActive: "15 min ago" },
-    { name: "اقامتگاه سه", avatar: "https://cdn-icons-png.flaticon.com/128/3153/3153859.png", city: "یزد", owner: "مالک سه", price: 3000, lastActive: "20 hr ago" },
-    { name: "اقامتگاه چهار", avatar: "https://cdn-icons-png.flaticon.com/128/1600/1600667.png", city: "خوزستان", owner: "مالک چهار", price: 4000, lastActive: "1 hr ago" },
-    { name: "اقامتگاه پنج", avatar: "https://cdn-icons-png.flaticon.com/128/3313/3313260.png", city: "یزد", owner: "مالک پنج", price: 5000, lastActive: "40 min ago" },
-    { name: "اقامتگاه شش", avatar: "https://cdn-icons-png.flaticon.com/128/2350/2350864.png", city: "آذربایجان", owner: "مالک شش", price: 60000, lastActive: "5 hr ago" },
+    switch (city) {
+        case "arak":
+            return "اراک"
+            break;
 
-]
+        case "ardebil":
+            return "اردبیل"
+            break;
 
-const updateUser = () => {
-    alert("update user")
+
+        case "oromieh":
+            return "ارومیه"
+            break;
+
+
+        case "isfahan":
+            return "اصفهان"
+            break;
+
+        case "ahvaz":
+            return "اهواز"
+            break;
+
+        case "elam":
+            return "ایلام"
+            break;
+
+        case "bognord":
+            return "بجنورد"
+            break;
+
+        case "bandar_abbas":
+            return "بندرعباس"
+            break;
+
+        case "boshehr":
+            return "بوشهر"
+            break;
+
+        case "birgand":
+            return "بیرجند"
+            break;
+
+        case "tabriz":
+            return "تبریز"
+            break;
+
+        case "tehran":
+            return "تهران"
+            break;
+
+        case "khoram_abad":
+            return "خرم آباد "
+            break;
+
+        case "rasht":
+            return "رشت"
+            break;
+
+        case "zahedan":
+            return "زاهدان"
+            break;
+
+        case "zanjan":
+            return "زنجان"
+            break;
+
+        case "sari":
+            return "ساری"
+            break;
+
+        case "semnan":
+            return "سمنان"
+            break;
+
+        case "sanandaj":
+            return "سنندج"
+            break;
+
+        case "sharekord":
+            return "شهرکرد"
+            break;
+
+
+        case "shiraz":
+            return "شیراز"
+            break;
+
+
+        case "ghazvin":
+            return "قزوین"
+            break;
+
+        case "ghom":
+            return "قم"
+            break;
+
+        case "karaj":
+            return "کرج"
+            break;
+
+        case "kerman":
+            return "کرمان"
+            break;
+
+        case "kermanshah":
+            return "کرمانشاه"
+            break;
+
+
+        case "gorgan":
+            return "گرگان"
+            break;
+
+        case "mashhad":
+            return "مشهد"
+            break;
+
+        case "hamedan":
+            return "همدان"
+            break;
+
+        case "yasoj":
+            return "یاسوج"
+            break;
+
+        case "yazd":
+            return "یزد"
+            break;
+
+        default:
+            break;
+    }
+}
+
+const updateHouse = (isActiveState, houseId) => {
+    let token = localStorage.getItem("userToken")
+
+    if (isActiveState) {
+        axios.put(`/api/admins/houses/${houseId}/deactive`, {}, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+        })
+            .then((response) => {
+                console.log('response', response.data)
+                Swal.fire({
+                    title: "<small>آیا از غیر فعال کردن اقامتگاه اطمینان دارید؟</small>",
+                    showDenyButton: true,
+                    confirmButtonText: "بله",
+                    denyButtonText: `خیر`
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Swal.fire("<small>اقامتگاه ویرایش شد!</small>", "", "success");
+                    } else if (result.isDenied) {
+                        Swal.fire("<small>تغییرات ذخیره نشد</small>", "", "info");
+                    }
+                });
+            })
+            .catch((error) => {
+                console.log('error', error)
+                Swal.fire("<small>تغییرات ذخیره نشد</small>", "", "danger");
+            })
+    } else {
+        axios.put(`/api/admins/houses/${houseId}/active`, {}, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+        })
+            .then((response) => {
+                console.log('response', response.data)
+                Swal.fire({
+                    title: "<small>آیا از فعال کردن اقامتگاه اطمینان دارید؟</small>",
+                    showDenyButton: true,
+                    confirmButtonText: "بله",
+                    denyButtonText: `خیر`
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Swal.fire("<small>اقامتگاه ویرایش شد!</small>", "", "success");
+                    } else if (result.isDenied) {
+                        Swal.fire("<small>تغییرات ذخیره نشد</small>", "", "info");
+                    }
+                });
+            })
+            .catch((error) => {
+                console.log('error', error)
+                Swal.fire("تغییرات ذخیره نشد", "", "danger");
+            })
+    }
+
 }
 
 
-
-const deleteUser = () => {
-    Swal.fire({
-        title: "آیا از حذف اقامتگاه اطمینان دارید؟",
-        showDenyButton: true,
-        showCancelButton: true,
-        confirmButtonText: "بله",
-        denyButtonText: `خیر`
-    }).then((result) => {
-        /* Read more about isConfirmed, isDenied below */
-        if (result.isConfirmed) {
-            Swal.fire("اقامتگاه حذف شد!", "", "success");
-        } else if (result.isDenied) {
-            Swal.fire("تغییرات ذخیره نشد", "", "info");
-        }
-    });
-}
 
 const Rooms = () => {
-    const dispatch = useDispatch()
-    useEffect(() => {
-        dispatch(setPageTitle({ title: "اقامتگاه ها" }))
-    }, [])
+    const [houses, setHouses] = useState([])
 
-    const [members, setMembers] = useState(TEAM_MEMBERS)
+    useEffect(() => {
+        let token = localStorage.getItem("userToken")
+        const AuthStr = 'Bearer '.concat(token);
+
+
+
+        axios.get('/api/admins/houses', { headers: { authorization: AuthStr } })
+            .then(response => {
+                console.log(response.data.houses);
+
+                setHouses(response.data.houses)
+            })
+            .catch((error) => {
+                console.log('error ' + error);
+            });
+    }, [])
 
 
     return (
@@ -84,41 +261,40 @@ const Rooms = () => {
 
             <TitleCard title="اقامتگاه ها" topMargin="mt-2" TopSideButtons={<TopSideButtons />}>
 
-                {/* Team Member list in table format loaded constant */}
                 <div className="overflow-x-auto w-full">
                     <table className="table w-full">
                         <thead>
                             <tr>
-                                <th>نام اقامتگاه</th>
-                                <th>نام استان(نام شهر)</th>
-                                <th>نام مالک</th>
-                                <th>قیمت</th>
-                                <th>ویرایش</th>
-                                <th>حذف</th>
+                                <th>نام خانه  </th>
+                                <th>استان(شهرستان) </th>
+                                <th>نام مالک </th>
+                                <th>شماره تلفن مالک</th>
+                                <th>تاریخ ایجاد</th>
+                                <th>وضعیت</th>
+                                <th>تغییر وضعیت</th>
                             </tr>
                         </thead>
                         <tbody>
                             {
-                                members.map((l, k) => {
+                                houses.map((l, k) => {
                                     return (
                                         <tr key={k}>
                                             <td>
                                                 <div className="flex items-center space-x-3">
                                                     <div className="avatar">
-                                                        <div className="mask mask-circle w-12 h-12">
-                                                            <img className="w-6 h-6" src={l.avatar} alt="Avatar" />
-                                                        </div>
+                                                        <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 256 256" class="h-8 w-8 text-gray-800" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M219.31,108.68l-80-80a16,16,0,0,0-22.62,0l-80,80A15.87,15.87,0,0,0,32,120v96a8,8,0,0,0,8,8h64a8,8,0,0,0,8-8V160h32v56a8,8,0,0,0,8,8h64a8,8,0,0,0,8-8V120A15.87,15.87,0,0,0,219.31,108.68ZM208,208H160V152a8,8,0,0,0-8-8H104a8,8,0,0,0-8,8v56H48V120l80-80,80,80Z"></path></svg>
                                                     </div>
                                                     <div>
                                                         <div className="font-bold mr-3">{l.name}</div>
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td>{l.city}</td>
-                                            <td>{l.owner}</td>
-                                            <td>{l.price}</td>
-                                            <td><button onClick={() => deleteUser()}><DeleteIcon /></button></td>
-                                            <td><button onClick={() => updateUser()}><EditIcon /></button></td>
+                                            <td>{convertCityEnglishToPersian(l.province)}</td>
+                                            <td>{l.owner.name}</td>
+                                            <td>{l.owner.phone}</td>
+                                            <td>{new Date(l.createdAt).toLocaleDateString('fa')}</td>
+                                            <td>{l.isActive ? 'فعال' : 'غیرفعال'}</td>
+                                            <td><button onClick={() => updateHouse(l.isActive, l._id)}><EditIcon /></button></td>
                                         </tr>
                                     )
                                 })

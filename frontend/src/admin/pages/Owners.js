@@ -9,7 +9,8 @@ import { openModal } from "../features/common/modalSlice"
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
 import { setPageTitle } from '../features/common/headerSlice'
-
+import axios from "axios"
+import { RiUser3Line } from "@remixicon/react"
 
 // load icons
 import DeleteIcon from '@iconscout/react-unicons/icons/uil-trash-alt'
@@ -24,102 +25,136 @@ const TopSideButtons = () => {
 
     const createNewUser = () => {
         // dispatch(showNotification({ message: "Add New Member clicked", status: 1 }))
-        dispatch(openModal({ title: "ایجاد ملک دار جدید", bodyType: MODAL_BODY_TYPES.ADD_NEW_ADMIN }))
+        dispatch(openModal({ title: "ایجاد ادمین جدید", bodyType: MODAL_BODY_TYPES.ADD_NEW_ADMIN }))
     }
 
 
 
     // return (
     //     <div className="inline-block float-right">
-    //         <button className="btn px-6 btn-sm normal-case btn-primary" onClick={() => createNewUser()}>ایجاد کاربر جدید</button>
+    //         <button className="btn px-6 btn-sm normal-case btn-primary" onClick={() => createNewUser()}>ایجاد مالک جدید</button>
     //     </div>
     // )
 }
 
 
-const TEAM_MEMBERS = [
-    { name: "ملک دار یک", avatar: "https://cdn-icons-png.flaticon.com/128/3135/3135715.png", email: "example@owners.test", role: "Owner", joinedOn: MomentJalali(new Date()).add(-5 * 1, 'days').format("jYYYY/jMM/jDD"), lastActive: "5 hr ago" },
-    { name: "ملک دار دو", avatar: "https://cdn-icons-png.flaticon.com/128/2202/2202112.png", email: "example@owners.test", role: "Admin", joinedOn: MomentJalali(new Date()).add(-5 * 2, 'days').format("jYYYY/jMM/jDD"), lastActive: "15 min ago" },
-    { name: "ملک دار سه", avatar: "https://cdn-icons-png.flaticon.com/128/560/560277.png", email: "example@owners.test", role: "Admin", joinedOn: MomentJalali(new Date()).add(-5 * 3, 'days').format("jYYYY/jMM/jDD"), lastActive: "20 hr ago" },
-    { name: "ملک دار چهار", avatar: "https://cdn-icons-png.flaticon.com/128/4140/4140037.png", email: "example@owners.test", role: "Manager", joinedOn: MomentJalali(new Date()).add(-5 * 4, 'days').format("jYYYY/jMM/jDD"), lastActive: "1 hr ago" },
-    { name: "ملک دار پنج", avatar: "https://cdn-icons-png.flaticon.com/128/4727/4727424.png", email: "example@owners.test", role: "Support", joinedOn: MomentJalali(new Date()).add(-5 * 5, 'days').format("jYYYY/jMM/jDD"), lastActive: "40 min ago" },
-    { name: "ملک دار شش", avatar: "https://cdn-icons-png.flaticon.com/128/4140/4140047.png", email: "example@owners.test", role: "Support", joinedOn: MomentJalali(new Date()).add(-5 * 7, 'days').format("jYYYY/jMM/jDD"), lastActive: "5 hr ago" },
+const updateOwner = (isActiveState, ownerId) => {
+    let token = localStorage.getItem("userToken")
 
-]
+    if (isActiveState) {
+        axios.put(`/api/admins/owners/${ownerId}/deactive`, {}, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+        })
+            .then((response) => {
+                console.log('response', response.data)
+                Swal.fire({
+                    title: "<small>آیا از غیر فعال کردن مالک اطمینان دارید؟</small>",
+                    showDenyButton: true,
+                    confirmButtonText: "بله",
+                    denyButtonText: `خیر`
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Swal.fire("<small>مالک ویرایش شد!</small>", "", "success");
+                    } else if (result.isDenied) {
+                        Swal.fire("<small>تغییرات ذخیره نشد</small>", "", "info");
+                    }
+                });
+            })
+            .catch((error) => {
+                console.log('error', error)
+                Swal.fire("<small>تغییرات ذخیره نشد</small>", "", "danger");
+            })
+    } else {
+        axios.put(`/api/admins/owners/${ownerId}/active`, {}, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+        })
+            .then((response) => {
+                console.log('response', response.data)
+                Swal.fire({
+                    title: "<small>آیا از فعال کردن مالک اطمینان دارید؟</small>",
+                    showDenyButton: true,
+                    confirmButtonText: "بله",
+                    denyButtonText: `خیر`
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Swal.fire("<small>مالک ویرایش شد!</small>", "", "success");
+                    } else if (result.isDenied) {
+                        Swal.fire("<small>تغییرات ذخیره نشد</small>", "", "info");
+                    }
+                });
+            })
+            .catch((error) => {
+                console.log('error', error)
+                Swal.fire("تغییرات ذخیره نشد", "", "danger");
+            })
+    }
 
-const updateUser = () => {
-    alert("update user")
 }
 
 
-
-const deleteUser = () => {
-    Swal.fire({
-        title: "آیا از حذف ملک دار اطمینان دارید؟",
-        showDenyButton: true,
-        showCancelButton: true,
-        confirmButtonText: "بله",
-        denyButtonText: `خیر`
-    }).then((result) => {
-        /* Read more about isConfirmed, isDenied below */
-        if (result.isConfirmed) {
-            Swal.fire("ملک دار حذف شد!", "", "success");
-        } else if (result.isDenied) {
-            Swal.fire("تغییرات ذخیره نشد", "", "info");
-        }
-    });
-}
 
 const Owners = () => {
-    const dispatch = useDispatch()
+    const [owners, setOwners] = useState([])
 
     useEffect(() => {
-        dispatch(setPageTitle({ title: "ملک دارها" }))
-    }, [])
+        let token = localStorage.getItem("userToken")
+        const AuthStr = 'Bearer '.concat(token);
 
-    const [members, setMembers] = useState(TEAM_MEMBERS)
+
+
+        axios.get('/api/admins/owners', { headers: { authorization: AuthStr } })
+            .then(response => {
+                setOwners(response.data.owners)
+            })
+            .catch((error) => {
+                console.log('error ' + error);
+            });
+    }, [])
 
 
     return (
         <>
 
-            <TitleCard title="ملک دارها" topMargin="mt-2" TopSideButtons={<TopSideButtons />}>
+            <TitleCard title="مالک ها" topMargin="mt-2" TopSideButtons={<TopSideButtons />}>
 
-                {/* Team Member list in table format loaded constant */}
                 <div className="overflow-x-auto w-full">
                     <table className="table w-full">
                         <thead>
                             <tr>
                                 <th>نام و نام خانوادگی</th>
+                                <th>شماره تلفن</th>
                                 <th>ایمیل</th>
                                 <th>تاریخ عضویت</th>
-                                <th>آخرین فعالیت</th>
-                                <th>حذف</th>
-                                <th>ویرایش</th>
+                                <th>وضعیت</th>
+                                <th>تغییر وضعیت</th>
                             </tr>
                         </thead>
                         <tbody>
                             {
-                                members.map((l, k) => {
+                                owners.map((l, k) => {
                                     return (
                                         <tr key={k}>
                                             <td>
                                                 <div className="flex items-center space-x-3">
                                                     <div className="avatar">
-                                                        <div className="mask mask-circle w-12 h-12">
-                                                            <img className="w-6 h-6" src={l.avatar} alt="Avatar" />
-                                                        </div>
+                                                        <RiUser3Line />
                                                     </div>
                                                     <div>
                                                         <div className="font-bold mr-3">{l.name}</div>
                                                     </div>
                                                 </div>
                                             </td>
+                                            <td>{l.phone}</td>
                                             <td>{l.email}</td>
-                                            <td>{l.joinedOn}</td>
-                                            <td>{l.lastActive}</td>
-                                            <td><button onClick={() => deleteUser()}><DeleteIcon /></button></td>
-                                            <td><button onClick={() => updateUser()}><EditIcon /></button></td>
+                                            <td>{new Date(l.createdAt).toLocaleDateString('fa')}</td>
+                                            <td>{l.isActive ? 'فعال' : 'غیرفعال'}</td>
+                                            <td><button onClick={() => updateOwner(l.isActive, l._id)}><EditIcon /></button></td>
                                         </tr>
                                     )
                                 })

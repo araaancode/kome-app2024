@@ -25,6 +25,8 @@ const importData = async () => {
 
     // await Driver.deleteMany()
 
+    await Bus.deleteMany()
+
     // import houses
     // const sampleHouses = houses.map((house) => {
     //   return { ...house }

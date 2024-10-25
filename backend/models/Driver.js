@@ -145,10 +145,10 @@ const driverSchema = new mongoose.Schema({
   passwordChangedAt: Date,
   passwordResetToken: String,
   passwordResetExpires: Date,
+
   isActive: {
     type: Boolean,
     default: true,
-    select: false
   },
 
 }, { timestamps: true });

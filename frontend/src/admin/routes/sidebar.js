@@ -38,12 +38,12 @@ const routes = [
     icon: <LiaUserSecretSolid className={iconClasses} />, 
     name: 'ادمین ها',
   },
-  {
-    path: '/admins/requests', // url
-    // path: '/admins/leads', // url
-    icon: <FileSearchIcon className={iconClasses} />, // icon component
-    name: ' درخواست ها ', // name that appear in Sidebar
-  },
+  // {
+  //   path: '/admins/requests', // url
+  //   // path: '/admins/leads', // url
+  //   icon: <FileSearchIcon className={iconClasses} />, // icon component
+  //   name: ' درخواست ها ', // name that appear in Sidebar
+  // },
   {
     path: '/admins/tickets', // url
     // path: '/admins/transactions', // url
@@ -53,7 +53,7 @@ const routes = [
   // {
   //   path: '/admins/charts', // url
   //   icon: <TicketIcon className={iconClasses}/>, // icon component
-  //   name: 'تیکت پشتیبانی کاربران، ملک داران، اتوبوس دارها، غذادارها', // name that appear in Sidebar
+  //   name: 'تیکت پشتیبانی کاربران، ملک داران،  دارها، غذادارها', // name that appear in Sidebar
   // },
   {
     path: '/admins/financials', // url
@@ -72,7 +72,7 @@ const routes = [
     // path: '/admins/calendar', // url
     path: '/admins/drivers', // url
     icon: <DriversIcon className={iconClasses}/>, // icon component
-    name: 'اتوبوس دارها', // name that appear in Sidebar
+    name: ' راننده ها', // name that appear in Sidebar
   },
 
   {

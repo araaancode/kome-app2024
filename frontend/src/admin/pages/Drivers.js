@@ -9,7 +9,8 @@ import { openModal } from "../features/common/modalSlice"
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
 import { setPageTitle } from '../features/common/headerSlice'
-
+import axios from "axios"
+import { RiUser3Line } from "@remixicon/react"
 
 // load icons
 import DeleteIcon from '@iconscout/react-unicons/icons/uil-trash-alt'
@@ -24,101 +25,136 @@ const TopSideButtons = () => {
 
     const createNewUser = () => {
         // dispatch(showNotification({ message: "Add New Member clicked", status: 1 }))
-        dispatch(openModal({ title: "ایجاد راننده جدید", bodyType: MODAL_BODY_TYPES.ADD_NEW_ADMIN }))
+        dispatch(openModal({ title: "ایجاد ادمین جدید", bodyType: MODAL_BODY_TYPES.ADD_NEW_ADMIN }))
     }
 
 
 
     // return (
     //     <div className="inline-block float-right">
-    //         <button className="btn px-6 btn-sm normal-case btn-primary" onClick={() => createNewUser()}>ایجاد کاربر جدید</button>
+    //         <button className="btn px-6 btn-sm normal-case btn-primary" onClick={() => createNewUser()}>ایجاد راننده جدید</button>
     //     </div>
     // )
 }
 
 
-const TEAM_MEMBERS = [
-    { name: "راننده یک", avatar: "https://cdn-icons-png.flaticon.com/128/4900/4900915.png", email: "example@admin.test", role: "Owner", joinedOn: MomentJalali(new Date()).add(-5 * 1, 'days').format("jYYYY/jMM/jDD"), lastActive: "5 hr ago" },
-    { name: "راننده دو", avatar: "https://cdn-icons-png.flaticon.com/128/6009/6009108.png", email: "example@admin.test", role: "Admin", joinedOn: MomentJalali(new Date()).add(-5 * 2, 'days').format("jYYYY/jMM/jDD"), lastActive: "15 min ago" },
-    { name: "راننده سه", avatar: "https://cdn-icons-png.flaticon.com/128/2837/2837640.png", email: "example@admin.test", role: "Admin", joinedOn: MomentJalali(new Date()).add(-5 * 3, 'days').format("jYYYY/jMM/jDD"), lastActive: "20 hr ago" },
-    { name: "راننده چهار", avatar: "https://cdn-icons-png.flaticon.com/128/2684/2684218.png", email: "example@admin.test", role: "Manager", joinedOn: MomentJalali(new Date()).add(-5 * 4, 'days').format("jYYYY/jMM/jDD"), lastActive: "1 hr ago" },
-    { name: "راننده پنج", avatar: "https://cdn-icons-png.flaticon.com/128/2798/2798177.png", email: "example@admin.test", role: "Support", joinedOn: MomentJalali(new Date()).add(-5 * 5, 'days').format("jYYYY/jMM/jDD"), lastActive: "40 min ago" },
-    { name: "راننده شش", avatar: "https://cdn-icons-png.flaticon.com/128/1464/1464721.png", email: "example@admin.test", role: "Support", joinedOn: MomentJalali(new Date()).add(-5 * 7, 'days').format("jYYYY/jMM/jDD"), lastActive: "5 hr ago" },
+const updateDriver = (isActiveState, userId) => {
+    let token = localStorage.getItem("userToken")
 
-]
+    if (isActiveState) {
+        axios.put(`/api/admins/drivers/${userId}/deactive`, {}, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+        })
+            .then((response) => {
+                console.log('response', response.data)
+                Swal.fire({
+                    title: "<small>آیا از غیر فعال کردن راننده اطمینان دارید؟</small>",
+                    showDenyButton: true,
+                    confirmButtonText: "بله",
+                    denyButtonText: `خیر`
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Swal.fire("<small>راننده ویرایش شد!</small>", "", "success");
+                    } else if (result.isDenied) {
+                        Swal.fire("<small>تغییرات ذخیره نشد</small>", "", "info");
+                    }
+                });
+            })
+            .catch((error) => {
+                console.log('error', error)
+                Swal.fire("<small>تغییرات ذخیره نشد</small>", "", "danger");
+            })
+    } else {
+        axios.put(`/api/admins/drivers/${userId}/active`, {}, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+        })
+            .then((response) => {
+                console.log('response', response.data)
+                Swal.fire({
+                    title: "<small>آیا از فعال کردن راننده اطمینان دارید؟</small>",
+                    showDenyButton: true,
+                    confirmButtonText: "بله",
+                    denyButtonText: `خیر`
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Swal.fire("<small>راننده ویرایش شد!</small>", "", "success");
+                    } else if (result.isDenied) {
+                        Swal.fire("<small>تغییرات ذخیره نشد</small>", "", "info");
+                    }
+                });
+            })
+            .catch((error) => {
+                console.log('error', error)
+                Swal.fire("تغییرات ذخیره نشد", "", "danger");
+            })
+    }
 
-const updateUser = () => {
-    alert("update user")
 }
 
 
-
-const deleteUser = () => {
-    Swal.fire({
-        title: "آیا از حذف راننده اطمینان دارید؟",
-        showDenyButton: true,
-        showCancelButton: true,
-        confirmButtonText: "بله",
-        denyButtonText: `خیر`
-    }).then((result) => {
-        /* Read more about isConfirmed, isDenied below */
-        if (result.isConfirmed) {
-            Swal.fire("راننده حذف شد!", "", "success");
-        } else if (result.isDenied) {
-            Swal.fire("تغییرات ذخیره نشد", "", "info");
-        }
-    });
-}
 
 const Drivers = () => {
-    const dispatch = useDispatch()
-    useEffect(() => {
-        dispatch(setPageTitle({ title: "اتوبوس دارها" }))
-    }, [])
+    const [drivers, setDrivers] = useState([])
 
-    const [members, setMembers] = useState(TEAM_MEMBERS)
+    useEffect(() => {
+        let token = localStorage.getItem("userToken")
+        const AuthStr = 'Bearer '.concat(token);
+
+
+
+        axios.get('/api/admins/drivers', { headers: { authorization: AuthStr } })
+            .then(response => {
+                setDrivers(response.data.drivers)
+            })
+            .catch((error) => {
+                console.log('error ' + error);
+            });
+    }, [])
 
 
     return (
         <>
 
-            <TitleCard title="اتوبوس دارها" ظ topMargin="mt-2" TopSideButtons={<TopSideButtons />}>
+            <TitleCard title="راننده ها" topMargin="mt-2" TopSideButtons={<TopSideButtons />}>
 
-                {/* Team Member list in table format loaded constant */}
                 <div className="overflow-x-auto w-full">
                     <table className="table w-full">
                         <thead>
                             <tr>
                                 <th>نام و نام خانوادگی</th>
+                                <th>شماره تلفن</th>
                                 <th>ایمیل</th>
                                 <th>تاریخ عضویت</th>
-                                <th>آخرین فعالیت</th>
-                                <th>حذف</th>
-                                <th>ویرایش</th>
+                                <th>وضعیت</th>
+                                <th>تغییر وضعیت</th>
                             </tr>
                         </thead>
                         <tbody>
                             {
-                                members.map((l, k) => {
+                                drivers.map((l, k) => {
                                     return (
                                         <tr key={k}>
                                             <td>
                                                 <div className="flex items-center space-x-3">
                                                     <div className="avatar">
-                                                        <div className="mask mask-circle w-12 h-12">
-                                                            <img className="w-6 h-6" src={l.avatar} alt="Avatar" />
-                                                        </div>
+                                                        <RiUser3Line />
                                                     </div>
                                                     <div>
                                                         <div className="font-bold mr-3">{l.name}</div>
                                                     </div>
                                                 </div>
                                             </td>
+                                            <td>{l.phone}</td>
                                             <td>{l.email}</td>
-                                            <td>{l.joinedOn}</td>
-                                            <td>{l.lastActive}</td>
-                                            <td><button onClick={() => deleteUser()}><DeleteIcon /></button></td>
-                                            <td><button onClick={() => updateUser()}><EditIcon /></button></td>
+                                            <td>{new Date(l.createdAt).toLocaleDateString('fa')}</td>
+                                            <td>{l.isActive ? 'فعال' : 'غیرفعال'}</td>
+                                            <td><button onClick={() => updateDriver(l.isActive, l._id)}><EditIcon /></button></td>
                                         </tr>
                                     )
                                 })

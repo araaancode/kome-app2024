@@ -25,6 +25,7 @@ router.get('/users/:userId', authAdmin, adminCtrls.getUser)
 router.put('/users/:userId/active', authAdmin, adminCtrls.activeUser)
 router.put('/users/:userId/deactive', authAdmin, adminCtrls.deActiveUser)
 
+router.get('/users/support-tickets', authAdmin, adminCtrls.getAllUsersSupportTickets)
 router.get('/users/:userId/support-tickets', authAdmin, adminCtrls.getAllUserSupportTickets)
 router.get('/users/:userId/support-tickets/:stId', authAdmin, adminCtrls.getSingleUserSupportTicket)
 router.put('/users/:userId/support-tickets/:stId/add-comment', authAdmin, adminCtrls.addCommentToUserSupportTicket)

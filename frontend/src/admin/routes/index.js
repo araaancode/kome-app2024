@@ -27,11 +27,12 @@ const Rooms = lazy(() => import('../pages/Rooms'))
 const Owners = lazy(() => import('../pages/Owners'))
 const Admins = lazy(() => import('../pages/Admins'))
 const Profile = lazy(() => import('../pages/Profile'))
+const SingleTicket = lazy(() => import('../pages/SingleTicket'))
 
 
 const routes = [
-  
-  
+
+
   {
     path: '/all-admins', // the url
     component: Admins, // view rendered
@@ -55,6 +56,10 @@ const routes = [
   {
     path: '/tickets',
     component: Tickets,
+  },
+  {
+    path: '/tickets/:ticketId',
+    component: SingleTicket,
   },
   {
     path: '/financials',

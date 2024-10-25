@@ -12,7 +12,7 @@ const upload = require("../../utils/upload")
 router.get('/me', authCook, cookCtrls.getMe)
 
 router.put('/update-profile', authCook, cookCtrls.updateProfile)
-router.put('/update-avatar', authCook, upload.ownerAvatarUpload.single("avatar"), cookCtrls.updateAvatar)
+router.put('/update-avatar', authCook, upload.cookAvatarUpload.single("avatar"), cookCtrls.updateAvatar)
 
 
 // notifications
