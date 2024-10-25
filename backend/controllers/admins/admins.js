@@ -338,7 +338,7 @@ exports.deActiveUser = async (req, res) => {
 // @route = /api/admins/users/support-tickets
 exports.getAllUsersSupportTickets = async (req, res) => {
     try {
-        const supportTickets = await UserSupportTicket.find({}).populate('user')
+        const supportTickets = await UserSupportTicket.find({})
         if (supportTickets) {
             res.status(StatusCodes.OK).json({
                 status: 'success',
@@ -605,6 +605,39 @@ exports.deActiveCook = async (req, res) => {
         });
     }
 }
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # get all cook support tickets that cook send to admin -> GET -> Admin -> PRIVATE
+// @route = /api/admins/cooks/support-tickets
+exports.getAllCooksSupportTickets = async (req, res) => {
+    try {
+        const supportTickets = await CookSupportTicket.find({})
+        if (supportTickets) {
+            res.status(StatusCodes.OK).json({
+                status: 'success',
+                msg: ' تیکت های پشتیبانی آشپز پیدا شدند ',
+                success: true,
+                count: supportTickets.length,
+                data: supportTickets,
+            });
+        } else {
+            res.status(StatusCodes.NOT_FOUND).json({
+                status: 'failure',
+                msg: ' آشپزی وجود ندارد ',
+                success: false,
+            });
+        }
+
+    } catch (err) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            success: false,
+            msg: "خطای داخلی سرور",
+            error: err.message
+        });
+    }
+}
+
 
 // # description -> HTTP VERB -> Accesss -> Access Type
 // # get all cook support tickets that cook send to admin -> GET -> Admin -> PRIVATE

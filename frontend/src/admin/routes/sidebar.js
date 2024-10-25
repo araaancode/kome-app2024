@@ -44,12 +44,8 @@ const routes = [
   //   icon: <FileSearchIcon className={iconClasses} />, // icon component
   //   name: ' درخواست ها ', // name that appear in Sidebar
   // },
-  {
-    path: '/admins/tickets', // url
-    // path: '/admins/transactions', // url
-    icon: <TicketIcon className={iconClasses}/>, // icon component
-    name: 'تیکت ها',
-  },
+
+
   // {
   //   path: '/admins/charts', // url
   //   icon: <TicketIcon className={iconClasses}/>, // icon component
@@ -62,12 +58,22 @@ const routes = [
     name: 'بخش مالی', // name that appear in Sidebar
   },
   {
+    path: '/admins/rooms', // url
+    // path: '/admins/calendar', // url
+    icon: <PiHouse className={iconClasses}/>, // icon component
+    name: 'اقامتگاه ها', // name that appear in Sidebar
+  },
+  {
     // path: '/admins/calendar', // url
     path: '/admins/users', // url
     icon: <UsersIcon className={iconClasses}/>, // icon component
     name: ' کاربران', // name that appear in Sidebar
   },
-
+  {
+    path: '/admins/users/tickets', // url
+    icon: <TicketIcon className={iconClasses}/>, // icon component
+    name: 'تیکت های کاربر',
+  },
   {
     // path: '/admins/calendar', // url
     path: '/admins/drivers', // url
@@ -76,17 +82,23 @@ const routes = [
   },
 
   {
+    path: '/admins/drivers/tickets', // url
+    icon: <TicketIcon className={iconClasses}/>, // icon component
+    name: 'تیکت های راننده ها',
+  },
+
+  {
     path: '/admins/cooks', // url
     icon: <PiChefHat className={iconClasses}/>, // icon component
     name: 'غذادارها ', // name that appear in Sidebar
   },
-
   {
-    path: '/admins/rooms', // url
-    // path: '/admins/calendar', // url
-    icon: <PiHouse className={iconClasses}/>, // icon component
-    name: 'اقامتگاه ها', // name that appear in Sidebar
+    path: '/admins/cooks/tickets', // url
+    icon: <TicketIcon className={iconClasses}/>, // icon component
+    name: 'تیکت های غذادارها',
   },
+
+
 
   {
     // path: '/admins/calendar', // url
@@ -95,7 +107,11 @@ const routes = [
     name: 'ملک دارها', // name that appear in Sidebar
   },
 
-
+  {
+    path: '/admins/owners/tickets', // url
+    icon: <TicketIcon className={iconClasses}/>, // icon component
+    name: 'تیکت های ملک دارها',
+  },
 ]
 
 export default routes

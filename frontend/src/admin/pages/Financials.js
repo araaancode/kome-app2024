@@ -1,134 +1,137 @@
 import moment from "moment"
 import { useEffect, useState } from "react"
-import { setPageTitle,showNotification } from '../features/common/headerSlice'
 import { useDispatch, useSelector } from "react-redux"
 import TitleCard from "../components/Cards/TitleCard"
-import { RECENT_TRANSACTIONS } from "../utils/dummyData"
-import FunnelIcon from '@heroicons/react/24/outline/FunnelIcon'
-import XMarkIcon from '@heroicons/react/24/outline/XMarkIcon'
-import SearchBar from "../components/Input/SearchBar"
-const MomentJalali = require("moment-jalaali")
+import { showNotification } from '../features/common/headerSlice'
+import MomentJalali from "moment-jalaali"
+import { CONFIRMATION_MODAL_CLOSE_TYPES, MODAL_BODY_TYPES } from '../utils/globalConstantUtil'
+import { openModal } from "../features/common/modalSlice"
+import Swal from 'sweetalert2'
+import withReactContent from 'sweetalert2-react-content'
+import { setPageTitle } from '../features/common/headerSlice'
+import axios from "axios"
+import { RiTentLine,RiUser3Line, RiUser3Fill, RiSearchLine, RiCalendar2Line, RiLogoutBoxRLine, RiHeart2Line, RiBankCard2Line, RiNotificationLine, RiCustomerService2Line, RiCameraFill } from "@remixicon/react";
 
-const TopSideButtons = ({ removeFilter, applyFilter, applySearch }) => {
 
-    const [filterParam, setFilterParam] = useState("")
-    const [searchText, setSearchText] = useState("")
-    const locationFilters = ["تبریز", "اصفهان", "قم", "مشهد", "زاهدان"]
+const TopSideButtons = () => {
 
-    const showFiltersAndApply = (params) => {
-        applyFilter(params)
-        setFilterParam(params)
-    }
+    const dispatch = useDispatch()
 
-    const removeAppliedFilter = () => {
-        removeFilter()
-        setFilterParam("")
-        setSearchText("")
-    }
 
-    useEffect(() => {
-        if (searchText == "") {
-            removeAppliedFilter()
-        } else {
-            applySearch(searchText)
-        }
-    }, [searchText])
 
-    return (
-        <div className="inline-block float-right flex">
-            <SearchBar searchText={searchText} styleClass="mr-4" setSearchText={setSearchText} />
-            {filterParam != "" && <button onClick={() => removeAppliedFilter()} className="btn btn-xs mr-2  ml-2 btn-active btn-ghost normal-case">{filterParam}<XMarkIcon className="w-4 ml-2" /></button>}
-            <div className="dropdown dropdown-bottom dropdown-end">
-                <label tabIndex={0} className="btn btn-sm btn-outline mr-2"><FunnelIcon className="w-5 mr-2" />فیلتر</label>
-                <ul tabIndex={0} className="dropdown-content menu p-2 text-sm shadow bg-base-100 rounded-box w-52">
-                    {
-                        locationFilters.map((l, k) => {
-                            return <li key={k}><a onClick={() => showFiltersAndApply(l)}>{l}</a></li>
-                        })
-                    }
-                    <div className="divider mt-0 mb-0"></div>
-                    <li><a onClick={() => removeAppliedFilter()}>حذف فیلتر</a></li>
-                </ul>
-            </div>
-        </div>
-    )
 }
 
 
-function Financials() {
+
+
+
+const Financials = () => {
     const dispatch = useDispatch()
+    const [isClicked, setIsClicked] = useState(false)
+
+
     useEffect(() => {
-      dispatch(setPageTitle({ title: "بخش مالی" }))
+        dispatch(setPageTitle({ title: "بخش مالی" }))
     }, [])
 
-    const [trans, setTrans] = useState(RECENT_TRANSACTIONS)
 
-    const removeFilter = () => {
-        setTrans(RECENT_TRANSACTIONS)
-    }
-
-    const applyFilter = (params) => {
-        let filteredTransactions = RECENT_TRANSACTIONS.filter((t) => { return t.location == params })
-        setTrans(filteredTransactions)
-    }
-
-    // Search according to name
-    const applySearch = (value) => {
-        let filteredTransactions = RECENT_TRANSACTIONS.filter((t) => { return t.email.toLowerCase().includes(value.toLowerCase()) || t.email.toLowerCase().includes(value.toLowerCase()) })
-        setTrans(filteredTransactions)
-    }
 
     return (
         <>
 
-            <TitleCard topMargin="mt-2" TopSideButtons={<TopSideButtons applySearch={applySearch} applyFilter={applyFilter} removeFilter={removeFilter} />}>
+            <TitleCard title="بخش مالی" topMargin="mt-2" TopSideButtons={<TopSideButtons />}>
 
-                {/* Team Member list in table format loaded constant */}
-                <div className="overflow-x-auto w-full">
-                    <table className="table w-full">
-                        <thead>
-                            <tr>
-                                <th>نام</th>
-                                <th>شناسه تراکنش</th>
-                                <th>ایمیل</th>
-                                <th>شهر</th>
-                                <th>مقدار</th>
-                                <th>تاریخ تراکنش</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {
-                                trans.map((l, k) => {
-                                    return (
-                                        <tr key={k}>
-                                            <td>
-                                                <div className="flex items-center space-x-3">
-                                                    <div className="avatar">
-                                                        <div className="mask mask-circle w-12 h-12">
-                                                            <img src={l.avatar} alt="Avatar" />
-                                                        </div>
-                                                    </div>
-                                                    <div>
-                                                        <div className="font-bold mr-2">{l.name}</div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td>{l.id}</td>
-                                            <td>{l.email}</td>
-                                            <td>{l.location}</td>
-                                            <td>{l.amount}</td>
-                                            <td>{new Date().toLocaleString("fa")}</td>
-                                        </tr>
-                                    )
-                                })
-                            }
-                        </tbody>
-                    </table>
-                </div>
+                    {isClicked ? (
+                        <div className="w-full py-4 px-6 bg-white mt-0 rounded-lg mx-6 h-30">
+                            <h1 className='px-8 mt-8 mb-2 text-blue-800 text-xl font-bold'>افزودن اطلاعات حساب</h1>
+                            <p className='px-8 my-2'>افزودن اطلاعات حساب
+                                جهت واریز مبالغ اجاره اقامتگاهتان اطلاعات مربوط به حساب بانکی خود را وارد نمایید</p>
+                            <div className="flex w-full justify-center items-center">
+                                <form className="bg-white ounded px-8 pt-6 pb-8 mb-4 w-full">
+                                    {/* First Row */}
+                                    <div className="flex flex-wrap -mx-3 mb-6">
+                                        <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                                            <label
+                                                className="block uppercase tracking-wide rounded-md font-bold mb-2"
+                                                htmlFor="firstName"
+                                            >
+                                                نام و نام خانوادگی <span className='text-red-500'>*</span>
+                                            </label>
+                                            <input
+                                                className="block w-full border border-gray-400 rounded-md px-4 leading-tight focus:outline-none"
+                                                id="first-name"
+                                                type="text"
+                                                style={{ borderRadius: '5px', padding: '15px', height: '60px' }}
+                                            />
+                                        </div>
+                                        <div className="w-full md:w-1/2 px-3">
+                                            <label
+                                                className="block uppercase tracking-wide rounded-md font-bold mb-2"
+                                                htmlFor="lastName"
+                                            >
+                                                شماره کارت<span className='text-red-500'>*</span>
+                                            </label>
+                                            <input
+                                                className="block w-full border border-gray-400 rounded-md px-4 leading-tight focus:outline-none"
+                                                id="firstName"
+                                                type="text"
+                                                style={{ borderRadius: '5px', padding: '15px', height: '60px' }}
+
+                                            />
+                                        </div>
+                                    </div>
+                                    {/* Second Row */}
+
+
+                                    <div className="w-full" dir='ltr'>
+                                        <label dir='rtl'
+                                            className="block uppercase tracking-wide rounded-md font-bold mb-2"
+                                            htmlFor="lastName"
+                                        >
+                                            شماره شبا<span className='text-red-500 mr-2'>*</span>
+                                        </label>
+                                        <div className="flex items-center">
+                                            <span style={{ padding: '15px', height: '60px', borderTopLeftRadius: '5px', borderBottomLeftRadius: '5px' }} className="inline-flex items-center px-4 border border-gray-400">
+                                                IR
+                                            </span>
+                                            <input style={{ padding: '15px', height: '60px', borderTopRightRadius: '5px', borderBottomRightRadius: '5px', borderTopLeftRadius: '0', borderBottomLeftRadius: '0' }} type="text" className="rounded-none border border-gray-400 block w-full focus:outline-none" />
+                                        </div>
+
+                                    </div>
+
+                                    <div className="border-t border-blue-800 my-8" />
+                                    {/* Submit Button */}
+                                    <div className="flex items-center justify-between">
+                                        <button
+                                            className="bg-blue-800 hover:bg-blue-900 text-white font-bold p-6 rounded focus:outline-none focus:shadow-outline"
+                                            type="button"
+                                        >
+                                            ثبت اطلاعات
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="w-full p-6 bg-white m-auto h-screen mx-6">
+                            <div className="flex items-center justify-center h-50">
+                                <div className="bg-whit p-4 text-center">
+                                    <div style={{ width: '150px', height: '150px', margin: '10px auto' }} className="flex items-center justify-center w-16 h-16 bg-gray-200 rounded-full">
+                                        <RiBankCard2Line className="text-gray-400 w-12 h-12 " />
+                                    </div>
+                                    <h2 style={{ fontSize: '20px' }} className="text-gray-500 mb-2">هنوز هیچ حساب بانکی وجود ندارد</h2>
+                                    <h2 style={{ fontSize: '20px' }} className="text-gray-500">جهت دریافت وجه، اطلاعات حساب خود را اضافه کنید</h2>
+                                    <button onClick={(e) => setIsClicked(true)} style={{ borderRadius: "10px", margin: '50px 0' }} className="bg-blue-800 text-white py-4 px-8 hover:bg-blue-900 font-bold transition duration-300">
+                                        + افزودن اطلاعات حساب
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
             </TitleCard>
         </>
     )
 }
-
 
 export default Financials

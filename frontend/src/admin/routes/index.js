@@ -18,7 +18,6 @@ const GettingStarted = lazy(() => import('../pages/GettingStarted'))
 const DocFeatures = lazy(() => import('../pages/DocFeatures'))
 const DocComponents = lazy(() => import('../pages/DocComponents'))
 const Requests = lazy(() => import('../pages/Requests'))
-const Tickets = lazy(() => import('../pages/Tickets'))
 const Financials = lazy(() => import('../pages/Financials'))
 const Users = lazy(() => import('../pages/Users'))
 const Drivers = lazy(() => import('../pages/Drivers'))
@@ -27,6 +26,7 @@ const Rooms = lazy(() => import('../pages/Rooms'))
 const Owners = lazy(() => import('../pages/Owners'))
 const Admins = lazy(() => import('../pages/Admins'))
 const Profile = lazy(() => import('../pages/Profile'))
+const UsersTickets = lazy(() => import('../pages/UsersTickets'))
 const SingleTicket = lazy(() => import('../pages/SingleTicket'))
 
 
@@ -54,12 +54,20 @@ const routes = [
     component: Requests,
   },
   {
-    path: '/tickets',
-    component: Tickets,
+    path: '/users/tickets',
+    component: UsersTickets,
   },
   {
-    path: '/tickets/:ticketId',
-    component: SingleTicket,
+    path: '/drivers/tickets',
+    component: UsersTickets,
+  },
+  {
+    path: '/owners/tickets',
+    component: UsersTickets,
+  },
+  {
+    path: '/cooks/tickets',
+    component: UsersTickets,
   },
   {
     path: '/financials',

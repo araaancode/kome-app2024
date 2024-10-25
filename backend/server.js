@@ -79,26 +79,20 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 // mount routes
+
 // *** users endpoints ***
 app.use('/api/users/auth', userAuthRoutes)
 app.use('/api/users', userRoutes)
 
+
 // *** admins endpoints ***
 app.use('/api/admins/auth', adminAuthRoutes)
 app.use('/api/admins', adminRoutes)
-// app.use('/api/admins/drivers', adminDriverRoutes)
-// app.use('/api/admins/users', adminUserRoutes)
-// app.use('/api/admins/owners', adminOwnerRoutes)
-// app.use('/api/admins/cooks', adminCookRoutes)
-// app.use('/api/admins/houses', adminHouseRoutes)
-// app.use('/api/admins/houses-reservations', adminHouseReservationRoutes)
-// app.use('/api/admins/buses', adminBusRoutes)
-// app.use('/api/admins/buses-tickets', adminBusesTicketRoutes)
-// app.use('/api/admins/support-tickets', adminSupportTicketRoutes)
 
 // *** drivers endpoints ***
 app.use('/api/drivers/auth', driverAuthRoutes)
 app.use('/api/drivers', driverRoutes)
+
 
 // *** owners endpoints ***
 app.use('/api/owners/auth', ownerAuthRoutes)
@@ -106,6 +100,9 @@ app.use('/api/owners', ownerRoutes)
 
 app.use('/api/cooks/auth', cookAuthRoutes)
 app.use('/api/cooks', cookRoutes)
+
+
+
 
 
 // error middlewares

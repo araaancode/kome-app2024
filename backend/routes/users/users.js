@@ -11,9 +11,9 @@ const { userUpload } = require("../../utils/upload")
 
 
 // profile
-// router.get('/me', protect, userCtrls.getMe)
-// router.put('/update-profile', protect, userCtrls.updateProfile)
-// router.put('/update-avatar', protect, userUpload.single('avatar'), userCtrls.updateAvatar)
+router.get('/me', protect, userCtrls.getMe)
+router.put('/update-profile', protect, userCtrls.updateProfile)
+router.put('/update-avatar', protect, userUpload.single('avatar'), userCtrls.updateAvatar)
 
 // houses
 router.get('/houses', userCtrls.getHouses)
@@ -45,15 +45,15 @@ router.put('/foods/orders/:orderId/confirm', protect, userCtrls.confirmOrderFood
 router.put('/foods/orders/:orderId/cancel', protect, userCtrls.confirmOrderFood)
 
 // buses
-// router.get('/buses', userCtrls.getBuses)
-// router.get('/buses/:busId', userCtrls.getBus)
-// router.put('/buses/add-favorite-bus', protect, userCtrls.addFavoriteBus)
-// router.put('/buses/delete-favorite-bus', protect, userCtrls.deleteFavoriteBus)
-// router.post('/buses/search-buses', userCtrls.searchBuses)
-// router.post('/buses/book-bus', protect, userCtrls.bookBus)
-// router.post('/buses/search-one-side-bus-tickets', userCtrls.searchOneSideBusTickes)
-// router.post('/buses/search-two-side-bus-tickets', userCtrls.searchTwoSideBusTickes)
-// router.put('/buses/delete-favorite-bus', protect, userCtrls.deleteFavoriteBus)
+router.get('/buses', userCtrls.getBuses)
+router.get('/buses/:busId', userCtrls.getBus)
+router.put('/buses/add-favorite-bus', protect, userCtrls.addFavoriteBus)
+router.put('/buses/delete-favorite-bus', protect, userCtrls.deleteFavoriteBus)
+router.post('/buses/search-buses', userCtrls.searchBuses)
+router.post('/buses/book-bus', protect, userCtrls.bookBus)
+router.post('/buses/search-one-side-bus-tickets', userCtrls.searchOneSideBusTickes)
+router.post('/buses/search-two-side-bus-tickets', userCtrls.searchTwoSideBusTickes)
+router.put('/buses/delete-favorite-bus', protect, userCtrls.deleteFavoriteBus)
 
 router.get('/buses/tickets', protect, userCtrls.getAllBusTickets)
 router.get('/buses/tickets/:ticketId', protect, userCtrls.getSingleBusTicket)
@@ -73,8 +73,8 @@ router.post('/support-tickets', protect, userCtrls.createSupportTicket)
 router.put('/support-tickets/:stId/read', protect, userCtrls.readSupportTicket)
 router.put('/support-tickets/:stId/add-comment', protect, userCtrls.addCommentsToSupportTicket)
 
-// router.get('/owners', userCtrls.getOwners)
-// router.get('/owners/:ownerId', userCtrls.getOwner)
+router.get('/owners', userCtrls.getOwners)
+router.get('/owners/:ownerId', userCtrls.getOwner)
 
 
 

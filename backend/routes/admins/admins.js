@@ -20,22 +20,29 @@ router.post('/notifications', adminCtrls.createNotification)
 router.put('/notifications/:notificationId/mark', authAdmin, adminCtrls.markNotification)
 
 // users
-router.get('/users', authAdmin, adminCtrls.getUsers)
-router.get('/users/:userId', authAdmin, adminCtrls.getUser)
-router.put('/users/:userId/active', authAdmin, adminCtrls.activeUser)
-router.put('/users/:userId/deactive', authAdmin, adminCtrls.deActiveUser)
-
 router.get('/users/support-tickets', authAdmin, adminCtrls.getAllUsersSupportTickets)
 router.get('/users/:userId/support-tickets', authAdmin, adminCtrls.getAllUserSupportTickets)
 router.get('/users/:userId/support-tickets/:stId', authAdmin, adminCtrls.getSingleUserSupportTicket)
 router.put('/users/:userId/support-tickets/:stId/add-comment', authAdmin, adminCtrls.addCommentToUserSupportTicket)
 
+router.get('/users', authAdmin, adminCtrls.getUsers)
+router.get('/users/:userId', authAdmin, adminCtrls.getUser)
+router.put('/users/:userId/active', authAdmin, adminCtrls.activeUser)
+router.put('/users/:userId/deactive', authAdmin, adminCtrls.deActiveUser)
+
+
 
 // cooks
+
+router.get('/cooks/support-tickets', authAdmin, adminCtrls.getAllCooksSupportTickets)
+
 router.get('/cooks', authAdmin, adminCtrls.getCooks)
 router.get('/cooks/:cookId', authAdmin, adminCtrls.getCook)
 router.put('/cooks/:cookId/active', authAdmin, adminCtrls.activeCook)
 router.put('/cooks/:cookId/deactive', authAdmin, adminCtrls.deActiveCook)
+
+router.get('/cooks/support-tickets', authAdmin, adminCtrls.getAllCooksSupportTickets)
+
 router.get('/cooks/:cookId/support-tickets', authAdmin, adminCtrls.getAllCookSupportTickets)
 router.get('/cooks/:cookId/support-tickets/:stId', authAdmin, adminCtrls.getSingleCookSupportTicket)
 router.put('/cooks/:cookId/support-tickets/:stId/add-comment', authAdmin, adminCtrls.addCommentToCookSupportTicket)
