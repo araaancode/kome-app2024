@@ -30,12 +30,12 @@ const routes = [
 
   {
     path: '/admins/dashboard',
-    icon: <DashboardIcon className={iconClasses} />, 
+    icon: <DashboardIcon className={iconClasses} />,
     name: 'داشبورد مدیریت',
   },
   {
     path: '/admins/all-admins',
-    icon: <LiaUserSecretSolid className={iconClasses} />, 
+    icon: <LiaUserSecretSolid className={iconClasses} />,
     name: 'ادمین ها',
   },
   // {
@@ -54,47 +54,48 @@ const routes = [
   {
     path: '/admins/financials', // url
     // path: '/admins/integration', // url
-    icon: <MoneyIcon className={iconClasses}/>, // icon component
+    icon: <MoneyIcon className={iconClasses} />, // icon component
     name: 'بخش مالی', // name that appear in Sidebar
   },
   {
     path: '/admins/rooms', // url
     // path: '/admins/calendar', // url
-    icon: <PiHouse className={iconClasses}/>, // icon component
+    icon: <PiHouse className={iconClasses} />, // icon component
     name: 'اقامتگاه ها', // name that appear in Sidebar
   },
   {
     // path: '/admins/calendar', // url
     path: '/admins/users', // url
-    icon: <UsersIcon className={iconClasses}/>, // icon component
+    icon: <UsersIcon className={iconClasses} />, // icon component
     name: ' کاربران', // name that appear in Sidebar
   },
   {
-    path: '/admins/users/tickets', // url
-    icon: <TicketIcon className={iconClasses}/>, // icon component
-    name: 'تیکت های کاربر',
+    path: '/admins/users/support-tickets', // url
+    icon: <TicketIcon className={iconClasses} />, // icon component
+    name: 'تیکت های کاربران',
   },
+  /* /admins/users/:userId/support-tickets /:stId*/ 
   {
     // path: '/admins/calendar', // url
     path: '/admins/drivers', // url
-    icon: <DriversIcon className={iconClasses}/>, // icon component
+    icon: <DriversIcon className={iconClasses} />, // icon component
     name: ' راننده ها', // name that appear in Sidebar
   },
 
   {
     path: '/admins/drivers/tickets', // url
-    icon: <TicketIcon className={iconClasses}/>, // icon component
+    icon: <TicketIcon className={iconClasses} />, // icon component
     name: 'تیکت های راننده ها',
   },
 
   {
     path: '/admins/cooks', // url
-    icon: <PiChefHat className={iconClasses}/>, // icon component
+    icon: <PiChefHat className={iconClasses} />, // icon component
     name: 'غذادارها ', // name that appear in Sidebar
   },
   {
     path: '/admins/cooks/tickets', // url
-    icon: <TicketIcon className={iconClasses}/>, // icon component
+    icon: <TicketIcon className={iconClasses} />, // icon component
     name: 'تیکت های غذادارها',
   },
 
@@ -103,13 +104,13 @@ const routes = [
   {
     // path: '/admins/calendar', // url
     path: '/admins/owners', // url
-    icon: <HomeIcon className={iconClasses}/>, // icon component
+    icon: <HomeIcon className={iconClasses} />, // icon component
     name: 'ملک دارها', // name that appear in Sidebar
   },
 
   {
     path: '/admins/owners/tickets', // url
-    icon: <TicketIcon className={iconClasses}/>, // icon component
+    icon: <TicketIcon className={iconClasses} />, // icon component
     name: 'تیکت های ملک دارها',
   },
 ]

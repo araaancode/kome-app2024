@@ -338,7 +338,7 @@ exports.deActiveUser = async (req, res) => {
 // @route = /api/admins/users/support-tickets
 exports.getAllUsersSupportTickets = async (req, res) => {
     try {
-        const supportTickets = await UserSupportTicket.find({})
+        const supportTickets = await UserSupportTicket.find({}).populate('user')
         if (supportTickets) {
             res.status(StatusCodes.OK).json({
                 status: 'success',
@@ -405,7 +405,7 @@ exports.getAllUserSupportTickets = async (req, res) => {
 // @route = /api/admins/users/support-tickets/:userId/:stId
 exports.getSingleUserSupportTicket = async (req, res) => {
     try {
-        const supportTicket = await UserSupportTicket.find({ user: req.params.userId, _id: req.params.stId })
+        const supportTicket = await UserSupportTicket.findOne({ user: req.params.userId, _id: req.params.stId }).populate("assignedTo admin")
         if (supportTicket) {
             res.status(StatusCodes.OK).json({
                 status: 'success',
@@ -446,7 +446,8 @@ exports.addCommentToUserSupportTicket = async (req, res) => {
 
             supportTicketFound.comments.push(comments)
 
-
+            supportTicketFound.isRead = true
+            supportTicketFound.status = "In Progress"
             await supportTicketFound.save().then((ticket) => {
                 return res.status(StatusCodes.OK).json({
                     status: 'success',
@@ -477,6 +478,48 @@ exports.addCommentToUserSupportTicket = async (req, res) => {
         });
     }
 }
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # add comment to user support ticket -> PUT -> Admin -> PRIVATE
+// @route = /api/admins/users/:userId/support-tickets/:stId/close-ticket
+exports.closeUserSupportTicket = async (req, res) => {
+    try {
+        let supportTicketFound = await UserSupportTicket.findOne({ user: req.params.userId, _id: req.params.stId })
+        if (supportTicketFound) {
+
+
+            supportTicketFound.status = "Closed"
+            await supportTicketFound.save().then((ticket) => {
+                return res.status(StatusCodes.OK).json({
+                    status: 'success',
+                    msg: " تیکت بسته شد",
+                    ticket
+                })
+            }).catch((error) => {
+                console.log(error);
+                return res.status(StatusCodes.BAD_REQUEST).json({
+                    status: 'failure',
+                    msg: "تیکت پاسخ داده نشد",
+                    error
+                })
+            })
+        } else {
+            return res.status(StatusCodes.NOT_FOUND).json({
+                status: 'failure',
+                msg: "تیکت پیدا نشد"
+            })
+        }
+
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
 
 // *********************** cooks ***********************
 // # description -> HTTP VERB -> Accesss -> Access Type

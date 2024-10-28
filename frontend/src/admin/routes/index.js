@@ -27,7 +27,7 @@ const Owners = lazy(() => import('../pages/Owners'))
 const Admins = lazy(() => import('../pages/Admins'))
 const Profile = lazy(() => import('../pages/Profile'))
 const UsersTickets = lazy(() => import('../pages/UsersTickets'))
-const SingleTicket = lazy(() => import('../pages/SingleTicket'))
+const SingleUserTicket = lazy(() => import('../pages/SingleUserTicket'))
 
 
 const routes = [
@@ -54,8 +54,12 @@ const routes = [
     component: Requests,
   },
   {
-    path: '/users/tickets',
+    path: '/users/support-tickets',
     component: UsersTickets,
+  },
+  {
+    path: '/users/:userId/support-tickets/:stId',
+    component: SingleUserTicket,
   },
   {
     path: '/drivers/tickets',

@@ -10,7 +10,7 @@ import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
 import { setPageTitle } from '../features/common/headerSlice'
 import axios from "axios"
-import { RiUser3Line,RiCloseCircleLine} from "@remixicon/react"
+import { RiUser3Line, RiCloseCircleLine, RiCheckboxCircleLine } from "@remixicon/react"
 import "../components/modal.css"
 import { RiEye2Line, RiEyeCloseLine, RiPhoneLine, RiUserSmileLine, RiUser2Line, RiMailLine, RiUser5Line } from "@remixicon/react"
 import { IoColorPaletteOutline } from "react-icons/io5";
@@ -71,25 +71,25 @@ const TopSideButtons = () => {
 
 
 
-const deleteUser = (adminId) => {
+const closeTicket = (ticketId, userId) => {
   let token = localStorage.getItem("userToken")
 
+  // @route = /api/admins/users/:userId/support-tickets/:stId/close-ticket
 
-  axios.delete(`/api/admins/${adminId}`, {
+  axios.put(`/api/admins/users/${userId}/support-tickets/${ticketId}/close-ticket`, {}, {
     headers: {
       'authorization': 'Bearer ' + token
     },
   })
     .then((response) => {
-      console.log('response', response.data)
       Swal.fire({
-        title: "<small>آیا از حذف ادمین اطمینان دارید؟</small>",
+        title: "<small>آیا از بستن تیکت اطمینان دارید؟</small>",
         showDenyButton: true,
         confirmButtonText: "بله",
         denyButtonText: `خیر`
       }).then((result) => {
         if (result.isConfirmed) {
-          Swal.fire("<small>ادمین حذف شد!</small>", "", "success");
+          Swal.fire("<small>تیکت بسته شد!</small>", "", "success");
         } else if (result.isDenied) {
           Swal.fire("<small>تغییرات ذخیره نشد</small>", "", "info");
         }
@@ -109,7 +109,6 @@ const UserTickets = () => {
   const [adminId, setAdminId] = useState("");
 
   const [userTickets, setUserTickets] = useState([])
-  const [cookTickets, setCookTickets] = useState([])
 
   const handleRoleChange = (e) => {
     setRole(e.target.value);
@@ -142,7 +141,7 @@ const UserTickets = () => {
   const getStatusComponent = (item) => {
     if (item === "Open") return <div className="badge badge-warning">باز</div>
     if (item === "In Progress") return <div className="badge badge-ghost"> در حال بررسی</div>
-    if (item === "Closedu") return <div className="badge badge-secondary"> بسته</div>
+    if (item === "Closed") return <div className="badge badge-secondary"> بسته</div>
     else return <div className="badge">{item}</div>
   }
 
@@ -194,6 +193,7 @@ const UserTickets = () => {
         Swal.fire("<small>تغییرات ذخیره نشد</small>", "", "error");
       })
   }
+
 
   return (
     <>
@@ -258,11 +258,11 @@ const UserTickets = () => {
                       <td>
                         <div className="flex items-center space-x-3">
                           <div className="avatar">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="h-8 w-8 text-gray-800"><path d="M9,10a1,1,0,0,0-1,1v2a1,1,0,0,0,2,0V11A1,1,0,0,0,9,10Zm12,1a1,1,0,0,0,1-1V6a1,1,0,0,0-1-1H3A1,1,0,0,0,2,6v4a1,1,0,0,0,1,1,1,1,0,0,1,0,2,1,1,0,0,0-1,1v4a1,1,0,0,0,1,1H21a1,1,0,0,0,1-1V14a1,1,0,0,0-1-1,1,1,0,0,1,0-2ZM20,9.18a3,3,0,0,0,0,5.64V17H10a1,1,0,0,0-2,0H4V14.82A3,3,0,0,0,4,9.18V7H8a1,1,0,0,0,2,0H20Z"></path></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="h-8 w-8 text-gray-800"><path d="M9,10a1,1,0,0,0-1,1v2a1,1,0,0,0,2,0V11A1,1,0,0,0,9,10Zm12,1a1,1,0,0,0,1-1V6a1,1,0,0,0-1-1H3A1,1,0,0,0,2,6v4a1,1,0,0,0,1,1,1,1,0,0,1,0,2,1,1,0,0,0-1,1v4a1,1,0,0,0,1,1H21a1,1,0,0,0,1-1V14a1,1,0,0,0-1-1,1,1,0,0,1,0-2ZM20,9.18a3,3,0,0,0,0,5.64V17H10a1,1,0,0,0-2,0H4V14.82A3,3,0,0,0,4,9.18V7H8a1,1,0,0,0,2,0H20Z"></path></svg>
                           </div>
                           <div>
                             <div className="font-bold mr-3">
-                              <a href={`/admins/${l.assignedTo}/tickets`}>{l._id}</a>
+                              {l._id}
                             </div>
                           </div>
                         </div>
@@ -270,8 +270,15 @@ const UserTickets = () => {
                       <td>{new Date(l.createdAt).toLocaleDateString('fa')}</td>
                       <td>{getStatusComponent(l.status)}</td>
                       <td>{getPriorityComponent(l.priority)}</td>
-                      <td><a href={`/admins/${l.assignedTo}/tickets`}><EditIcon /></a></td>
-                      <td><button onClick={() => deleteUser(l._id)}><RiCloseCircleLine /></button></td>
+                      {/* /admins/users/:userId/support-tickets */}
+                      <td>
+                        {l.status === "Closed" ? (<p>پاسخ داده شده</p>) :( <a href={`/admins/users/${l.assignedTo}/support-tickets/${l._id}`}><EditIcon /></a>)}
+                       
+                        </td>
+                      <td>
+                        {l.status === "Closed" ? (<button className="cursor-not-allowed" disabled="true"><RiCheckboxCircleLine /></button>) : (<button onClick={() => closeTicket(l._id, l.user._id)}><RiCloseCircleLine /></button>)}
+
+                      </td>
                     </tr>
                   )
                 })
