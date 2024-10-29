@@ -24,7 +24,7 @@ router.get('/users/support-tickets', authAdmin, adminCtrls.getAllUsersSupportTic
 router.get('/users/:userId/support-tickets', authAdmin, adminCtrls.getAllUserSupportTickets)
 router.get('/users/:userId/support-tickets/:stId', authAdmin, adminCtrls.getSingleUserSupportTicket)
 router.put('/users/:userId/support-tickets/:stId/add-comment', authAdmin, adminCtrls.addCommentToUserSupportTicket)
-router.put('/users/:userId/support-tickets/:stId/close-ticket', authAdmin, adminCtrls.closeUserSupportTicket)
+router.put('/users/:userId/suticketspport-tickets/:stId/close-ticket', authAdmin, adminCtrls.closeUserSupportTicket)
 
 router.get('/users', authAdmin, adminCtrls.getUsers)
 router.get('/users/:userId', authAdmin, adminCtrls.getUser)
@@ -57,13 +57,18 @@ router.get('/owners/:ownerId/support-tickets/:stId', authAdmin, adminCtrls.getSi
 router.put('/owners/:ownerId/support-tickets/:stId/add-comment', authAdmin, adminCtrls.addCommentToOwnerSupportTicket)
 
 // drivers
+router.get('/drivers/support-tickets', authAdmin, adminCtrls.getAllDriversSupportTickets)
+
 router.get('/drivers', authAdmin, adminCtrls.getDrivers)
 router.get('/drivers/:driverId', authAdmin, adminCtrls.getDriver)
 router.put('/drivers/:driverId/active', authAdmin, adminCtrls.activeDriver)
 router.put('/drivers/:driverId/deactive', authAdmin, adminCtrls.deActiveDriver)
+
 router.get('/drivers/:driverId/support-tickets', authAdmin, adminCtrls.getAllDriverSupportTickets)
 router.get('/drivers/:driverId/support-tickets/:stId', authAdmin, adminCtrls.getSingleDriverSupportTicket)
 router.put('/drivers/:driverId/support-tickets/:stId/add-comment', authAdmin, adminCtrls.addCommentToDriverSupportTicket)
+router.put('/drivers/:driverId/support-tickets/:stId/close-ticket', authAdmin, adminCtrls.closeDriverSupportTicket)
+
 
 // foods
 router.get('/foods', authAdmin, adminCtrls.getFoods)

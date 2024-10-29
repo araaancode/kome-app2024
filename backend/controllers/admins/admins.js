@@ -1167,6 +1167,41 @@ exports.deActiveDriver = async (req, res) => {
 
 // # description -> HTTP VERB -> Accesss -> Access Type
 // # get all driver support tickets that driver send to admin -> GET -> Admin -> PRIVATE
+// @route = /api/admins/drivers/support-tickets
+exports.getAllDriversSupportTickets = async (req, res) => {
+    try {
+        const supportTickets = await DriverSupportTicket.find({})
+        if (supportTickets) {
+            res.status(StatusCodes.OK).json({
+                status: 'success',
+                msg: ' تیکت های پشتیبانی رانندگان پیدا شدند ',
+                success: true,
+                count: supportTickets.length,
+                data: supportTickets,
+            });
+        } else {
+            res.status(StatusCodes.NOT_FOUND).json({
+                status: 'failure',
+                msg: ' راننده ای وجود ندارد ',
+                success: false,
+            });
+        }
+
+    } catch (err) {
+        console.log(err);
+
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            success: false,
+            msg: "خطای داخلی سرور",
+            error: err.message
+        });
+    }
+}
+
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # get all driver support tickets that driver send to admin -> GET -> Admin -> PRIVATE
 // @route = /api/admins/drivers/:driverId/support-tickets
 exports.getAllDriverSupportTickets = async (req, res) => {
     try {
@@ -1277,6 +1312,46 @@ exports.addCommentToDriverSupportTicket = async (req, res) => {
     }
 }
 
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # add comment to driver support ticket -> PUT -> Admin -> PRIVATE
+// @route = /api/admins/drivers/:driverId/support-tickets/:stId/close-ticket
+exports.closeDriverSupportTicket = async (req, res) => {
+    try {
+        let supportTicketFound = await DriverSupportTicket.findOne({ driver: req.params.driverId, _id: req.params.stId })
+        if (supportTicketFound) {
+
+
+            supportTicketFound.status = "Closed"
+            await supportTicketFound.save().then((ticket) => {
+                return res.status(StatusCodes.OK).json({
+                    status: 'success',
+                    msg: " تیکت بسته شد",
+                    ticket
+                })
+            }).catch((error) => {
+                console.log(error);
+                return res.status(StatusCodes.BAD_REQUEST).json({
+                    status: 'failure',
+                    msg: "تیکت پاسخ داده نشد",
+                    error
+                })
+            })
+        } else {
+            return res.status(StatusCodes.NOT_FOUND).json({
+                status: 'failure',
+                msg: "تیکت پیدا نشد"
+            })
+        }
+
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
 
 // *********************** foods ***********************
 // # description -> HTTP VERB -> Accesss -> Access Type
