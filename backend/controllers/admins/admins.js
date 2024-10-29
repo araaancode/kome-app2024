@@ -720,7 +720,7 @@ exports.getAllCookSupportTickets = async (req, res) => {
 // @route = /api/admins/cooks/support-tickets/:cookId/:stId
 exports.getSingleCookSupportTicket = async (req, res) => {
     try {
-        const supportTicket = await CookSupportTicket.find({ cook: req.params.cookId, _id: req.params.stId })
+        const supportTicket = await CookSupportTicket.find({ cook: req.params.cookId, _id: req.params.stId }).populate('assignedTo')
         if (supportTicket) {
             res.status(StatusCodes.OK).json({
                 status: 'success',

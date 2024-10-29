@@ -110,7 +110,6 @@ const Drivers = () => {
 
         axios.get('/api/admins/drivers', { headers: { authorization: AuthStr } })
             .then(response => {
-                console.log(response);
                 setDrivers(response.data.drivers)
             })
             .catch((error) => {

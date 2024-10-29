@@ -83,7 +83,7 @@ const routes = [
   },
 
   {
-    path: '/admins/drivers/tickets', // url
+    path: '/admins/drivers/support-tickets', // url
     icon: <TicketIcon className={iconClasses} />, // icon component
     name: 'تیکت های راننده ها',
   },
@@ -94,7 +94,7 @@ const routes = [
     name: 'غذادارها ', // name that appear in Sidebar
   },
   {
-    path: '/admins/cooks/tickets', // url
+    path: '/admins/cooks/support-tickets', // url
     icon: <TicketIcon className={iconClasses} />, // icon component
     name: 'تیکت های غذادارها',
   },
@@ -109,7 +109,7 @@ const routes = [
   },
 
   {
-    path: '/admins/owners/tickets', // url
+    path: '/admins/owners/support-tickets', // url
     icon: <TicketIcon className={iconClasses} />, // icon component
     name: 'تیکت های ملک دارها',
   },
