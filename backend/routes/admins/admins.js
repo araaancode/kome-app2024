@@ -50,13 +50,18 @@ router.put('/cooks/:cookId/support-tickets/:stId/close-ticket', authAdmin, admin
 
 
 // owners
+router.get('/owners/support-tickets', authAdmin, adminCtrls.getAllOwnersSupportTickets)
+
 router.get('/owners', authAdmin, adminCtrls.getOwners)
 router.get('/owners/:ownerId', authAdmin, adminCtrls.getOwner)
 router.put('/owners/:ownerId/active', authAdmin, adminCtrls.activeOwner)
 router.put('/owners/:ownerId/deactive', authAdmin, adminCtrls.deActiveOwner)
+
 router.get('/owners/:ownerId/support-tickets', authAdmin, adminCtrls.getAllOwnerSupportTickets)
 router.get('/owners/:ownerId/support-tickets/:stId', authAdmin, adminCtrls.getSingleOwnerSupportTicket)
 router.put('/owners/:ownerId/support-tickets/:stId/add-comment', authAdmin, adminCtrls.addCommentToOwnerSupportTicket)
+router.put('/owners/:ownerId/support-tickets/:stId/close-ticket', authAdmin, adminCtrls.closeOwnerSupportTicket)
+
 
 // drivers
 router.get('/drivers/support-tickets', authAdmin, adminCtrls.getAllDriversSupportTickets)

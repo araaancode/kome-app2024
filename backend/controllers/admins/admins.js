@@ -968,6 +968,40 @@ exports.deActiveOwner = async (req, res) => {
     }
 }
 
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # get all owners support tickets that owner send to admin -> GET -> Admin -> PRIVATE
+// @route = /api/admins/owners/support-tickets
+exports.getAllOwnersSupportTickets = async (req, res) => {
+    try {
+        const supportTickets = await OwnerSupportTicket.find()
+        if (supportTickets) {
+            res.status(StatusCodes.OK).json({
+                status: 'success',
+                msg: ' تیکت های پشتیبانی ملک دارها پیدا شدند ',
+                success: true,
+                count: supportTickets.length,
+                data: supportTickets,
+            });
+        } else {
+            res.status(StatusCodes.NOT_FOUND).json({
+                status: 'failure',
+                msg: ' ملک داری وجود ندارد ',
+                success: false,
+            });
+        }
+
+    } catch (err) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            success: false,
+            msg: "خطای داخلی سرور",
+            error: err.message
+        });
+    }
+}
+
+
 // # description -> HTTP VERB -> Accesss -> Access Type
 // # get all owner support tickets that owner send to admin -> GET -> Admin -> PRIVATE
 // @route = /api/admins/owners/:ownerId/support-tickets
@@ -1006,7 +1040,7 @@ exports.getAllOwnerSupportTickets = async (req, res) => {
 // @route = /api/admins/owners/support-tickets/:ownerId/:stId
 exports.getSingleOwnerSupportTicket = async (req, res) => {
     try {
-        const supportTicket = await OwnerSupportTicket.find({ owner: req.params.ownerId, _id: req.params.stId })
+        const supportTicket = await OwnerSupportTicket.find({ owner: req.params.ownerId, _id: req.params.stId }).populate('owner')
         if (supportTicket) {
             res.status(StatusCodes.OK).json({
                 status: 'success',
@@ -1081,6 +1115,48 @@ exports.addCommentToOwnerSupportTicket = async (req, res) => {
         });
     }
 }
+
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # add comment to owner support ticket -> PUT -> Admin -> PRIVATE
+// @route = /api/admins/owners/:ownerId/support-tickets/:stId/close-ticket
+exports.closeOwnerSupportTicket = async (req, res) => {
+    try {
+        let supportTicketFound = await OwnerSupportTicket.findOne({ owner: req.params.ownerId, _id: req.params.stId })
+        if (supportTicketFound) {
+
+
+            supportTicketFound.status = "Closed"
+            await supportTicketFound.save().then((ticket) => {
+                return res.status(StatusCodes.OK).json({
+                    status: 'success',
+                    msg: " تیکت بسته شد",
+                    ticket
+                })
+            }).catch((error) => {
+                console.log(error);
+                return res.status(StatusCodes.BAD_REQUEST).json({
+                    status: 'failure',
+                    msg: "تیکت پاسخ داده نشد",
+                    error
+                })
+            })
+        } else {
+            return res.status(StatusCodes.NOT_FOUND).json({
+                status: 'failure',
+                msg: "تیکت پیدا نشد"
+            })
+        }
+
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
+
 
 // *********************** drivers ***********************
 // # description -> HTTP VERB -> Accesss -> Access Type

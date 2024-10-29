@@ -71,12 +71,12 @@ const TopSideButtons = () => {
 
 
 
-const closeTicket = (ticketId, cookId) => {
+const closeTicket = (ticketId, ownerId) => {
   let token = localStorage.getItem("userToken")
 
-  // @route = /api/admins/cooks/:cookId/support-tickets/:stId/close-ticket
+  // @route = /api/admins/owners/:ownerId/support-tickets/:stId/close-ticket
 
-  // axios.put(`/api/admins/cooks/${cookId}/support-tickets/${ticketId}/close-ticket`, {}, {
+  // axios.put(`/api/admins/owners/${ownerId}/support-tickets/${ticketId}/close-ticket`, {}, {
   //   headers: {
   //     'authorization': 'Bearer ' + token
   //   },
@@ -150,7 +150,7 @@ const CooksTickets = () => {
     let token = localStorage.getItem("userToken")
     const AuthStr = 'Bearer '.concat(token);
 
-    axios.get('/api/admins/cooks/support-tickets', { headers: { authorization: AuthStr } })
+    axios.get('/api/admins/owners/support-tickets', { headers: { authorization: AuthStr } })
       .then(response => {
         setUserTickets(response.data.data)
       })
@@ -270,13 +270,13 @@ const CooksTickets = () => {
                       <td>{new Date(l.createdAt).toLocaleDateString('fa')}</td>
                       <td>{getStatusComponent(l.status)}</td>
                       <td>{getPriorityComponent(l.priority)}</td>
-                      {/* /admins/cooks/:cookId/support-tickets */}
+                      {/* /admins/owners/:ownerId/support-tickets */}
                       <td>
-                        {l.status === "Closed" ? (<p>پاسخ داده شده</p>) :( <a href={`/admins/cooks/${l.assignedTo}/support-tickets/${l._id}`}><EditIcon /></a>)}
+                        {l.status === "Closed" ? (<p>پاسخ داده شده</p>) :( <a href={`/admins/owners/${l.assignedTo}/support-tickets/${l._id}`}><EditIcon /></a>)}
                        
                         </td>
                       <td>
-                        {l.status === "Closed" ? (<button className="cursor-not-allowed" disabled="true"><RiCheckboxCircleLine /></button>) : (<button onClick={() => closeTicket(l._id, l.user._id)}><RiCloseCircleLine /></button>)}
+                        {l.status === "Closed" ? (<button className="cursor-not-allowed" disabled="true"><RiCheckboxCircleLine /></button>) : (<button onClick={() => closeTicket(l._id, l.owner)}><RiCloseCircleLine /></button>)}
 
                       </td>
                     </tr>
