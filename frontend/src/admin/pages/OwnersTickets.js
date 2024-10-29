@@ -76,29 +76,29 @@ const closeTicket = (ticketId, cookId) => {
 
   // @route = /api/admins/cooks/:cookId/support-tickets/:stId/close-ticket
 
-  axios.put(`/api/admins/cooks/${cookId}/support-tickets/${ticketId}/close-ticket`, {}, {
-    headers: {
-      'authorization': 'Bearer ' + token
-    },
-  })
-    .then((response) => {
-      Swal.fire({
-        title: "<small>آیا از بستن تیکت اطمینان دارید؟</small>",
-        showDenyButton: true,
-        confirmButtonText: "بله",
-        denyButtonText: `خیر`
-      }).then((result) => {
-        if (result.isConfirmed) {
-          Swal.fire("<small>تیکت بسته شد!</small>", "", "success");
-        } else if (result.isDenied) {
-          Swal.fire("<small>تغییرات ذخیره نشد</small>", "", "info");
-        }
-      });
-    })
-    .catch((error) => {
-      console.log('error', error)
-      Swal.fire("<small>تغییرات ذخیره نشد</small>", "", "error");
-    })
+  // axios.put(`/api/admins/cooks/${cookId}/support-tickets/${ticketId}/close-ticket`, {}, {
+  //   headers: {
+  //     'authorization': 'Bearer ' + token
+  //   },
+  // })
+  //   .then((response) => {
+  //     Swal.fire({
+  //       title: "<small>آیا از بستن تیکت اطمینان دارید؟</small>",
+  //       showDenyButton: true,
+  //       confirmButtonText: "بله",
+  //       denyButtonText: `خیر`
+  //     }).then((result) => {
+  //       if (result.isConfirmed) {
+  //         Swal.fire("<small>تیکت بسته شد!</small>", "", "success");
+  //       } else if (result.isDenied) {
+  //         Swal.fire("<small>تغییرات ذخیره نشد</small>", "", "info");
+  //       }
+  //     });
+  //   })
+  //   .catch((error) => {
+  //     console.log('error', error)
+  //     Swal.fire("<small>تغییرات ذخیره نشد</small>", "", "error");
+  //   })
 
 }
 
@@ -272,11 +272,11 @@ const CooksTickets = () => {
                       <td>{getPriorityComponent(l.priority)}</td>
                       {/* /admins/cooks/:cookId/support-tickets */}
                       <td>
-                        {l.status === "Closed" ? (<p>پاسخ داده شده</p>) : (<a href={`/admins/cooks/${l.assignedTo}/support-tickets/${l._id}`}><EditIcon /></a>)}
-
-                      </td>
+                        {l.status === "Closed" ? (<p>پاسخ داده شده</p>) :( <a href={`/admins/cooks/${l.assignedTo}/support-tickets/${l._id}`}><EditIcon /></a>)}
+                       
+                        </td>
                       <td>
-                        {l.status === "Closed" ? (<button className="cursor-not-allowed" disabled="true"><RiCheckboxCircleLine /></button>) : (<button onClick={() => closeTicket(l._id, l.cook)}><RiCloseCircleLine /></button>)}
+                        {l.status === "Closed" ? (<button className="cursor-not-allowed" disabled="true"><RiCheckboxCircleLine /></button>) : (<button onClick={() => closeTicket(l._id, l.user._id)}><RiCloseCircleLine /></button>)}
 
                       </td>
                     </tr>

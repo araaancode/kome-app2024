@@ -763,6 +763,9 @@ exports.addCommentToCookSupportTicket = async (req, res) => {
             supportTicketFound.comments.push(comments)
 
 
+            supportTicketFound.isRead = true
+            supportTicketFound.status = "In Progress"
+
             await supportTicketFound.save().then((ticket) => {
                 return res.status(StatusCodes.OK).json({
                     status: 'success',
@@ -794,6 +797,46 @@ exports.addCommentToCookSupportTicket = async (req, res) => {
     }
 }
 
+// # description -> HTTP VERB -> Accesss -> Access Type
+// # add comment to cook support ticket -> PUT -> Admin -> PRIVATE
+// @route = /api/admins/cooks/:cookId/support-tickets/:stId/close-ticket
+exports.closeCookSupportTicket = async (req, res) => {
+    try {
+        let supportTicketFound = await CookSupportTicket.findOne({ cook: req.params.cookId, _id: req.params.stId })
+        if (supportTicketFound) {
+
+
+            supportTicketFound.status = "Closed"
+            await supportTicketFound.save().then((ticket) => {
+                return res.status(StatusCodes.OK).json({
+                    status: 'success',
+                    msg: " تیکت بسته شد",
+                    ticket
+                })
+            }).catch((error) => {
+                console.log(error);
+                return res.status(StatusCodes.BAD_REQUEST).json({
+                    status: 'failure',
+                    msg: "تیکت پاسخ داده نشد",
+                    error
+                })
+            })
+        } else {
+            return res.status(StatusCodes.NOT_FOUND).json({
+                status: 'failure',
+                msg: "تیکت پیدا نشد"
+            })
+        }
+
+    } catch (error) {
+        console.error(error.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            status: 'failure',
+            msg: "خطای داخلی سرور",
+            error
+        });
+    }
+}
 
 
 
@@ -1006,6 +1049,8 @@ exports.addCommentToOwnerSupportTicket = async (req, res) => {
             supportTicketFound.comments.push(comments)
 
 
+            supportTicketFound.isRead = true
+            supportTicketFound.status = "In Progress"
             await supportTicketFound.save().then((ticket) => {
                 return res.status(StatusCodes.OK).json({
                     status: 'success',
@@ -1281,6 +1326,8 @@ exports.addCommentToDriverSupportTicket = async (req, res) => {
             supportTicketFound.comments.push(comments)
 
 
+            supportTicketFound.isRead = true
+            supportTicketFound.status = "In Progress"
             await supportTicketFound.save().then((ticket) => {
                 return res.status(StatusCodes.OK).json({
                     status: 'success',

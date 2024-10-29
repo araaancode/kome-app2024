@@ -46,6 +46,8 @@ router.get('/cooks/support-tickets', authAdmin, adminCtrls.getAllCooksSupportTic
 router.get('/cooks/:cookId/support-tickets', authAdmin, adminCtrls.getAllCookSupportTickets)
 router.get('/cooks/:cookId/support-tickets/:stId', authAdmin, adminCtrls.getSingleCookSupportTicket)
 router.put('/cooks/:cookId/support-tickets/:stId/add-comment', authAdmin, adminCtrls.addCommentToCookSupportTicket)
+router.put('/cooks/:cookId/support-tickets/:stId/close-ticket', authAdmin, adminCtrls.closeCookSupportTicket)
+
 
 // owners
 router.get('/owners', authAdmin, adminCtrls.getOwners)
