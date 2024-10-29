@@ -49,6 +49,9 @@ const adminSchema = new mongoose.Schema({
     type: String,
     default: 'default.jpg'
   },
+  gender: {
+    type: String,
+  },
   role: {
     type: String,
     enum: ['superadmin', 'admin', 'moderator'],
