@@ -1040,7 +1040,7 @@ exports.getAllOwnerSupportTickets = async (req, res) => {
 // @route = /api/admins/owners/support-tickets/:ownerId/:stId
 exports.getSingleOwnerSupportTicket = async (req, res) => {
     try {
-        const supportTicket = await OwnerSupportTicket.find({ owner: req.params.ownerId, _id: req.params.stId }).populate('owner')
+        const supportTicket = await OwnerSupportTicket.find({ owner: req.params.ownerId, _id: req.params.stId }).populate('assignedTo owner')
         if (supportTicket) {
             res.status(StatusCodes.OK).json({
                 status: 'success',
