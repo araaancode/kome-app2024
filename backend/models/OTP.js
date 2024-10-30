@@ -15,8 +15,14 @@ const userOTPSchema = new mongoose.Schema(
             unique: true,
         },
         code: String,
+        otpExpiresAt: {
+            type: Date,
+        }
     }, { timestamps: true }
 );
+
+
+
 
 const UserOTP = mongoose.model("userOTP", userOTPSchema);
 

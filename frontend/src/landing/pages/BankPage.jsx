@@ -39,6 +39,9 @@ const BankPage = () => {
   function logout() {
     localStorage.removeItem("userToken")
     navigate('/');
+    // location.reload()
+    window.location.reload()
+
   }
 
 

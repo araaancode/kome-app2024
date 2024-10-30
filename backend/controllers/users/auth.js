@@ -7,10 +7,8 @@ const Token = require('../../models/Token');
 const OTP = require("../../models/OTP")
 const { StatusCodes } = require("http-status-codes")
 const bcrypt = require("bcryptjs")
-
-
 const { sendEmail, sendSuccessEmail } = require("../../utils/sendMail")
-
+const sendOTPUtil = require("../../utils/sendOTP")
 
 const signToken = id => {
     return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -26,6 +24,8 @@ const sendOTPCode = async (phone, user, req, res) => {
         otp.code = code;
         otp.save().then((data) => {
             if (data) {
+
+                sendOTPUtil(otp.code, phone)
                 res.status(StatusCodes.CREATED).json({
                     msg: "کد تایید ارسال شد",
                     data
@@ -33,6 +33,8 @@ const sendOTPCode = async (phone, user, req, res) => {
             }
 
         }).catch((error) => {
+            console.log(error);
+
             res.status(StatusCodes.BAD_REQUEST).json({
                 msg: "کد تایید ارسال نشد",
                 error
@@ -45,6 +47,8 @@ const sendOTPCode = async (phone, user, req, res) => {
         })
 
         if (newOtp) {
+            sendOTPUtil(newOtp.code, phone)
+
             res.status(StatusCodes.CREATED).json({
                 msg: "کد تایید جدید ساخته شد",
                 code: newOtp

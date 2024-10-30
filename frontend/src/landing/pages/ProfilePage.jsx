@@ -98,6 +98,8 @@ const ProfilePage = () => {
   function logout() {
     localStorage.removeItem("userToken")
     navigate('/');
+    window.location.reload()
+
   }
 
 
@@ -174,10 +176,10 @@ const ProfilePage = () => {
             </Link>
           </div>
           <div className='my-6 px-8'>
-            <Link onClick={logout}>
+            <Link to="/">
               <li className="flex items-center mb-2">
                 <span className="mr-2 text-gray-400"><RiLogoutBoxRLine /></span>
-                <span style={{ fontSize: '18px' }} className="mr-4">خروج</span>
+                <button className="mx-4" onClick={logout}>خروج</button>
               </li>
             </Link>
           </div>

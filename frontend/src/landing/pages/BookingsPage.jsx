@@ -138,6 +138,8 @@ const BookingsPage = () => {
   function logout() {
     localStorage.removeItem("userToken")
     navigate('/');
+    window.location.reload()
+
   }
 
 

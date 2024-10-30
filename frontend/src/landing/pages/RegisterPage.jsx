@@ -119,23 +119,23 @@ const LoginPage = () => {
 
   return (
     <div dir="rtl" className="flex justify-center items-center h-screen bg-gray-50 shadow-md">
-      <div className="w-5/12 px-10 space-y-2 bg-white rounded border">
+      <div className="w-7/12 px-10 space-y-2 bg-white rounded border">
         <div className='flex flex-col bg-white px-4 sm:px-2 md:px-4 lg:px-8 py-4 w-full max-w-md mx-auto my-1'>
           <div className="self-center text-xl sm:text-2xl uppercase text-gray-800">
             <div className="w-12 h-12 mx-3 bg-white rounded-full">
-              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="remixicon w-12 h-12"><path d="M22.1034 19L12.8659 3.00017C12.7782 2.84815 12.6519 2.72191 12.4999 2.63414C12.0216 2.358 11.41 2.52187 11.1339 3.00017L1.89638 19H1V21C8.33333 21 15.6667 21 23 21V19H22.1034ZM7.59991 19.0002H4.20568L11.9999 5.50017L19.7941 19.0002H16.4001L12 11L7.59991 19.0002ZM12 15.1501L14.1175 19H9.88254L12 15.1501Z"></path></svg>
+              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" className="remixicon w-12 h-12"><path d="M22.1034 19L12.8659 3.00017C12.7782 2.84815 12.6519 2.72191 12.4999 2.63414C12.0216 2.358 11.41 2.52187 11.1339 3.00017L1.89638 19H1V21C8.33333 21 15.6667 21 23 21V19H22.1034ZM7.59991 19.0002H4.20568L11.9999 5.50017L19.7941 19.0002H16.4001L12 11L7.59991 19.0002ZM12 15.1501L14.1175 19H9.88254L12 15.1501Z"></path></svg>
             </div>
           </div>
           <div className="relative mt-6 h-px bg-gray-300">
             <div className="absolute left-0 top-0 flex justify-center w-full -mt-2">
-              <span className="bg-white px-4 text-xs text-gray-500 uppercase"> ثبت نام در کومه  </span>
+              <span className="bg-white px-4 text-xs text-gray-500 uppercase"> ثبت نام در سایت  </span>
             </div>
           </div>
         </div>
         <p className='text-center text-gray-500' style={{ marginBottom: '30px' }}>برای ثبت نام اطلاعات خود را وارد کنید. </p>
         <form className="space-y-2 mt-4" onSubmit={register}>
-          <div class="container mx-auto p-4">
-            <div class="grid grid-cols-2 gap-4">
+          <div className="container mx-auto p-4">
+            <div className="grid grid-cols-2 gap-4">
               {/* name */}
               <div className="flex flex-col mb-4">
                 <label htmlFor="name" className="mb-1 text-xs sm:text-sm tracking-wide text-gray-600">نام و نام خانوادگی</label>

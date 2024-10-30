@@ -30,6 +30,8 @@ export default function AccountNav() {
   function logout() {
     localStorage.removeItem("userToken")
     navigate('/');
+    window.location.reload()
+
   }
 
   return (

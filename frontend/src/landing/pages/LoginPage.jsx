@@ -54,7 +54,7 @@ const LoginPage = () => {
 
 
       axios.post('/api/users/auth/login', { phone, password }, config).then((data) => {
-        console.log(data);
+
         axios.post('/api/users/auth/send-otp', { phone }, config).then((otpData) => {
 
           toast.info('!کد یکبار مصرف ارسال شده را در زیر وارد کنید', {
@@ -68,10 +68,21 @@ const LoginPage = () => {
           })
 
           setIsLogin(true)
+        }).catch((err) => {
+          console.log(err.response.data.msg);
+          toast.error(err.response.data.msg, {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+          });
         })
       }).catch((errMsg) => {
-        console.log(errMsg);
-        toast.error(errMsg, {
+        console.log(errMsg.response.data.msg);
+        toast.error(errMsg.response.data.msg, {
           position: "top-right",
           autoClose: 5000,
           hideProgressBar: false,
@@ -171,7 +182,7 @@ const LoginPage = () => {
 
           <div className="relative mt-10 h-px bg-gray-300">
             <div className="absolute left-0 top-0 flex justify-center w-full -mt-2">
-              <span className="bg-white px-4 text-xs text-gray-500 uppercase"> ورود به کومه </span>
+              <span className="bg-white px-4 text-xs text-gray-500 uppercase"> ورود به سایت </span>
             </div>
           </div>
         </div>
