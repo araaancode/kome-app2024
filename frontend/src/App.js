@@ -32,6 +32,9 @@ import { UserContextProvider } from "./landing/components/UserContext";
 import PublicRoutes from "./landing/routing/publicRoutes"
 import PrivateRoutes from "./landing/routing/privateRoutes"
 
+// admin private routes
+import AdminPublicRoutes from "./admin/routing/publicRoutes"
+import AdminPrivateRoutes from "./admin/routing/privateRoutes"
 
 // Importing pages
 import Layout from "./admin/containers/Layout"
@@ -109,11 +112,16 @@ function App() {
             </Route>
 
             {/* admins routes*/}
-            <Route path="/admins/login" element={<Login />} />
-            <Route path="/admins/forgot-password" element={<ForgotPassword />} />
-            <Route path="/admins/register" element={<Register />} />
-            <Route path="/admins/*" element={<Layout />} />
-            <Route path="/admins" element={<Navigate to={token ? "/admins/welcome" : "/admins/login"} replace />} />
+            <Route element={<AdminPublicRoutes />}>
+              <Route path="/admins/forgot-password" element={<ForgotPassword />} />
+              <Route path="/admins/login" element={<Login />} />
+              <Route path="/admins/register" element={<Register />} />
+            </Route>
+            <Route element={<AdminPrivateRoutes />}>
+              <Route path="/admins/*" element={<Layout />} />
+            </Route>
+
+            {/* <Route path="/admins" element={<Navigate to={token ? "/admins/welcome" : "/admins/login"} replace />} /> */}
 
 
 

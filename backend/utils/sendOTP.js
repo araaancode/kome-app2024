@@ -27,5 +27,5 @@ const sendOTPUtil = async (otp,phone) => {
 }
 
 
-module.exports = sendOTPUtil
 
+module.exports = sendOTPUtil
