@@ -4,12 +4,12 @@
   "description": "this is a reservation application ",
   "main": "index.js",
   "scripts": {
-    "start": "node backend/server",
-    "server": "nodemon backend/server",
-    "import": "node backend/seeder.js -i",
-    "remove": "node backend/seeder.js -d",
-    "importDrivers": "node backend/seeder.js -i",
-    "removeDrivers": "node backend/seeder.js -d"
+    "start": "node server",
+    "server": "nodemon server",
+    "import": "node seeder.js -i",
+    "remove": "node seeder.js -d",
+    "importDrivers": "node seeder.js -i",
+    "removeDrivers": "node seeder.js -d"
   },
   "author": "araaancode@gmail.com",
   "license": "MIT",
